@@ -1,0 +1,180 @@
+@import './glass-base';
+
+// Glass Card
+.glass-card {
+  @include glass-base;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  overflow: hidden;
+  
+  // Variants
+  &.glass-clear {
+    @include glass-clear;
+  }
+  
+  &.glass-frosted {
+    @include glass-frosted;
+  }
+  
+  &.glass-refractive {
+    @include glass-refractive;
+  }
+  
+  // Interactive state
+  &.glass-interactive {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 20px 25px -5px var(--glass-shadow),
+        0 10px 10px -5px var(--glass-shadow);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+  
+  // Glow effect
+  &.glass-glow {
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: conic-gradient(
+        from 180deg at 50% 50%,
+        #00ffff 0deg,
+        #ff00ff 90deg,
+        #00ff00 180deg,
+        #ffff00 270deg,
+        #00ffff 360deg
+      );
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -1;
+      filter: blur(20px);
+    }
+    
+    &:hover::after {
+      opacity: 0.5;
+    }
+  }
+}
+
+// Glass Button
+.glass-button {
+  @include glass-base;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+  
+  // Remove default button styles
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+  
+  // Sizes
+  &--sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  &--md {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  &--lg {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+  }
+  
+  // Variants
+  &--primary {
+    background: rgba(59, 130, 246, var(--glass-opacity));
+    border-color: rgba(59, 130, 246, var(--glass-border-opacity));
+    
+    &:hover {
+      background: rgba(59, 130, 246, 0.2);
+    }
+  }
+  
+  &--secondary {
+    background: rgba(107, 114, 128, var(--glass-opacity));
+    border-color: rgba(107, 114, 128, var(--glass-border-opacity));
+    
+    &:hover {
+      background: rgba(107, 114, 128, 0.2);
+    }
+  }
+  
+  &--ghost {
+    background: transparent;
+    
+    &:hover {
+      background: var(--glass-bg);
+    }
+  }
+  
+  // Ripple effect
+  &__ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: ripple 0.6s ease-out;
+  }
+  
+  @keyframes ripple {
+    to {
+      transform: translate(-50%, -50%) scale(4);
+      opacity: 0;
+    }
+  }
+}
+
+// Responsive glass adjustments
+@media (max-width: 768px) {
+  :root {
+    // Reduce blur for performance on mobile
+    --glass-blur: 5px;
+    --glass-saturation: 150%;
+  }
+  
+  .glass-card {
+    // Simplify effects on mobile
+    &.glass-refractive::before {
+      display: none; // Disable shimmer
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .glass-card {
+    transition: none;
+    
+    &::before {
+      animation: none;
+    }
+  }
+  
+  .glass-button__ripple {
+    animation: none;
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  :root {
+    --glass-opacity: 0.9;
+    --glass-border-opacity: 1;
+    --glass-blur: 0px;
+  }
+}

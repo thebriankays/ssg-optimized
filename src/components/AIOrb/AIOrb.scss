@@ -1,0 +1,120 @@
+/* @property definitions are global and cannot be scoped */
+@property --a { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
+@property --l { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --x { syntax: '<length>'; inherits: false; initial-value: 0; }
+@property --y { syntax: '<length>'; inherits: false; initial-value: 0; }
+@property --o { syntax: '<number>'; inherits: false; initial-value: 0; }
+@property --width-ratio { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --scale { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --value { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
+
+/* Keyframes are global but only used by the scoped classes below */
+@keyframes ai-orb-anim {
+  from { --a: 360deg; --l: 0.35; --o: 1; }
+  30% { --l: 1.5; }
+  70% { --o: 0.4; --l: 0.05; }
+  98% { --o: 0.7; }
+  to { --a: 0deg; --l: 0.35; --o: 1; }
+}
+@keyframes ai-orb-ring-anim {
+  from { --value: var(--start); --scale: 1; }
+  50% { --scale: 1.2; --width-ratio: 1.5; }
+  70% { --scale: 1; --value: calc(var(--start) + 180deg); --width-ratio: 1; }
+  80% { --scale: 1.2; --width-ratio: 1.5; }
+  to { --value: calc(var(--start) + 360deg); --scale: 1; --width-ratio: 1; }
+}
+
+.ai-orb {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible; // Allow the orb to expand beyond container
+
+  &__main-container {
+    --s: 4.2rem; // Made bigger to be more prominent
+    --p: calc(var(--s) / 4);
+    width: var(--s);
+    aspect-ratio: 1;
+    --bg-color: color-mix(in srgb, #7b7bf4, transparent 90%);
+    background: radial-gradient(
+        60% 75% at center, var(--bg-color) 50%, transparent 50%
+      ), radial-gradient(75% 60% at center, var(--bg-color) 50%, transparent 50%);
+    padding: var(--p);
+    display: grid;
+    place-items: center;
+    position: relative;
+    border-radius: 50%;
+    transform: scale(1.3); // Increased scale for more visibility
+  }
+
+  &__inner-container {
+    overflow: hidden;
+    background: #b6a9f8;
+    width: 100%;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+
+  &__glass-overlay {
+    overflow: hidden;
+    position: absolute;
+    --w: 1px;
+    inset: calc(var(--p) - var(--w));
+    border-radius: 50%;
+    backdrop-filter: blur(3px);
+    box-shadow: 0 0 4px color-mix(in srgb, black, transparent 70%);
+    background: radial-gradient(5px at 70% 30%, rgba(255, 255, 255, 0.7), transparent);
+  }
+
+  &__rings {
+    aspect-ratio: 1; border-radius: 50%;
+    position: absolute; inset: 0;
+    perspective: 11rem;
+    opacity: .9;
+    
+    &:before, &:after {
+      content: ""; position: absolute; inset: 0;
+      background: rgba(255, 0, 0, 1);
+      border-radius: 50%; --width-ratio: 1;
+      border: calc(0.2rem * var(--width-ratio)) solid transparent; // Made even thicker for better visibility
+      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      background: linear-gradient(white, blue, magenta, violet, lightyellow) border-box;
+      animation: ai-orb-ring-anim 8s ease-in-out infinite;
+      --scale: 1; --value: var(--start);
+      transform: rotateY(var(--value)) rotateX(var(--value)) rotateZ(var(--value)) scale(var(--scale));
+    }
+    &:before { --start: 180deg; }
+    &:after { --start: 90deg; }
+    
+    // Nested rings with different start angles
+    > .ai-orb__rings {
+      &:before { --start: 360deg; }
+      &:after { --start: 270deg; }
+    }
+  }
+
+  &__dot {
+    --count: 4;
+    --radius: 0.7rem; // Made bigger with the orb
+    opacity: .9; position: absolute; width: 1rem; aspect-ratio: 1; border-radius: 50%;
+    --offset-per-item: calc(360deg / var(--count));
+    --current-angle-offset: calc(var(--offset-per-item) * var(--i) + var(--a));
+    transform: translate(calc(cos(var(--current-angle-offset)) * var(--radius) + var(--x, 0)), calc(sin(var(--current-angle-offset)) * var(--radius) * -1)) scale(calc(.6 + var(--l)));
+    animation: ai-orb-anim 5.5s cubic-bezier(.45,-.35,.16,1.5) infinite;
+    transition: opacity 0.3s linear;
+    opacity: var(--o, 1);
+    
+    &--1 { --i: 1; background: radial-gradient(50% 50% at center, #c979ee, #74bcd6); width: 1.4rem; animation-timing-function: cubic-bezier(.12,.32,.68,.24); --x: 0.1rem; }
+    &--2 { --i: 2; background: radial-gradient(50% 50% at center, #ef788c, #e7e7fb); width: 1.3rem; }
+    &--3 { --i: 3; background: radial-gradient(50% 50% at center, #eb7fc6, transparent); width: 0.5rem; opacity: .6; --x: -0.1rem; }
+    &--4 { --i: 0; background: #6d67c8; animation-timing-function: cubic-bezier(.39,-.03,.75,.47); }
+  }
+}

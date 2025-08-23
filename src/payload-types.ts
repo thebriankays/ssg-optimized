@@ -72,6 +72,39 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
+    'travel-advisories': TravelAdvisory;
+    'visa-requirements': VisaRequirement;
+    airports: Airport;
+    'michelin-restaurants': MichelinRestaurant;
+    countries: Country;
+    regions: Region;
+    destinations: Destination;
+    languages: Language;
+    currencies: Currency;
+    airlines: Airline;
+    bookings: Booking;
+    'chat-sessions': ChatSession;
+    'club-members': ClubMember;
+    'country-details': CountryDetail;
+    'country-media': CountryMedia;
+    'country-religions': CountryReligion;
+    'crime-index-scores': CrimeIndexScore;
+    'crime-trends': CrimeTrend;
+    customers: Customer;
+    'destination-categories': DestinationCategory;
+    'destination-types': DestinationType;
+    experiences: Experience;
+    'experience-types': ExperienceType;
+    'flight-cache': FlightCache;
+    leads: Lead;
+    'map-data-cache': MapDataCache;
+    religions: Religion;
+    routes: Route;
+    'sales-funnel': SalesFunnel;
+    'social-media-posts': SocialMediaPost;
+    timezones: Timezone;
+    'travel-diaries': TravelDiary;
+    'travel-itineraries': TravelItinerary;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -81,13 +114,56 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    regions: {
+      destinations: 'destinations';
+    };
+    languages: {
+      destinations: 'destinations';
+    };
+    currencies: {
+      destinations: 'destinations';
+    };
+  };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'travel-advisories': TravelAdvisoriesSelect<false> | TravelAdvisoriesSelect<true>;
+    'visa-requirements': VisaRequirementsSelect<false> | VisaRequirementsSelect<true>;
+    airports: AirportsSelect<false> | AirportsSelect<true>;
+    'michelin-restaurants': MichelinRestaurantsSelect<false> | MichelinRestaurantsSelect<true>;
+    countries: CountriesSelect<false> | CountriesSelect<true>;
+    regions: RegionsSelect<false> | RegionsSelect<true>;
+    destinations: DestinationsSelect<false> | DestinationsSelect<true>;
+    languages: LanguagesSelect<false> | LanguagesSelect<true>;
+    currencies: CurrenciesSelect<false> | CurrenciesSelect<true>;
+    airlines: AirlinesSelect<false> | AirlinesSelect<true>;
+    bookings: BookingsSelect<false> | BookingsSelect<true>;
+    'chat-sessions': ChatSessionsSelect<false> | ChatSessionsSelect<true>;
+    'club-members': ClubMembersSelect<false> | ClubMembersSelect<true>;
+    'country-details': CountryDetailsSelect<false> | CountryDetailsSelect<true>;
+    'country-media': CountryMediaSelect<false> | CountryMediaSelect<true>;
+    'country-religions': CountryReligionsSelect<false> | CountryReligionsSelect<true>;
+    'crime-index-scores': CrimeIndexScoresSelect<false> | CrimeIndexScoresSelect<true>;
+    'crime-trends': CrimeTrendsSelect<false> | CrimeTrendsSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
+    'destination-categories': DestinationCategoriesSelect<false> | DestinationCategoriesSelect<true>;
+    'destination-types': DestinationTypesSelect<false> | DestinationTypesSelect<true>;
+    experiences: ExperiencesSelect<false> | ExperiencesSelect<true>;
+    'experience-types': ExperienceTypesSelect<false> | ExperienceTypesSelect<true>;
+    'flight-cache': FlightCacheSelect<false> | FlightCacheSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
+    'map-data-cache': MapDataCacheSelect<false> | MapDataCacheSelect<true>;
+    religions: ReligionsSelect<false> | ReligionsSelect<true>;
+    routes: RoutesSelect<false> | RoutesSelect<true>;
+    'sales-funnel': SalesFunnelSelect<false> | SalesFunnelSelect<true>;
+    'social-media-posts': SocialMediaPostsSelect<false> | SocialMediaPostsSelect<true>;
+    timezones: TimezonesSelect<false> | TimezonesSelect<true>;
+    'travel-diaries': TravelDiariesSelect<false> | TravelDiariesSelect<true>;
+    'travel-itineraries': TravelItinerariesSelect<false> | TravelItinerariesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -98,15 +174,17 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {
     header: Header;
     footer: Footer;
+    'site-settings': SiteSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: null;
   user: User & {
@@ -146,7 +224,7 @@ export interface UserAuthOperations {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
+  id: number;
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
@@ -173,11 +251,11 @@ export interface Page {
             reference?:
               | ({
                   relationTo: 'pages';
-                  value: string | Page;
+                  value: number | Page;
                 } | null)
               | ({
                   relationTo: 'posts';
-                  value: string | Post;
+                  value: number | Post;
                 } | null);
             url?: string | null;
             label: string;
@@ -189,15 +267,334 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
-    media?: (string | null) | Media;
+    media?: (number | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | ArchiveBlock
+    | FormBlock
+    | WebGLCarouselBlock
+    | WhatameshBlock
+    | ScrollingImagesBlock
+    | {
+        title?: string | null;
+        /**
+         * Optional description text to display above the globe
+         */
+        description?: string | null;
+        defaultView?: ('advisories' | 'visa' | 'michelin' | 'airports') | null;
+        globeSettings?: {
+          autoRotate?: boolean | null;
+          /**
+           * Speed of automatic rotation
+           */
+          autoRotateSpeed?: number | null;
+          /**
+           * Hex color for the globe atmosphere
+           */
+          atmosphereColor?: string | null;
+          /**
+           * Height of the atmosphere layer
+           */
+          atmosphereAltitude?: number | null;
+        };
+        glassSettings?: {
+          /**
+           * Glass tint color (hex format)
+           */
+          tint?: string | null;
+          opacity?: number | null;
+          /**
+           * Backdrop blur in pixels
+           */
+          blur?: number | null;
+        };
+        dataSettings?: {
+          /**
+           * Limit number of airports shown for performance
+           */
+          maxAirports?: number | null;
+          /**
+           * Limit number of restaurants shown for performance
+           */
+          maxRestaurants?: number | null;
+          showOnlyThreeStars?: boolean | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'travel-data-globe';
+      }
+    | {
+        /**
+         * The text to display in 3D
+         */
+        text: string;
+        typography?: {
+          font?:
+            | (
+                | '/fonts/inter-bold.woff'
+                | '/fonts/inter-regular.woff'
+                | '/fonts/monument-extended.woff'
+                | '/fonts/fk-grotesk.woff'
+              )
+            | null;
+          fontSize?: number | null;
+          letterSpacing?: number | null;
+          lineHeight?: number | null;
+          /**
+           * Maximum width before text wraps
+           */
+          maxWidth?: number | null;
+          textAlign?: ('left' | 'center' | 'right' | 'justify') | null;
+        };
+        appearance?: {
+          /**
+           * Text color (hex format)
+           */
+          color?: string | null;
+          /**
+           * Glow color (hex format)
+           */
+          emissive?: string | null;
+          emissiveIntensity?: number | null;
+          material?: ('basic' | 'standard' | 'physical') | null;
+          metalness?: number | null;
+          roughness?: number | null;
+        };
+        outline?: {
+          enabled?: boolean | null;
+          outlineColor?: string | null;
+          outlineWidth?: number | null;
+          outlineOpacity?: number | null;
+        };
+        animation?: {
+          type?: ('none' | 'typewriter' | 'fade' | 'wave' | 'glitch') | null;
+          duration?: number | null;
+          delay?: number | null;
+          /**
+           * Delay between each character animation
+           */
+          stagger?: number | null;
+        };
+        transform?: {
+          position?: {
+            x?: number | null;
+            y?: number | null;
+            z?: number | null;
+          };
+          rotation?: {
+            x?: number | null;
+            y?: number | null;
+            z?: number | null;
+          };
+          scale?: number | null;
+        };
+        layout?: {
+          /**
+           * CSS height value (e.g., 400px, 50vh)
+           */
+          height?: string | null;
+          fullWidth?: boolean | null;
+          backgroundColor?: string | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'webgl-text';
+      }
+    | DolphinsBlock
+    | {
+        title: string;
+        description?: string | null;
+        /**
+         * Your Google Maps API key with Maps JavaScript API and Map3D enabled
+         */
+        googleMapsApiKey: string;
+        mapSettings: {
+          /**
+           * Google Maps Map ID configured for 3D maps
+           */
+          mapId: string;
+          defaultLocation: {
+            lat: number;
+            lng: number;
+            altitude?: number | null;
+            heading?: number | null;
+            tilt?: number | null;
+            range?: number | null;
+          };
+          gestureHandling?: ('greedy' | 'cooperative' | 'none' | 'auto') | null;
+        };
+        pois?:
+          | {
+              name: string;
+              description?: string | null;
+              category?:
+                | ('landmark' | 'restaurant' | 'hotel' | 'museum' | 'park' | 'shopping' | 'entertainment' | 'other')
+                | null;
+              location: {
+                lat: number;
+                lng: number;
+                altitude?: number | null;
+              };
+              image?: (number | null) | Media;
+              /**
+               * URL to a 3D model file (GLTF/GLB) for the marker
+               */
+              icon?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        tours?:
+          | {
+              name: string;
+              description?: string | null;
+              waypoints?:
+                | {
+                    name?: string | null;
+                    description?: string | null;
+                    location: {
+                      lat: number;
+                      lng: number;
+                      altitude?: number | null;
+                      heading?: number | null;
+                      tilt?: number | null;
+                      range?: number | null;
+                    };
+                    /**
+                     * How long to stay at this waypoint
+                     */
+                    duration?: number | null;
+                    /**
+                     * How long to transition to the next waypoint
+                     */
+                    transitionDuration?: number | null;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'area-explorer';
+      }
+    | {
+        sections: {
+          type: 'intro' | 'chapter' | 'quote' | 'parallax' | 'outro';
+          title?: string | null;
+          subtitle?: string | null;
+          content?: {
+            root: {
+              type: string;
+              children: {
+                type: string;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          } | null;
+          quote?: string | null;
+          simpleContent?: string | null;
+          media?: {
+            type?: ('none' | 'image' | 'video' | 'webgl') | null;
+            image?: (number | null) | Media;
+            video?: (number | null) | Media;
+            webglComponent?: ('spiral' | 'particles' | 'waves') | null;
+            /**
+             * JSON object with props to pass to the WebGL component
+             */
+            webglProps?:
+              | {
+                  [k: string]: unknown;
+                }
+              | unknown[]
+              | string
+              | number
+              | boolean
+              | null;
+          };
+          layout?: ('center' | 'left' | 'right' | 'fullscreen') | null;
+          animation?: {
+            type?: ('none' | 'fade' | 'slide' | 'scale' | 'parallax') | null;
+            duration?: number | null;
+            delay?: number | null;
+          };
+          background?: {
+            /**
+             * CSS color value (e.g., #000000, rgba(0,0,0,0.5))
+             */
+            color?: string | null;
+            /**
+             * CSS gradient (e.g., linear-gradient(to bottom, #000, #333))
+             */
+            gradient?: string | null;
+            image?: (number | null) | Media;
+            blur?: number | null;
+            /**
+             * Color overlay for background image
+             */
+            overlay?: string | null;
+          };
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'storytelling';
+      }
+    | {
+        type: 'none' | 'whatamesh' | 'gradient' | 'particles' | 'fluid';
+        colors?: {
+          /**
+           * Hex color format (e.g., #c3e4ff)
+           */
+          color1?: string | null;
+          /**
+           * Hex color format (e.g., #6ec3f4)
+           */
+          color2?: string | null;
+          /**
+           * Hex color format (e.g., #eae2ff)
+           */
+          color3?: string | null;
+          /**
+           * Hex color format (e.g., #b9beff)
+           */
+          color4?: string | null;
+        };
+        /**
+         * Controls the strength of the background effect
+         */
+        intensity?: number | null;
+        /**
+         * Speed multiplier for animations
+         */
+        animationSpeed?: number | null;
+        /**
+         * Make background cover the entire viewport
+         */
+        fullScreen?: boolean | null;
+        /**
+         * Fix background to viewport (parallax effect)
+         */
+        fixed?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'background';
+      }
+  )[];
   meta?: {
     title?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
-    image?: (string | null) | Media;
+    image?: (number | null) | Media;
     description?: string | null;
   };
   publishedAt?: string | null;
@@ -212,9 +609,9 @@ export interface Page {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title: string;
-  heroImage?: (string | null) | Media;
+  heroImage?: (number | null) | Media;
   content: {
     root: {
       type: string;
@@ -230,18 +627,18 @@ export interface Post {
     };
     [k: string]: unknown;
   };
-  relatedPosts?: (string | Post)[] | null;
-  categories?: (string | Category)[] | null;
+  relatedPosts?: (number | Post)[] | null;
+  categories?: (number | Category)[] | null;
   meta?: {
     title?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
-    image?: (string | null) | Media;
+    image?: (number | null) | Media;
     description?: string | null;
   };
   publishedAt?: string | null;
-  authors?: (string | User)[] | null;
+  authors?: (number | User)[] | null;
   populatedAuthors?:
     | {
         id?: string | null;
@@ -259,7 +656,7 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt?: string | null;
   caption?: {
     root: {
@@ -351,14 +748,14 @@ export interface Media {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: string;
+  id: number;
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
-  parent?: (string | null) | Category;
+  parent?: (number | null) | Category;
   breadcrumbs?:
     | {
-        doc?: (string | null) | Category;
+        doc?: (number | null) | Category;
         url?: string | null;
         label?: string | null;
         id?: string | null;
@@ -372,7 +769,7 @@ export interface Category {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -420,11 +817,11 @@ export interface CallToActionBlock {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: string | Page;
+                value: number | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: string | Post;
+                value: number | Post;
               } | null);
           url?: string | null;
           label: string;
@@ -470,11 +867,11 @@ export interface ContentBlock {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: string | Page;
+                value: number | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: string | Post;
+                value: number | Post;
               } | null);
           url?: string | null;
           label: string;
@@ -495,7 +892,7 @@ export interface ContentBlock {
  * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
-  media: string | Media;
+  media: number | Media;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaBlock';
@@ -522,12 +919,12 @@ export interface ArchiveBlock {
   } | null;
   populateBy?: ('collection' | 'selection') | null;
   relationTo?: 'posts' | null;
-  categories?: (string | Category)[] | null;
+  categories?: (number | Category)[] | null;
   limit?: number | null;
   selectedDocs?:
     | {
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       }[]
     | null;
   id?: string | null;
@@ -539,7 +936,7 @@ export interface ArchiveBlock {
  * via the `definition` "FormBlock".
  */
 export interface FormBlock {
-  form: string | Form;
+  form: number | Form;
   enableIntro?: boolean | null;
   introContent?: {
     root: {
@@ -565,7 +962,7 @@ export interface FormBlock {
  * via the `definition` "forms".
  */
 export interface Form {
-  id: string;
+  id: number;
   title: string;
   fields?:
     | (
@@ -736,10 +1133,2430 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WebGLCarouselBlock".
+ */
+export interface WebGLCarouselBlock {
+  items?:
+    | {
+        image: number | Media;
+        title?: string | null;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  autoplay?: boolean | null;
+  autoplaySpeed?: number | null;
+  variant?: ('default' | 'cards' | 'fullscreen') | null;
+  showIndicators?: boolean | null;
+  showArrows?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'webglCarousel';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WhatameshBlock".
+ */
+export interface WhatameshBlock {
+  colors?:
+    | {
+        color: string;
+        id?: string | null;
+      }[]
+    | null;
+  amplitude?: number | null;
+  speed?: number | null;
+  darkenTop?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'whatamesh';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ScrollingImagesBlock".
+ */
+export interface ScrollingImagesBlock {
+  images?:
+    | {
+        image: number | Media;
+        alt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  direction?: ('horizontal' | 'vertical') | null;
+  speed?: number | null;
+  gap?: number | null;
+  autoScroll?: boolean | null;
+  pauseOnHover?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'scrollingImages';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DolphinsBlock".
+ */
+export interface DolphinsBlock {
+  showWater?: boolean | null;
+  showSky?: boolean | null;
+  dolphinCount?: number | null;
+  animationSpeed?: number | null;
+  waterColor?: string | null;
+  skyColor?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'dolphins';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "travel-advisories".
+ */
+export interface TravelAdvisory {
+  id: number;
+  title: string;
+  pubDate?: string | null;
+  /**
+   * Link to official advisory source
+   */
+  link?: string | null;
+  threatLevel: '1' | '2' | '3' | '4';
+  /**
+   * Country name extracted from the advisory
+   */
+  countryTag?: string | null;
+  /**
+   * Link to country in our system
+   */
+  country?: (number | null) | Country;
+  category?: ('advisory' | 'alert' | 'warning') | null;
+  /**
+   * Summary of the advisory
+   */
+  description?: string | null;
+  /**
+   * Regional threat levels within the country
+   */
+  regions?:
+    | {
+        region?: string | null;
+        level?: ('1' | '2' | '3' | '4') | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Whether this advisory is currently active
+   */
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "countries".
+ */
+export interface Country {
+  id: number;
+  name: string;
+  /**
+   * ISO-3166-1 alpha-2 (US, FR, etc.)
+   */
+  code: string;
+  /**
+   * ISO-3166-1 alpha-3 (USA, FRA, etc.)
+   */
+  code3?: string | null;
+  /**
+   * ISO-3166-1 numeric (840, etc.)
+   */
+  isoCode?: string | null;
+  continent: 'africa' | 'antarctica' | 'asia' | 'europe' | 'north-america' | 'oceania-australia' | 'south-america';
+  /**
+   * Geographic region within continent
+   */
+  region?: string | null;
+  subregion?: string | null;
+  capital?: string | null;
+  /**
+   * Filename in /public/flags (auto-set from code)
+   */
+  flag?: string | null;
+  /**
+   * Primary country-code domain (.fr, .us, etc.)
+   */
+  webDomain?: string | null;
+  /**
+   * International dialing code (+1, +33, etc.)
+   */
+  dialingCode?: string | null;
+  /**
+   * What to call people from this country (American, French, etc.)
+   */
+  demonym?: string | null;
+  /**
+   * Official and commonly spoken languages
+   */
+  languages?: (number | Language)[] | null;
+  /**
+   * Religions practiced in the country with percentages
+   */
+  religions?:
+    | {
+        religion: number | Religion;
+        /**
+         * Percentage of population
+         */
+        percentage?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  timezones?: (number | Timezone)[] | null;
+  currencies?: (number | Currency)[] | null;
+  /**
+   * Countries that share a land border
+   */
+  neighboringCountries?: (number | Country)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "languages".
+ */
+export interface Language {
+  id: number;
+  name: string;
+  /**
+   * ISO 639-1 language code (e.g., en, fr, es)
+   */
+  code: string;
+  nativeName?: string | null;
+  /**
+   * All destinations where this language is spoken
+   */
+  destinations?: {
+    docs?: (number | Destination)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinations".
+ */
+export interface Destination {
+  id: number;
+  title: string;
+  /**
+   * Search for a location using Google Places
+   */
+  locationData?: {
+    address?: string | null;
+    coordinates?: {
+      lat?: number | null;
+      lng?: number | null;
+    };
+    placeID?: string | null;
+    country?: string | null;
+    continent?: string | null;
+    city?: string | null;
+    state?: string | null;
+    googleMapsUri?: string | null;
+    isGoodForChildren?: boolean | null;
+    isGoodForGroups?: boolean | null;
+    priceLevel?: number | null;
+    rating?: number | null;
+    user_ratings_total?: number | null;
+    reviews?:
+      | {
+          author_name?: string | null;
+          rating?: number | null;
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    photos?:
+      | {
+          photo_reference?: string | null;
+          height?: number | null;
+          width?: number | null;
+          id?: string | null;
+        }[]
+      | null;
+    tempCountryData?: {
+      countryName?: string | null;
+      countryCode?: string | null;
+      currencyCode?: string | null;
+      languageCode?: string | null;
+      region?: string | null;
+      state?: string | null;
+      googleMapsUri?: string | null;
+    };
+  };
+  lat?: number | null;
+  lng?: number | null;
+  continent: 'Africa' | 'Asia' | 'Europe' | 'North America' | 'Oceania' | 'South America' | 'Antarctica';
+  city?: string | null;
+  state?: string | null;
+  googleMapsUri?: string | null;
+  countryRelation?: (number | null) | Country;
+  currencyRelation?: (number | null) | Currency;
+  languagesRelation?: (number | Language)[] | null;
+  regionRelation?: (number | null) | Region;
+  country?: string | null;
+  /**
+   * Country flag SVG file
+   */
+  flagSvg?: string | null;
+  languages?: string | null;
+  countryData?: {
+    label?: string | null;
+    code?: string | null;
+    capital?: string | null;
+    region?: string | null;
+    currency?: {
+      code?: string | null;
+      label?: string | null;
+      symbol?: string | null;
+    };
+    language?: {
+      code?: string | null;
+      label?: string | null;
+      nativeName?: string | null;
+    };
+    flag?: string | null;
+  };
+  isGoodForChildren?: boolean | null;
+  isGoodForGroups?: boolean | null;
+  priceLevel?: number | null;
+  rating?: number | null;
+  user_ratings_total?: number | null;
+  reviews?:
+    | {
+        author_name?: string | null;
+        rating?: number | null;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  featuredImage?: (number | null) | Media;
+  featuredVideo?: (number | null) | Media;
+  mediaGallery?: (number | Media)[] | null;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  relatedDestinations?: (number | Destination)[] | null;
+  authors?: (number | User)[] | null;
+  populatedAuthors?:
+    | {
+        id?: string | null;
+        name?: string | null;
+      }[]
+    | null;
+  /**
+   * Show photorealistic 3D map view
+   */
+  enable3DMap?: boolean | null;
+  areaExplorerConfig?: {
+    showPOIs?: boolean | null;
+    poiTypes?:
+      | (
+          | 'restaurant'
+          | 'bar'
+          | 'cafe'
+          | 'store'
+          | 'supermarket'
+          | 'park'
+          | 'bank'
+          | 'school'
+          | 'bus_station'
+          | 'train_station'
+          | 'airport'
+          | 'parking'
+          | 'lodging'
+          | 'tourist_attraction'
+        )[]
+      | null;
+    /**
+     * Maximum number of POIs to display
+     */
+    poiDensity?: number | null;
+    /**
+     * Search radius for POIs (100m - 50km)
+     */
+    searchRadius?: number | null;
+    /**
+     * Automatically rotate the camera around the destination
+     */
+    autoOrbit?: boolean | null;
+    theme?: ('dark' | 'light') | null;
+    /**
+     * Override the default center point to focus on a specific landmark or area
+     */
+    customCenter?: {
+      enabled?: boolean | null;
+      /**
+       * Latitude of the landmark/area to center on
+       */
+      lat?: number | null;
+      /**
+       * Longitude of the landmark/area to center on
+       */
+      lng?: number | null;
+      /**
+       * E.g., "Eiffel Tower area", "Downtown district"
+       */
+      description?: string | null;
+    };
+  };
+  /**
+   * Points of Interest are automatically cached when coordinates change
+   */
+  poiDataCachedAt?: string | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "currencies".
+ */
+export interface Currency {
+  id: number;
+  name: string;
+  /**
+   * ISO 4217 currency code (e.g., USD, EUR, GBP)
+   */
+  code: string;
+  symbol: string;
+  /**
+   * Exchange rate to USD (updated via API)
+   */
+  exchangeRate?: number | null;
+  /**
+   * Last time the exchange rate was updated
+   */
+  exchangeRateUpdatedAt?: string | null;
+  /**
+   * All destinations using this currency
+   */
+  destinations?: {
+    docs?: (number | Destination)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions".
+ */
+export interface Region {
+  id: number;
+  name: string;
+  /**
+   * Short region / state code (optional)
+   */
+  code?: string | null;
+  country: number | Country;
+  /**
+   * Administrative level
+   */
+  type: 'state' | 'province' | 'region' | 'territory' | 'district';
+  capital?: string | null;
+  /**
+   * All destinations in this region
+   */
+  destinations?: {
+    docs?: (number | Destination)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "religions".
+ */
+export interface Religion {
+  id: number;
+  /**
+   * Name of the religion
+   */
+  name: string;
+  /**
+   * Brief description of the religion
+   */
+  description?: string | null;
+  /**
+   * Parent religion (e.g., Christianity for Catholic)
+   */
+  parentReligion?: (number | null) | Religion;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Timezone data for countries and regions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "timezones".
+ */
+export interface Timezone {
+  id: number;
+  /**
+   * IANA timezone identifier (e.g., America/New_York)
+   */
+  name: string;
+  /**
+   * URL-friendly slug (e.g., america-new-york)
+   */
+  slug: string;
+  /**
+   * Human-readable name (e.g., Eastern Time (US & Canada))
+   */
+  label: string;
+  /**
+   * UTC offset in ±HH:MM format
+   */
+  offset: string;
+  /**
+   * UTC offset in minutes (negative for west of UTC)
+   */
+  offsetMinutes: number;
+  /**
+   * Whether this timezone observes daylight saving time
+   */
+  isDST?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "visa-requirements".
+ */
+export interface VisaRequirement {
+  id: number;
+  passportCountry: number | Country;
+  destinationCountry: number | Country;
+  requirement: 'visa_free' | 'visa_on_arrival' | 'evisa' | 'eta' | 'visa_required' | 'no_admission';
+  days?: number | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Airport data with IATA/ICAO codes and location information
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "airports".
+ */
+export interface Airport {
+  id: number;
+  /**
+   * Full name of the airport
+   */
+  name: string;
+  /**
+   * IATA code (3-letter code)
+   */
+  iata?: string | null;
+  /**
+   * ICAO code (4-letter code)
+   */
+  icao?: string | null;
+  /**
+   * City served by the airport
+   */
+  city: string;
+  /**
+   * Country where the airport is located
+   */
+  country: number | Country;
+  /**
+   * State/Province/Region where the airport is located
+   */
+  region?: (number | null) | Region;
+  /**
+   * Latitude coordinate
+   */
+  latitude: number;
+  /**
+   * Longitude coordinate
+   */
+  longitude: number;
+  /**
+   * Elevation in feet above sea level
+   */
+  elevation?: number | null;
+  /**
+   * Timezone of the airport
+   */
+  timezone?: (number | null) | Timezone;
+  /**
+   * Type/size of the airport
+   */
+  type?: ('large' | 'medium' | 'small' | 'heliport' | 'seaplane' | 'closed') | null;
+  /**
+   * OpenFlights database ID for data mapping
+   */
+  openflights_id?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "michelin-restaurants".
+ */
+export interface MichelinRestaurant {
+  id: number;
+  name: string;
+  /**
+   * Michelin stars (1 – 3)
+   */
+  rating?: number | null;
+  year?: number | null;
+  link?: string | null;
+  website?: string | null;
+  phone?: string | null;
+  /**
+   * Images pulled from Michelin Guide
+   */
+  gallery?: (number | Media)[] | null;
+  country?: (number | null) | Country;
+  location?: {
+    latitude?: number | null;
+    longitude?: number | null;
+    address?: string | null;
+    city?: string | null;
+    destination?: (number | null) | Destination;
+  };
+  type?: ('restaurant' | 'bib-gourmand' | 'green-star' | 'young-chef') | null;
+  award?: string | null;
+  cuisine?: string | null;
+  priceRange?: ('1' | '2' | '3' | '4') | null;
+  greenStar?: boolean | null;
+  description?: string | null;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Airline data with IATA/ICAO codes and callsigns
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "airlines".
+ */
+export interface Airline {
+  id: number;
+  /**
+   * Full name of the airline
+   */
+  name: string;
+  /**
+   * Alternative name or alias
+   */
+  alias?: string | null;
+  /**
+   * IATA code (2-letter code)
+   */
+  iata?: string | null;
+  /**
+   * ICAO code (3-letter code)
+   */
+  icao?: string | null;
+  /**
+   * Radio callsign used by pilots
+   */
+  callsign?: string | null;
+  /**
+   * Country where the airline is based
+   */
+  country: string;
+  /**
+   * Whether the airline is currently active
+   */
+  active?: boolean | null;
+  /**
+   * OpenFlights database ID
+   */
+  openflights_id?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bookings".
+ */
+export interface Booking {
+  id: number;
+  /**
+   * Auto-generated unique booking reference
+   */
+  bookingNumber: string;
+  customer: number | Customer;
+  destination: number | Destination;
+  status?: ('inquiry' | 'quote-sent' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled') | null;
+  travelDates: {
+    departure: string;
+    return: string;
+  };
+  travelers?:
+    | {
+        firstName: string;
+        lastName: string;
+        dateOfBirth?: string | null;
+        passportNumber?: string | null;
+        specialRequests?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  itinerary?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  accommodations?:
+    | {
+        hotel?: string | null;
+        checkIn?: string | null;
+        checkOut?: string | null;
+        roomType?: string | null;
+        cost?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  flights?:
+    | {
+        airline?: string | null;
+        flightNumber?: string | null;
+        departure?: {
+          airport?: string | null;
+          date?: string | null;
+          time?: string | null;
+        };
+        arrival?: {
+          airport?: string | null;
+          date?: string | null;
+          time?: string | null;
+        };
+        cost?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  pricing: {
+    subtotal?: number | null;
+    taxes?: number | null;
+    fees?: number | null;
+    discount?: number | null;
+    totalAmount: number;
+    currency: number | Currency;
+  };
+  payments?:
+    | {
+        amount: number;
+        date: string;
+        method?: ('credit-card' | 'bank-transfer' | 'check' | 'cash') | null;
+        reference?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string | null;
+  status?: ('active' | 'inactive' | 'vip' | 'blacklisted') | null;
+  clubMember?: boolean | null;
+  preferredDestinations?: (number | Destination)[] | null;
+  travelStyle?: ('ultra-luxury' | 'luxury' | 'premium' | 'adventure-luxury' | 'cultural-luxury') | null;
+  budget?: {
+    min?: number | null;
+    max?: number | null;
+    currency?: (number | null) | Currency;
+  };
+  totalSpent?: number | null;
+  bookings?: (number | Booking)[] | null;
+  notes?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  socialMedia?: {
+    instagram?: string | null;
+    facebook?: string | null;
+    twitter?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-sessions".
+ */
+export interface ChatSession {
+  id: number;
+  /**
+   * Auto-generated based on conversation topic
+   */
+  title?: string | null;
+  member: number | ClubMember;
+  status?: ('active' | 'paused' | 'ended') | null;
+  context?: {
+    upcomingBooking?: (number | null) | Booking;
+    currentDestination?: (number | null) | Destination;
+    interests?:
+      | {
+          interest?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  messages?:
+    | {
+        sender: 'user' | 'assistant';
+        content: string;
+        timestamp: string;
+        attachments?: (number | Media)[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * AI-generated summary of the conversation
+   */
+  summary?: string | null;
+  actionItems?:
+    | {
+        item?: string | null;
+        completed?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "club-members".
+ */
+export interface ClubMember {
+  id: number;
+  customer: number | Customer;
+  firstName: string;
+  lastName: string;
+  email: string;
+  membershipLevel: 'silver' | 'gold' | 'platinum' | 'diamond';
+  status?: ('active' | 'suspended' | 'expired') | null;
+  joinDate: string;
+  renewalDate: string;
+  preferences?: {
+    preferredDestinationTypes?:
+      | (
+          | 'beach-islands'
+          | 'cultural-historical'
+          | 'adventure-nature'
+          | 'urban-metropolitan'
+          | 'wine-culinary'
+          | 'wellness-spa'
+        )[]
+      | null;
+    accommodationPreferences?:
+      | ('luxury-hotels' | 'boutique-properties' | 'private-villas' | 'exclusive-resorts' | 'historic-properties')[]
+      | null;
+    communicationPreferences?: {
+      emailUpdates?: boolean | null;
+      smsNotifications?: boolean | null;
+      frequency?: ('weekly' | 'bi-weekly' | 'monthly' | 'quarterly') | null;
+    };
+  };
+  benefits?: {
+    conciergeAccess?: boolean | null;
+    exclusiveDeals?: boolean | null;
+    priorityBooking?: boolean | null;
+    customItinerary?: boolean | null;
+    aiChatbotAccess?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "country-details".
+ */
+export interface CountryDetail {
+  id: number;
+  country: number | Country;
+  /**
+   * Country has no direct access to the ocean
+   */
+  landlocked?: boolean | null;
+  area?: {
+    /**
+     * Total area in square kilometers
+     */
+    total?: number | null;
+    /**
+     * Land area in square kilometers
+     */
+    land?: number | null;
+    /**
+     * Water area in square kilometers
+     */
+    water?: number | null;
+  };
+  /**
+   * Total surface area in square kilometers
+   */
+  surfaceArea?: number | null;
+  elevation?: {
+    /**
+     * Mean elevation in meters
+     */
+    meanElevation?: number | null;
+    /**
+     * Name and elevation of highest point
+     */
+    highestPoint?: string | null;
+    /**
+     * Name and elevation of lowest point
+     */
+    lowestPoint?: string | null;
+  };
+  /**
+   * Latest population estimate
+   */
+  population?: number | null;
+  /**
+   * People per square kilometer
+   */
+  populationDensity?: number | null;
+  /**
+   * Annual growth rate as percentage
+   */
+  populationGrowthRate?: number | null;
+  /**
+   * Births per 1000 population
+   */
+  birthRate?: number | null;
+  /**
+   * Deaths per 1000 population
+   */
+  deathRate?: number | null;
+  /**
+   * Net migration per 1000 population
+   */
+  migrationRate?: number | null;
+  lifeExpectancy?: {
+    /**
+     * Average life expectancy in years
+     */
+    total?: number | null;
+    /**
+     * Male life expectancy in years
+     */
+    male?: number | null;
+    /**
+     * Female life expectancy in years
+     */
+    female?: number | null;
+  };
+  /**
+   * Average temperature in Celsius
+   */
+  yearlyAverageTemp?: number | null;
+  /**
+   * Climate description
+   */
+  climate?: string | null;
+  /**
+   * Terrain description
+   */
+  terrain?: string | null;
+  /**
+   * Common natural hazards
+   */
+  naturalHazards?: string | null;
+  /**
+   * Major natural resources
+   */
+  naturalResources?: string | null;
+  drivingSide?: ('right' | 'left') | null;
+  /**
+   * Type of government
+   */
+  governmentType?: string | null;
+  /**
+   * Current head of state
+   */
+  chiefOfState?: string | null;
+  /**
+   * Current head of government
+   */
+  headOfGovernment?: string | null;
+  gdp?: {
+    /**
+     * GDP in billions USD
+     */
+    nominal?: number | null;
+    /**
+     * GDP per capita in USD
+     */
+    perCapita?: number | null;
+    /**
+     * Annual GDP growth rate as percentage
+     */
+    growthRate?: number | null;
+  };
+  /**
+   * Traditional national dish
+   */
+  nationalDish?: string | null;
+  ethnicGroups?:
+    | {
+        name: string;
+        /**
+         * Percentage of population
+         */
+        percentage?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  ageStructure?: {
+    /**
+     * Percentage aged 0-14
+     */
+    age0to14?: number | null;
+    /**
+     * Percentage aged 15-64
+     */
+    age15to64?: number | null;
+    /**
+     * Percentage aged 65+
+     */
+    age65plus?: number | null;
+  };
+  sexRatio?: {
+    /**
+     * Males per female at birth
+     */
+    atBirth?: number | null;
+    /**
+     * Males per female in total population
+     */
+    total?: number | null;
+  };
+  urbanization?: {
+    /**
+     * Percentage living in urban areas
+     */
+    urbanPopulation?: number | null;
+    /**
+     * Annual rate of urbanization
+     */
+    rateOfUrbanization?: number | null;
+  };
+  majorUrbanAreas?:
+    | {
+        name: string;
+        population?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Health expenditure as % of GDP
+   */
+  healthExpenditure?: number | null;
+  /**
+   * Physicians per 1000 population
+   */
+  physicianDensity?: number | null;
+  /**
+   * Hospital beds per 1000 population
+   */
+  hospitalBedDensity?: number | null;
+  /**
+   * Adult obesity rate as percentage
+   */
+  obesityRate?: number | null;
+  /**
+   * Liters per capita per year
+   */
+  alcoholConsumption?: number | null;
+  /**
+   * Percentage of adults who smoke
+   */
+  tobaccoUse?: number | null;
+  /**
+   * Percentage of women aged 15-49 who are married
+   */
+  marriedWomenRate?: number | null;
+  literacy?: {
+    /**
+     * Total literacy rate
+     */
+    total?: number | null;
+    /**
+     * Male literacy rate
+     */
+    male?: number | null;
+    /**
+     * Female literacy rate
+     */
+    female?: number | null;
+  };
+  /**
+   * Education expenditure as % of GDP
+   */
+  educationExpenditure?: number | null;
+  /**
+   * Major environmental issues
+   */
+  environmentalIssues?: string | null;
+  /**
+   * Forest area as percentage of land area
+   */
+  forestArea?: number | null;
+  /**
+   * CO2 emissions in metric tons per capita
+   */
+  co2Emissions?: number | null;
+  /**
+   * Percentage of population using internet
+   */
+  internetUsers?: number | null;
+  /**
+   * Mobile subscriptions per 100 population
+   */
+  mobileSubscriptions?: number | null;
+  /**
+   * Fixed telephone lines (total)
+   */
+  telephoneLines?: number | null;
+  /**
+   * Historical background and overview
+   */
+  background?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  independence?: {
+    date?: string | null;
+    /**
+     * Independence from which country
+     */
+    from?: string | null;
+  };
+  /**
+   * Constitutional history
+   */
+  constitution?: string | null;
+  legalSystem?: string | null;
+  /**
+   * Voting age and requirements
+   */
+  suffrage?: string | null;
+  /**
+   * Citizenship requirements
+   */
+  citizenship?: string | null;
+  politicalParties?:
+    | {
+        name: string;
+        leader?: string | null;
+        founded?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Member of which international organizations
+   */
+  internationalOrganizations?: string | null;
+  diplomaticRepresentationFromUS?: {
+    chiefOfMission?: string | null;
+    embassy?: string | null;
+    telephone?: string | null;
+  };
+  /**
+   * International disputes
+   */
+  disputes?: string | null;
+  refugeesAndIdps?: {
+    refugees?: number | null;
+    /**
+     * Internally displaced persons
+     */
+    idps?: number | null;
+    statelessPersons?: number | null;
+  };
+  /**
+   * Human trafficking situation
+   */
+  trafficking?: string | null;
+  /**
+   * Illicit drugs situation
+   */
+  illicitDrugs?: string | null;
+  /**
+   * Economic overview
+   */
+  economyOverview?: string | null;
+  /**
+   * Total labor force
+   */
+  laborForce?: number | null;
+  /**
+   * Unemployment rate as percentage
+   */
+  unemploymentRate?: number | null;
+  /**
+   * Major agricultural products
+   */
+  agricultureProducts?: string | null;
+  /**
+   * Major industries
+   */
+  industries?: string | null;
+  /**
+   * Major exports
+   */
+  exports?: string | null;
+  /**
+   * Major imports
+   */
+  imports?: string | null;
+  /**
+   * Public debt as % of GDP
+   */
+  publicDebt?: number | null;
+  /**
+   * Taxes and revenues as % of GDP
+   */
+  taxesAndRevenues?: number | null;
+  /**
+   * Annual inflation rate
+   */
+  inflationRate?: number | null;
+  /**
+   * Military expenditure as % of GDP
+   */
+  militaryExpenditure?: number | null;
+  /**
+   * Military service branches
+   */
+  militaryBranches?: string | null;
+  /**
+   * Electricity production in kWh
+   */
+  energyProduction?: number | null;
+  /**
+   * Electricity consumption in kWh
+   */
+  energyConsumption?: number | null;
+  /**
+   * Terrorism-related information
+   */
+  terrorismNotes?: string | null;
+  /**
+   * UNESCO World Heritage Sites
+   */
+  worldHeritageSites?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "country-media".
+ */
+export interface CountryMedia {
+  id: number;
+  country: number | Country;
+  title: string;
+  mediaType:
+    | 'map-physical'
+    | 'map-political'
+    | 'map-administrative'
+    | 'map-location'
+    | 'map-relief'
+    | 'map-transportation'
+    | 'map-population'
+    | 'photo-landscape'
+    | 'photo-city'
+    | 'photo-culture'
+    | 'photo-historical'
+    | 'infographic'
+    | 'chart'
+    | 'other';
+  description?: string | null;
+  /**
+   * Upload media file or reference existing
+   */
+  media?: (number | null) | Media;
+  /**
+   * External URL if media is hosted elsewhere (e.g., CIA Factbook)
+   */
+  externalUrl?: string | null;
+  source?: ('cia-factbook' | 'user-upload' | 'government' | 'stock' | 'public-domain' | 'other') | null;
+  /**
+   * Original source URL
+   */
+  sourceUrl?: string | null;
+  /**
+   * Copyright information if applicable
+   */
+  copyright?: string | null;
+  /**
+   * Year the media was created/published
+   */
+  year?: number | null;
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Geographic location if this media represents a specific place
+   */
+  geoLocation?: {
+    latitude?: number | null;
+    longitude?: number | null;
+    placeName?: string | null;
+  };
+  /**
+   * Feature this media item prominently
+   */
+  featured?: boolean | null;
+  /**
+   * Order for displaying media items
+   */
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "country-religions".
+ */
+export interface CountryReligion {
+  id: number;
+  /**
+   * Country
+   */
+  country: number | Country;
+  /**
+   * Religion
+   */
+  religion: number | Religion;
+  /**
+   * Percentage of population
+   */
+  percentage: number;
+  /**
+   * Census/survey year
+   */
+  year?: number | null;
+  /**
+   * Additional notes
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "crime-index-scores".
+ */
+export interface CrimeIndexScore {
+  id: number;
+  country: number | Country;
+  year: number;
+  criminalityScore: number;
+  resilienceScore: number;
+  rank?: number | null;
+  region: string;
+  criminalMarkets?: {
+    humanTrafficking?: number | null;
+    humanSmuggling?: number | null;
+    extortionProtection?: number | null;
+    armsTrafficking?: number | null;
+    counterfeiting?: number | null;
+    illicitDrugs?: number | null;
+    environmentalCrimes?: number | null;
+    heistRobbery?: number | null;
+    financialCrimes?: number | null;
+    cyberCrimes?: number | null;
+    privateCorruption?: number | null;
+    publicCorruption?: number | null;
+    heroinTrade?: number | null;
+    syntheticDrugTrade?: number | null;
+  };
+  criminalActors?: {
+    mafiaStyle?: number | null;
+    criminalNetworks?: number | null;
+    stateActors?: number | null;
+    foreignActors?: number | null;
+    privateActors?: number | null;
+  };
+  resilience?: {
+    politicalLeadership?: number | null;
+    governmentTransparency?: number | null;
+    internationalCooperation?: number | null;
+    nationalPolicies?: number | null;
+    judicialSystem?: number | null;
+    lawEnforcement?: number | null;
+    territorialIntegrity?: number | null;
+    antiMoneyLaundering?: number | null;
+    economicRegulation?: number | null;
+    victimSupport?: number | null;
+    prevention?: number | null;
+    nonStateActors?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "crime-trends".
+ */
+export interface CrimeTrend {
+  id: number;
+  country: number | Country;
+  indicator: string;
+  category: 'markets' | 'actors' | 'resilience';
+  previousScore: number;
+  currentScore: number;
+  changePercent: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+  year: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destination-categories".
+ */
+export interface DestinationCategory {
+  id: number;
+  name: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  description?: string | null;
+  /**
+   * Lucide icon name for this category
+   */
+  icon?: string | null;
+  /**
+   * Hex color code for category display
+   */
+  color?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destination-types".
+ */
+export interface DestinationType {
+  id: number;
+  name: string;
+  slug?: string | null;
+  description?: string | null;
+  /**
+   * Key characteristics of this destination type
+   */
+  characteristics?:
+    | {
+        characteristic?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  typicalActivities?:
+    | {
+        activity?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  averageBudgetRange?: {
+    min?: number | null;
+    max?: number | null;
+    currency?: (number | null) | Currency;
+    period?: ('per-day' | 'per-week' | 'per-trip') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experiences".
+ */
+export interface Experience {
+  id: number;
+  title: string;
+  status?: ('draft' | 'published' | 'archived') | null;
+  /**
+   * Show this experience prominently on the website
+   */
+  featured?: boolean | null;
+  /**
+   * Show 3D photorealistic map view for this experience
+   */
+  enable3DExplorer?: boolean | null;
+  /**
+   * Create a narrative journey through the destinations
+   */
+  enable3DStorytelling?: boolean | null;
+  /**
+   * Detailed description of the experience
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Brief description for cards and previews
+   */
+  shortDescription: string;
+  /**
+   * Main image for the experience
+   */
+  heroImage: number | Media;
+  /**
+   * Additional images showcasing the experience
+   */
+  gallery?: (number | Media)[] | null;
+  /**
+   * Select the type of experience
+   */
+  experienceType: number | ExperienceType;
+  duration: {
+    days: number;
+    nights: number;
+  };
+  priceRange: {
+    currency?: ('USD' | 'EUR' | 'GBP') | null;
+    /**
+     * Starting price per person
+     */
+    startingFrom: number;
+    pricingNote?: string | null;
+  };
+  /**
+   * Add destinations in the order they will be visited
+   */
+  destinations: {
+    /**
+     * Select from existing destinations
+     */
+    destination?: (number | null) | Destination;
+    /**
+     * Or add a custom location not in destinations
+     */
+    customLocation?: {
+      title: string;
+      coordinates: {
+        lat: number;
+        lng: number;
+      };
+    };
+    /**
+     * Number of days at this destination
+     */
+    days: number;
+    /**
+     * What makes this destination special in this experience
+     */
+    description?: string | null;
+    highlights?:
+      | {
+          activity: string;
+          id?: string | null;
+        }[]
+      | null;
+    id?: string | null;
+  }[];
+  explorerConfig?: {
+    centerLocation?: ('auto' | 'first' | 'custom') | null;
+    customCenter?: {
+      lat: number;
+      lng: number;
+    };
+    showPOIs?: boolean | null;
+    poiTypes?:
+      | ('restaurant' | 'tourist_attraction' | 'lodging' | 'museum' | 'park' | 'shopping_mall' | 'cafe' | 'bar')[]
+      | null;
+    showDestinationMarkers?: boolean | null;
+    theme?: ('dark' | 'light') | null;
+  };
+  /**
+   * Chapters are automatically linked to your destinations
+   */
+  storyChapters?:
+    | {
+        title: string;
+        content: string;
+        /**
+         * Link this chapter to a destination from your list
+         */
+        useDestination?: boolean | null;
+        destinationIndex?: number | null;
+        /**
+         * Or specify custom coordinates not in your destinations
+         */
+        customLocation?: {
+          lat: number;
+          lng: number;
+        };
+        /**
+         * Optional image or video for this chapter
+         */
+        media?: (number | null) | Media;
+        /**
+         * Seconds to display this chapter
+         */
+        duration?: number | null;
+        cameraOptions?: {
+          /**
+           * Camera compass heading (-180 to 180)
+           */
+          heading?: number | null;
+          /**
+           * Camera tilt angle (-90 to 0)
+           */
+          pitch?: number | null;
+          /**
+           * Distance from location in meters
+           */
+          range?: number | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  storytellingConfig?: {
+    autoPlay?: boolean | null;
+    showNavigation?: boolean | null;
+    theme?: ('dark' | 'light') | null;
+  };
+  whatsIncluded?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  whatsNotIncluded?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  highlights?:
+    | {
+        highlight: string;
+        id?: string | null;
+      }[]
+    | null;
+  bestTimeToVisit?: string | null;
+  difficulty?: ('easy' | 'moderate' | 'challenging' | 'varies') | null;
+  groupSize?: {
+    min?: number | null;
+    max?: number | null;
+  };
+  seo?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+  };
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experience-types".
+ */
+export interface ExperienceType {
+  id: number;
+  name: string;
+  description?: string | null;
+  /**
+   * Icon to represent this experience type
+   */
+  icon?:
+    | (
+        | 'mountain'
+        | 'beach'
+        | 'cultural'
+        | 'wildlife'
+        | 'food-wine'
+        | 'wellness'
+        | 'luxury'
+        | 'family'
+        | 'romance'
+        | 'historical'
+        | 'adventure'
+        | 'trekking'
+        | 'water-sports'
+        | 'golf'
+        | 'photography'
+        | 'art-design'
+        | 'music-festivals'
+        | 'spiritual'
+        | 'rail'
+        | 'cruises'
+      )
+    | null;
+  /**
+   * Color to represent this experience type
+   */
+  color?: string | null;
+  /**
+   * Show this prominently in filters and navigation
+   */
+  featured?: boolean | null;
+  /**
+   * Order in which this type appears in lists (lower numbers first)
+   */
+  sortOrder?: number | null;
+  seo?: {
+    /**
+     * SEO title for the experience type category page
+     */
+    title?: string | null;
+    /**
+     * Meta description for search engines
+     */
+    description?: string | null;
+    /**
+     * Comma-separated keywords for SEO
+     */
+    keywords?: string | null;
+    /**
+     * Open Graph image for social media sharing
+     */
+    ogImage?: (number | null) | Media;
+  };
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Cache for flight data from various sources
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "flight-cache".
+ */
+export interface FlightCache {
+  id: number;
+  /**
+   * Flight code/callsign
+   */
+  flightCode: string;
+  /**
+   * Data source
+   */
+  source?: ('flightaware' | 'flightstats') | null;
+  /**
+   * Airline name
+   */
+  airline?: string | null;
+  /**
+   * Aircraft type
+   */
+  aircraft?: string | null;
+  /**
+   * Aircraft registration
+   */
+  registration?: string | null;
+  /**
+   * Departure airport
+   */
+  departureAirport?: string | null;
+  /**
+   * Departure airport IATA/ICAO code
+   */
+  departureAirportCode?: string | null;
+  /**
+   * Arrival airport
+   */
+  arrivalAirport?: string | null;
+  /**
+   * Arrival airport IATA/ICAO code
+   */
+  arrivalAirportCode?: string | null;
+  /**
+   * Departure gate
+   */
+  departureGate?: string | null;
+  /**
+   * Arrival gate
+   */
+  arrivalGate?: string | null;
+  /**
+   * Departure terminal
+   */
+  departureTerminal?: string | null;
+  /**
+   * Arrival terminal
+   */
+  arrivalTerminal?: string | null;
+  /**
+   * Baggage claim
+   */
+  baggage?: string | null;
+  /**
+   * Flight status
+   */
+  status?: string | null;
+  /**
+   * Flight distance in miles
+   */
+  distance?: number | null;
+  /**
+   * Flight duration
+   */
+  duration?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Flight route
+   */
+  route?: string | null;
+  /**
+   * Flight altitude
+   */
+  altitude?: number | null;
+  /**
+   * Flight speed
+   */
+  speed?: number | null;
+  /**
+   * Time elapsed
+   */
+  elapsedTime?: string | null;
+  /**
+   * Time remaining
+   */
+  remainingTime?: string | null;
+  /**
+   * Gate departure time
+   */
+  gateDepartureTime?: string | null;
+  /**
+   * Gate arrival time
+   */
+  gateArrivalTime?: string | null;
+  /**
+   * Takeoff time
+   */
+  takeoffTime?: string | null;
+  /**
+   * Landing time
+   */
+  landingTime?: string | null;
+  /**
+   * Scheduled departure time
+   */
+  scheduledDepartureTime?: string | null;
+  /**
+   * Scheduled arrival time
+   */
+  scheduledArrivalTime?: string | null;
+  /**
+   * Taxi out time
+   */
+  taxiOut?: string | null;
+  /**
+   * Taxi in time
+   */
+  taxiIn?: string | null;
+  /**
+   * Average delay
+   */
+  averageDelay?: string | null;
+  /**
+   * Airline logo URL
+   */
+  airlineLogoUrl?: string | null;
+  /**
+   * Friendly flight identifier
+   */
+  friendlyFlightIdentifier?: string | null;
+  /**
+   * Flight callsign
+   */
+  callsign?: string | null;
+  /**
+   * IATA code
+   */
+  iataCode?: string | null;
+  /**
+   * Departure city
+   */
+  departureCity?: string | null;
+  /**
+   * Departure state
+   */
+  departureState?: string | null;
+  /**
+   * Arrival city
+   */
+  arrivalCity?: string | null;
+  /**
+   * Arrival state
+   */
+  arrivalState?: string | null;
+  /**
+   * Flight progress status
+   */
+  flightProgressStatus?: string | null;
+  /**
+   * Flight progress time remaining
+   */
+  flightProgressTimeRemaining?: string | null;
+  /**
+   * Total travel time
+   */
+  totalTravelTime?: string | null;
+  /**
+   * Distance flown
+   */
+  flownDistance?: number | null;
+  /**
+   * Remaining distance
+   */
+  remainingDistanceScraped?: number | null;
+  /**
+   * Planned speed
+   */
+  plannedSpeed?: number | null;
+  /**
+   * Planned altitude
+   */
+  plannedAltitude?: number | null;
+  /**
+   * Airline IATA code
+   */
+  airlineIata?: string | null;
+  /**
+   * Airline ICAO code
+   */
+  airlineIcao?: string | null;
+  /**
+   * Departure country
+   */
+  departureCountry?: string | null;
+  /**
+   * Arrival country
+   */
+  arrivalCountry?: string | null;
+  /**
+   * Status code
+   */
+  statusCode?: string | null;
+  /**
+   * Aircraft IATA code
+   */
+  aircraftIata?: string | null;
+  /**
+   * Complete flight data from source
+   */
+  rawData:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Last update timestamp
+   */
+  lastUpdated?: string | null;
+  /**
+   * Cache expiration time
+   */
+  cacheExpiry: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads".
+ */
+export interface Lead {
+  id: number;
+  firstName?: string | null;
+  lastName?: string | null;
+  email: string;
+  phone?: string | null;
+  status?: ('new' | 'contacted' | 'qualified' | 'lost' | 'converted') | null;
+  source?: ('website' | 'social-media' | 'referral' | 'email-campaign' | 'google-ads' | 'other') | null;
+  interestedDestinations?: (number | Destination)[] | null;
+  budget?: {
+    min?: number | null;
+    max?: number | null;
+  };
+  travelDates?: {
+    start?: string | null;
+    end?: string | null;
+    flexible?: boolean | null;
+  };
+  notes?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  lastContact?: string | null;
+  nextFollowUp?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "map-data-cache".
+ */
+export interface MapDataCache {
+  id: number;
+  /**
+   * ID of the destination this cache belongs to
+   */
+  destinationId: string;
+  /**
+   * Unique cache key for this data
+   */
+  cacheKey: string;
+  dataType: 'cesium-tiles' | 'places-nearby' | 'place-details';
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  searchParams?: {
+    radius?: number | null;
+    /**
+     * Array of place types that were searched
+     */
+    types?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  /**
+   * The cached response data
+   */
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * When this cache entry expires
+   */
+  expiresAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Flight routes between airports
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "routes".
+ */
+export interface Route {
+  id: number;
+  /**
+   * Auto-generated route code (e.g., AA-LAX-JFK)
+   */
+  routeCode?: string | null;
+  /**
+   * Airline operating this route
+   */
+  airline?: (number | null) | Airline;
+  /**
+   * Airline code (IATA or ICAO)
+   */
+  airline_code?: string | null;
+  /**
+   * Departure airport
+   */
+  sourceAirport?: (number | null) | Airport;
+  /**
+   * Source airport code (IATA or ICAO)
+   */
+  source_airport_code?: string | null;
+  /**
+   * Arrival airport
+   */
+  destinationAirport?: (number | null) | Airport;
+  /**
+   * Destination airport code (IATA or ICAO)
+   */
+  destination_airport_code?: string | null;
+  /**
+   * Whether this is a codeshare flight
+   */
+  codeshare?: boolean | null;
+  /**
+   * Number of stops (0 for direct flights)
+   */
+  stops?: number | null;
+  /**
+   * Aircraft types used on this route
+   */
+  equipment?:
+    | {
+        /**
+         * Aircraft type code (e.g., 737, A320)
+         */
+        aircraft?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sales-funnel".
+ */
+export interface SalesFunnel {
+  id: number;
+  name: string;
+  stage: 'awareness' | 'interest' | 'consideration' | 'intent' | 'purchase' | 'retention';
+  lead?: (number | null) | Lead;
+  customer?: (number | null) | Customer;
+  estimatedValue?: number | null;
+  /**
+   * Percentage probability of closing
+   */
+  probability?: number | null;
+  expectedCloseDate?: string | null;
+  activities?:
+    | {
+        type?: ('call' | 'email' | 'meeting' | 'proposal' | 'follow-up') | null;
+        date?: string | null;
+        notes?: string | null;
+        outcome?: ('positive' | 'neutral' | 'negative') | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "social-media-posts".
+ */
+export interface SocialMediaPost {
+  id: number;
+  /**
+   * Internal title for organization
+   */
+  title: string;
+  content: string;
+  platforms: ('facebook' | 'instagram' | 'twitter' | 'youtube' | 'linkedin' | 'tiktok')[];
+  media?: (number | Media)[] | null;
+  status?: ('draft' | 'scheduled' | 'published' | 'failed') | null;
+  scheduledDate?: string | null;
+  publishedDate?: string | null;
+  errors?:
+    | {
+        platform?: string | null;
+        error?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relatedContent?: {
+    post?: (number | null) | Post;
+    destination?: (number | null) | Destination;
+  };
+  hashtags?:
+    | {
+        hashtag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  analytics?: {
+    impressions?: number | null;
+    engagements?: number | null;
+    clicks?: number | null;
+    shares?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "travel-diaries".
+ */
+export interface TravelDiary {
+  id: number;
+  title: string;
+  member: number | ClubMember;
+  destination: number | Destination;
+  booking?: (number | null) | Booking;
+  travelDates: {
+    start: string;
+    end: string;
+  };
+  status?: ('planning' | 'in-progress' | 'completed' | 'shared') | null;
+  entries?:
+    | {
+        date: string;
+        title: string;
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        photos?: (number | Media)[] | null;
+        location?: {
+          name?: string | null;
+          coordinates?: {
+            latitude?: number | null;
+            longitude?: number | null;
+          };
+        };
+        mood?: ('amazing' | 'great' | 'good' | 'okay' | 'disappointing') | null;
+        weather?: ('sunny' | 'partly-cloudy' | 'cloudy' | 'rainy' | 'stormy') | null;
+        id?: string | null;
+      }[]
+    | null;
+  highlights?:
+    | {
+        highlight?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  wouldRecommend?: boolean | null;
+  overallRating?: number | null;
+  /**
+   * Allow this diary to be featured on the website
+   */
+  publiclyVisible?: boolean | null;
+  featuredImage?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "travel-itineraries".
+ */
+export interface TravelItinerary {
+  id: number;
+  title: string;
+  status?: ('draft' | 'active' | 'completed' | 'cancelled') | null;
+  user?: (number | null) | User;
+  /**
+   * Enable photorealistic 3D map storytelling for this itinerary
+   */
+  enable3DStorytelling?: boolean | null;
+  /**
+   * Brief description of the itinerary
+   */
+  description?: string | null;
+  /**
+   * Cover image for the itinerary
+   */
+  coverImage?: (number | null) | Media;
+  travelDates: {
+    startDate: string;
+    endDate: string;
+  };
+  groupType: 'solo' | 'couple' | 'family' | 'friends' | 'business';
+  budgetRange: 'budget' | 'mid-range' | 'luxury' | 'ultra-luxury';
+  /**
+   * Build your travel story with location-based chapters
+   */
+  storyChapters?:
+    | {
+        /**
+         * Chapter title (e.g., "Arriving in Paris")
+         */
+        title: string;
+        /**
+         * Chapter content/narration
+         */
+        content: string;
+        /**
+         * When this happens in the itinerary
+         */
+        dateTime?: string | null;
+        locationType?: ('search' | 'coordinates' | 'destination') | null;
+        /**
+         * Search for a place (we'll fetch coordinates)
+         */
+        locationSearch?: string | null;
+        destination?: (number | null) | Destination;
+        coordinates?: {
+          lat: number;
+          lng: number;
+        };
+        /**
+         * Address or location name for display
+         */
+        address?: string | null;
+        media?: {
+          type?: ('none' | 'image' | 'youtube') | null;
+          image?: (number | null) | Media;
+          youtubeUrl?: string | null;
+          imageCredit?: string | null;
+        };
+        focusOptions?: {
+          showFocus?: boolean | null;
+          focusRadius?: number | null;
+          showLocationMarker?: boolean | null;
+        };
+        /**
+         * Optional: Override automatic camera positioning
+         */
+        cameraOptions?: {
+          useCustomCamera?: boolean | null;
+          /**
+           * Camera heading in degrees (0-360)
+           */
+          heading?: number | null;
+          /**
+           * Camera pitch in degrees (-90 to 90)
+           */
+          pitch?: number | null;
+          /**
+           * Camera roll in degrees
+           */
+          roll?: number | null;
+        };
+        /**
+         * How long to stay on this chapter during autoplay
+         */
+        duration?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  storytellingConfig?: {
+    theme?: ('dark' | 'light') | null;
+    autoPlay?: boolean | null;
+    autoPlayDelay?: number | null;
+    showNavigation?: boolean | null;
+    showTimeline?: boolean | null;
+    transparentBackground?: boolean | null;
+  };
+  summary?: {
+    totalDays?: number | null;
+    totalChapters?: number | null;
+  };
+  shareToken?: string | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
-  id: string;
+  id: number;
   /**
    * You will need to rebuild the website when changing this field.
    */
@@ -749,11 +3566,11 @@ export interface Redirect {
     reference?:
       | ({
           relationTo: 'pages';
-          value: string | Page;
+          value: number | Page;
         } | null)
       | ({
           relationTo: 'posts';
-          value: string | Post;
+          value: number | Post;
         } | null);
     url?: string | null;
   };
@@ -765,8 +3582,8 @@ export interface Redirect {
  * via the `definition` "form-submissions".
  */
 export interface FormSubmission {
-  id: string;
-  form: string | Form;
+  id: number;
+  form: number | Form;
   submissionData?:
     | {
         field: string;
@@ -784,18 +3601,18 @@ export interface FormSubmission {
  * via the `definition` "search".
  */
 export interface Search {
-  id: string;
+  id: number;
   title?: string | null;
   priority?: number | null;
   doc: {
     relationTo: 'posts';
-    value: string | Post;
+    value: number | Post;
   };
   slug?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
-    image?: (string | null) | Media;
+    image?: (number | null) | Media;
   };
   categories?:
     | {
@@ -813,7 +3630,7 @@ export interface Search {
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: string;
+  id: number;
   /**
    * Input data provided to the job
    */
@@ -905,52 +3722,184 @@ export interface PayloadJob {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'travel-advisories';
+        value: number | TravelAdvisory;
+      } | null)
+    | ({
+        relationTo: 'visa-requirements';
+        value: number | VisaRequirement;
+      } | null)
+    | ({
+        relationTo: 'airports';
+        value: number | Airport;
+      } | null)
+    | ({
+        relationTo: 'michelin-restaurants';
+        value: number | MichelinRestaurant;
+      } | null)
+    | ({
+        relationTo: 'countries';
+        value: number | Country;
+      } | null)
+    | ({
+        relationTo: 'regions';
+        value: number | Region;
+      } | null)
+    | ({
+        relationTo: 'destinations';
+        value: number | Destination;
+      } | null)
+    | ({
+        relationTo: 'languages';
+        value: number | Language;
+      } | null)
+    | ({
+        relationTo: 'currencies';
+        value: number | Currency;
+      } | null)
+    | ({
+        relationTo: 'airlines';
+        value: number | Airline;
+      } | null)
+    | ({
+        relationTo: 'bookings';
+        value: number | Booking;
+      } | null)
+    | ({
+        relationTo: 'chat-sessions';
+        value: number | ChatSession;
+      } | null)
+    | ({
+        relationTo: 'club-members';
+        value: number | ClubMember;
+      } | null)
+    | ({
+        relationTo: 'country-details';
+        value: number | CountryDetail;
+      } | null)
+    | ({
+        relationTo: 'country-media';
+        value: number | CountryMedia;
+      } | null)
+    | ({
+        relationTo: 'country-religions';
+        value: number | CountryReligion;
+      } | null)
+    | ({
+        relationTo: 'crime-index-scores';
+        value: number | CrimeIndexScore;
+      } | null)
+    | ({
+        relationTo: 'crime-trends';
+        value: number | CrimeTrend;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: number | Customer;
+      } | null)
+    | ({
+        relationTo: 'destination-categories';
+        value: number | DestinationCategory;
+      } | null)
+    | ({
+        relationTo: 'destination-types';
+        value: number | DestinationType;
+      } | null)
+    | ({
+        relationTo: 'experiences';
+        value: number | Experience;
+      } | null)
+    | ({
+        relationTo: 'experience-types';
+        value: number | ExperienceType;
+      } | null)
+    | ({
+        relationTo: 'flight-cache';
+        value: number | FlightCache;
+      } | null)
+    | ({
+        relationTo: 'leads';
+        value: number | Lead;
+      } | null)
+    | ({
+        relationTo: 'map-data-cache';
+        value: number | MapDataCache;
+      } | null)
+    | ({
+        relationTo: 'religions';
+        value: number | Religion;
+      } | null)
+    | ({
+        relationTo: 'routes';
+        value: number | Route;
+      } | null)
+    | ({
+        relationTo: 'sales-funnel';
+        value: number | SalesFunnel;
+      } | null)
+    | ({
+        relationTo: 'social-media-posts';
+        value: number | SocialMediaPost;
+      } | null)
+    | ({
+        relationTo: 'timezones';
+        value: number | Timezone;
+      } | null)
+    | ({
+        relationTo: 'travel-diaries';
+        value: number | TravelDiary;
+      } | null)
+    | ({
+        relationTo: 'travel-itineraries';
+        value: number | TravelItinerary;
       } | null)
     | ({
         relationTo: 'redirects';
-        value: string | Redirect;
+        value: number | Redirect;
       } | null)
     | ({
         relationTo: 'forms';
-        value: string | Form;
+        value: number | Form;
       } | null)
     | ({
         relationTo: 'form-submissions';
-        value: string | FormSubmission;
+        value: number | FormSubmission;
       } | null)
     | ({
         relationTo: 'search';
-        value: string | Search;
+        value: number | Search;
       } | null)
     | ({
         relationTo: 'payload-jobs';
-        value: string | PayloadJob;
+        value: number | PayloadJob;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -960,10 +3909,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -983,7 +3932,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1025,6 +3974,240 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        webglCarousel?: T | WebGLCarouselBlockSelect<T>;
+        whatamesh?: T | WhatameshBlockSelect<T>;
+        scrollingImages?: T | ScrollingImagesBlockSelect<T>;
+        'travel-data-globe'?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              defaultView?: T;
+              globeSettings?:
+                | T
+                | {
+                    autoRotate?: T;
+                    autoRotateSpeed?: T;
+                    atmosphereColor?: T;
+                    atmosphereAltitude?: T;
+                  };
+              glassSettings?:
+                | T
+                | {
+                    tint?: T;
+                    opacity?: T;
+                    blur?: T;
+                  };
+              dataSettings?:
+                | T
+                | {
+                    maxAirports?: T;
+                    maxRestaurants?: T;
+                    showOnlyThreeStars?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'webgl-text'?:
+          | T
+          | {
+              text?: T;
+              typography?:
+                | T
+                | {
+                    font?: T;
+                    fontSize?: T;
+                    letterSpacing?: T;
+                    lineHeight?: T;
+                    maxWidth?: T;
+                    textAlign?: T;
+                  };
+              appearance?:
+                | T
+                | {
+                    color?: T;
+                    emissive?: T;
+                    emissiveIntensity?: T;
+                    material?: T;
+                    metalness?: T;
+                    roughness?: T;
+                  };
+              outline?:
+                | T
+                | {
+                    enabled?: T;
+                    outlineColor?: T;
+                    outlineWidth?: T;
+                    outlineOpacity?: T;
+                  };
+              animation?:
+                | T
+                | {
+                    type?: T;
+                    duration?: T;
+                    delay?: T;
+                    stagger?: T;
+                  };
+              transform?:
+                | T
+                | {
+                    position?:
+                      | T
+                      | {
+                          x?: T;
+                          y?: T;
+                          z?: T;
+                        };
+                    rotation?:
+                      | T
+                      | {
+                          x?: T;
+                          y?: T;
+                          z?: T;
+                        };
+                    scale?: T;
+                  };
+              layout?:
+                | T
+                | {
+                    height?: T;
+                    fullWidth?: T;
+                    backgroundColor?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        dolphins?: T | DolphinsBlockSelect<T>;
+        'area-explorer'?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              googleMapsApiKey?: T;
+              mapSettings?:
+                | T
+                | {
+                    mapId?: T;
+                    defaultLocation?:
+                      | T
+                      | {
+                          lat?: T;
+                          lng?: T;
+                          altitude?: T;
+                          heading?: T;
+                          tilt?: T;
+                          range?: T;
+                        };
+                    gestureHandling?: T;
+                  };
+              pois?:
+                | T
+                | {
+                    name?: T;
+                    description?: T;
+                    category?: T;
+                    location?:
+                      | T
+                      | {
+                          lat?: T;
+                          lng?: T;
+                          altitude?: T;
+                        };
+                    image?: T;
+                    icon?: T;
+                    id?: T;
+                  };
+              tours?:
+                | T
+                | {
+                    name?: T;
+                    description?: T;
+                    waypoints?:
+                      | T
+                      | {
+                          name?: T;
+                          description?: T;
+                          location?:
+                            | T
+                            | {
+                                lat?: T;
+                                lng?: T;
+                                altitude?: T;
+                                heading?: T;
+                                tilt?: T;
+                                range?: T;
+                              };
+                          duration?: T;
+                          transitionDuration?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        storytelling?:
+          | T
+          | {
+              sections?:
+                | T
+                | {
+                    type?: T;
+                    title?: T;
+                    subtitle?: T;
+                    content?: T;
+                    quote?: T;
+                    simpleContent?: T;
+                    media?:
+                      | T
+                      | {
+                          type?: T;
+                          image?: T;
+                          video?: T;
+                          webglComponent?: T;
+                          webglProps?: T;
+                        };
+                    layout?: T;
+                    animation?:
+                      | T
+                      | {
+                          type?: T;
+                          duration?: T;
+                          delay?: T;
+                        };
+                    background?:
+                      | T
+                      | {
+                          color?: T;
+                          gradient?: T;
+                          image?: T;
+                          blur?: T;
+                          overlay?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        background?:
+          | T
+          | {
+              type?: T;
+              colors?:
+                | T
+                | {
+                    color1?: T;
+                    color2?: T;
+                    color3?: T;
+                    color4?: T;
+                  };
+              intensity?: T;
+              animationSpeed?: T;
+              fullScreen?: T;
+              fixed?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   meta?:
     | T
@@ -1121,6 +4304,78 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WebGLCarouselBlock_select".
+ */
+export interface WebGLCarouselBlockSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        image?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  autoplay?: T;
+  autoplaySpeed?: T;
+  variant?: T;
+  showIndicators?: T;
+  showArrows?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WhatameshBlock_select".
+ */
+export interface WhatameshBlockSelect<T extends boolean = true> {
+  colors?:
+    | T
+    | {
+        color?: T;
+        id?: T;
+      };
+  amplitude?: T;
+  speed?: T;
+  darkenTop?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ScrollingImagesBlock_select".
+ */
+export interface ScrollingImagesBlockSelect<T extends boolean = true> {
+  images?:
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        id?: T;
+      };
+  direction?: T;
+  speed?: T;
+  gap?: T;
+  autoScroll?: T;
+  pauseOnHover?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DolphinsBlock_select".
+ */
+export interface DolphinsBlockSelect<T extends boolean = true> {
+  showWater?: T;
+  showSky?: T;
+  dolphinCount?: T;
+  animationSpeed?: T;
+  waterColor?: T;
+  skyColor?: T;
   id?: T;
   blockName?: T;
 }
@@ -1290,6 +4545,1368 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "travel-advisories_select".
+ */
+export interface TravelAdvisoriesSelect<T extends boolean = true> {
+  title?: T;
+  pubDate?: T;
+  link?: T;
+  threatLevel?: T;
+  countryTag?: T;
+  country?: T;
+  category?: T;
+  description?: T;
+  regions?:
+    | T
+    | {
+        region?: T;
+        level?: T;
+        id?: T;
+      };
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "visa-requirements_select".
+ */
+export interface VisaRequirementsSelect<T extends boolean = true> {
+  passportCountry?: T;
+  destinationCountry?: T;
+  requirement?: T;
+  days?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "airports_select".
+ */
+export interface AirportsSelect<T extends boolean = true> {
+  name?: T;
+  iata?: T;
+  icao?: T;
+  city?: T;
+  country?: T;
+  region?: T;
+  latitude?: T;
+  longitude?: T;
+  elevation?: T;
+  timezone?: T;
+  type?: T;
+  openflights_id?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "michelin-restaurants_select".
+ */
+export interface MichelinRestaurantsSelect<T extends boolean = true> {
+  name?: T;
+  rating?: T;
+  year?: T;
+  link?: T;
+  website?: T;
+  phone?: T;
+  gallery?: T;
+  country?: T;
+  location?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+        address?: T;
+        city?: T;
+        destination?: T;
+      };
+  type?: T;
+  award?: T;
+  cuisine?: T;
+  priceRange?: T;
+  greenStar?: T;
+  description?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "countries_select".
+ */
+export interface CountriesSelect<T extends boolean = true> {
+  name?: T;
+  code?: T;
+  code3?: T;
+  isoCode?: T;
+  continent?: T;
+  region?: T;
+  subregion?: T;
+  capital?: T;
+  flag?: T;
+  webDomain?: T;
+  dialingCode?: T;
+  demonym?: T;
+  languages?: T;
+  religions?:
+    | T
+    | {
+        religion?: T;
+        percentage?: T;
+        id?: T;
+      };
+  timezones?: T;
+  currencies?: T;
+  neighboringCountries?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions_select".
+ */
+export interface RegionsSelect<T extends boolean = true> {
+  name?: T;
+  code?: T;
+  country?: T;
+  type?: T;
+  capital?: T;
+  destinations?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinations_select".
+ */
+export interface DestinationsSelect<T extends boolean = true> {
+  title?: T;
+  locationData?:
+    | T
+    | {
+        address?: T;
+        coordinates?:
+          | T
+          | {
+              lat?: T;
+              lng?: T;
+            };
+        placeID?: T;
+        country?: T;
+        continent?: T;
+        city?: T;
+        state?: T;
+        googleMapsUri?: T;
+        isGoodForChildren?: T;
+        isGoodForGroups?: T;
+        priceLevel?: T;
+        rating?: T;
+        user_ratings_total?: T;
+        reviews?:
+          | T
+          | {
+              author_name?: T;
+              rating?: T;
+              text?: T;
+              id?: T;
+            };
+        photos?:
+          | T
+          | {
+              photo_reference?: T;
+              height?: T;
+              width?: T;
+              id?: T;
+            };
+        tempCountryData?:
+          | T
+          | {
+              countryName?: T;
+              countryCode?: T;
+              currencyCode?: T;
+              languageCode?: T;
+              region?: T;
+              state?: T;
+              googleMapsUri?: T;
+            };
+      };
+  lat?: T;
+  lng?: T;
+  continent?: T;
+  city?: T;
+  state?: T;
+  googleMapsUri?: T;
+  countryRelation?: T;
+  currencyRelation?: T;
+  languagesRelation?: T;
+  regionRelation?: T;
+  country?: T;
+  flagSvg?: T;
+  languages?: T;
+  countryData?:
+    | T
+    | {
+        label?: T;
+        code?: T;
+        capital?: T;
+        region?: T;
+        currency?:
+          | T
+          | {
+              code?: T;
+              label?: T;
+              symbol?: T;
+            };
+        language?:
+          | T
+          | {
+              code?: T;
+              label?: T;
+              nativeName?: T;
+            };
+        flag?: T;
+      };
+  isGoodForChildren?: T;
+  isGoodForGroups?: T;
+  priceLevel?: T;
+  rating?: T;
+  user_ratings_total?: T;
+  reviews?:
+    | T
+    | {
+        author_name?: T;
+        rating?: T;
+        text?: T;
+        id?: T;
+      };
+  featuredImage?: T;
+  featuredVideo?: T;
+  mediaGallery?: T;
+  content?: T;
+  relatedDestinations?: T;
+  authors?: T;
+  populatedAuthors?:
+    | T
+    | {
+        id?: T;
+        name?: T;
+      };
+  enable3DMap?: T;
+  areaExplorerConfig?:
+    | T
+    | {
+        showPOIs?: T;
+        poiTypes?: T;
+        poiDensity?: T;
+        searchRadius?: T;
+        autoOrbit?: T;
+        theme?: T;
+        customCenter?:
+          | T
+          | {
+              enabled?: T;
+              lat?: T;
+              lng?: T;
+              description?: T;
+            };
+      };
+  poiDataCachedAt?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "languages_select".
+ */
+export interface LanguagesSelect<T extends boolean = true> {
+  name?: T;
+  code?: T;
+  nativeName?: T;
+  destinations?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "currencies_select".
+ */
+export interface CurrenciesSelect<T extends boolean = true> {
+  name?: T;
+  code?: T;
+  symbol?: T;
+  exchangeRate?: T;
+  exchangeRateUpdatedAt?: T;
+  destinations?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "airlines_select".
+ */
+export interface AirlinesSelect<T extends boolean = true> {
+  name?: T;
+  alias?: T;
+  iata?: T;
+  icao?: T;
+  callsign?: T;
+  country?: T;
+  active?: T;
+  openflights_id?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bookings_select".
+ */
+export interface BookingsSelect<T extends boolean = true> {
+  bookingNumber?: T;
+  customer?: T;
+  destination?: T;
+  status?: T;
+  travelDates?:
+    | T
+    | {
+        departure?: T;
+        return?: T;
+      };
+  travelers?:
+    | T
+    | {
+        firstName?: T;
+        lastName?: T;
+        dateOfBirth?: T;
+        passportNumber?: T;
+        specialRequests?: T;
+        id?: T;
+      };
+  itinerary?: T;
+  accommodations?:
+    | T
+    | {
+        hotel?: T;
+        checkIn?: T;
+        checkOut?: T;
+        roomType?: T;
+        cost?: T;
+        id?: T;
+      };
+  flights?:
+    | T
+    | {
+        airline?: T;
+        flightNumber?: T;
+        departure?:
+          | T
+          | {
+              airport?: T;
+              date?: T;
+              time?: T;
+            };
+        arrival?:
+          | T
+          | {
+              airport?: T;
+              date?: T;
+              time?: T;
+            };
+        cost?: T;
+        id?: T;
+      };
+  pricing?:
+    | T
+    | {
+        subtotal?: T;
+        taxes?: T;
+        fees?: T;
+        discount?: T;
+        totalAmount?: T;
+        currency?: T;
+      };
+  payments?:
+    | T
+    | {
+        amount?: T;
+        date?: T;
+        method?: T;
+        reference?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-sessions_select".
+ */
+export interface ChatSessionsSelect<T extends boolean = true> {
+  title?: T;
+  member?: T;
+  status?: T;
+  context?:
+    | T
+    | {
+        upcomingBooking?: T;
+        currentDestination?: T;
+        interests?:
+          | T
+          | {
+              interest?: T;
+              id?: T;
+            };
+      };
+  messages?:
+    | T
+    | {
+        sender?: T;
+        content?: T;
+        timestamp?: T;
+        attachments?: T;
+        id?: T;
+      };
+  summary?: T;
+  actionItems?:
+    | T
+    | {
+        item?: T;
+        completed?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "club-members_select".
+ */
+export interface ClubMembersSelect<T extends boolean = true> {
+  customer?: T;
+  firstName?: T;
+  lastName?: T;
+  email?: T;
+  membershipLevel?: T;
+  status?: T;
+  joinDate?: T;
+  renewalDate?: T;
+  preferences?:
+    | T
+    | {
+        preferredDestinationTypes?: T;
+        accommodationPreferences?: T;
+        communicationPreferences?:
+          | T
+          | {
+              emailUpdates?: T;
+              smsNotifications?: T;
+              frequency?: T;
+            };
+      };
+  benefits?:
+    | T
+    | {
+        conciergeAccess?: T;
+        exclusiveDeals?: T;
+        priorityBooking?: T;
+        customItinerary?: T;
+        aiChatbotAccess?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "country-details_select".
+ */
+export interface CountryDetailsSelect<T extends boolean = true> {
+  country?: T;
+  landlocked?: T;
+  area?:
+    | T
+    | {
+        total?: T;
+        land?: T;
+        water?: T;
+      };
+  surfaceArea?: T;
+  elevation?:
+    | T
+    | {
+        meanElevation?: T;
+        highestPoint?: T;
+        lowestPoint?: T;
+      };
+  population?: T;
+  populationDensity?: T;
+  populationGrowthRate?: T;
+  birthRate?: T;
+  deathRate?: T;
+  migrationRate?: T;
+  lifeExpectancy?:
+    | T
+    | {
+        total?: T;
+        male?: T;
+        female?: T;
+      };
+  yearlyAverageTemp?: T;
+  climate?: T;
+  terrain?: T;
+  naturalHazards?: T;
+  naturalResources?: T;
+  drivingSide?: T;
+  governmentType?: T;
+  chiefOfState?: T;
+  headOfGovernment?: T;
+  gdp?:
+    | T
+    | {
+        nominal?: T;
+        perCapita?: T;
+        growthRate?: T;
+      };
+  nationalDish?: T;
+  ethnicGroups?:
+    | T
+    | {
+        name?: T;
+        percentage?: T;
+        id?: T;
+      };
+  ageStructure?:
+    | T
+    | {
+        age0to14?: T;
+        age15to64?: T;
+        age65plus?: T;
+      };
+  sexRatio?:
+    | T
+    | {
+        atBirth?: T;
+        total?: T;
+      };
+  urbanization?:
+    | T
+    | {
+        urbanPopulation?: T;
+        rateOfUrbanization?: T;
+      };
+  majorUrbanAreas?:
+    | T
+    | {
+        name?: T;
+        population?: T;
+        id?: T;
+      };
+  healthExpenditure?: T;
+  physicianDensity?: T;
+  hospitalBedDensity?: T;
+  obesityRate?: T;
+  alcoholConsumption?: T;
+  tobaccoUse?: T;
+  marriedWomenRate?: T;
+  literacy?:
+    | T
+    | {
+        total?: T;
+        male?: T;
+        female?: T;
+      };
+  educationExpenditure?: T;
+  environmentalIssues?: T;
+  forestArea?: T;
+  co2Emissions?: T;
+  internetUsers?: T;
+  mobileSubscriptions?: T;
+  telephoneLines?: T;
+  background?: T;
+  independence?:
+    | T
+    | {
+        date?: T;
+        from?: T;
+      };
+  constitution?: T;
+  legalSystem?: T;
+  suffrage?: T;
+  citizenship?: T;
+  politicalParties?:
+    | T
+    | {
+        name?: T;
+        leader?: T;
+        founded?: T;
+        id?: T;
+      };
+  internationalOrganizations?: T;
+  diplomaticRepresentationFromUS?:
+    | T
+    | {
+        chiefOfMission?: T;
+        embassy?: T;
+        telephone?: T;
+      };
+  disputes?: T;
+  refugeesAndIdps?:
+    | T
+    | {
+        refugees?: T;
+        idps?: T;
+        statelessPersons?: T;
+      };
+  trafficking?: T;
+  illicitDrugs?: T;
+  economyOverview?: T;
+  laborForce?: T;
+  unemploymentRate?: T;
+  agricultureProducts?: T;
+  industries?: T;
+  exports?: T;
+  imports?: T;
+  publicDebt?: T;
+  taxesAndRevenues?: T;
+  inflationRate?: T;
+  militaryExpenditure?: T;
+  militaryBranches?: T;
+  energyProduction?: T;
+  energyConsumption?: T;
+  terrorismNotes?: T;
+  worldHeritageSites?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "country-media_select".
+ */
+export interface CountryMediaSelect<T extends boolean = true> {
+  country?: T;
+  title?: T;
+  mediaType?: T;
+  description?: T;
+  media?: T;
+  externalUrl?: T;
+  source?: T;
+  sourceUrl?: T;
+  copyright?: T;
+  year?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  geoLocation?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+        placeName?: T;
+      };
+  featured?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "country-religions_select".
+ */
+export interface CountryReligionsSelect<T extends boolean = true> {
+  country?: T;
+  religion?: T;
+  percentage?: T;
+  year?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "crime-index-scores_select".
+ */
+export interface CrimeIndexScoresSelect<T extends boolean = true> {
+  country?: T;
+  year?: T;
+  criminalityScore?: T;
+  resilienceScore?: T;
+  rank?: T;
+  region?: T;
+  criminalMarkets?:
+    | T
+    | {
+        humanTrafficking?: T;
+        humanSmuggling?: T;
+        extortionProtection?: T;
+        armsTrafficking?: T;
+        counterfeiting?: T;
+        illicitDrugs?: T;
+        environmentalCrimes?: T;
+        heistRobbery?: T;
+        financialCrimes?: T;
+        cyberCrimes?: T;
+        privateCorruption?: T;
+        publicCorruption?: T;
+        heroinTrade?: T;
+        syntheticDrugTrade?: T;
+      };
+  criminalActors?:
+    | T
+    | {
+        mafiaStyle?: T;
+        criminalNetworks?: T;
+        stateActors?: T;
+        foreignActors?: T;
+        privateActors?: T;
+      };
+  resilience?:
+    | T
+    | {
+        politicalLeadership?: T;
+        governmentTransparency?: T;
+        internationalCooperation?: T;
+        nationalPolicies?: T;
+        judicialSystem?: T;
+        lawEnforcement?: T;
+        territorialIntegrity?: T;
+        antiMoneyLaundering?: T;
+        economicRegulation?: T;
+        victimSupport?: T;
+        prevention?: T;
+        nonStateActors?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "crime-trends_select".
+ */
+export interface CrimeTrendsSelect<T extends boolean = true> {
+  country?: T;
+  indicator?: T;
+  category?: T;
+  previousScore?: T;
+  currentScore?: T;
+  changePercent?: T;
+  trend?: T;
+  year?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  email?: T;
+  phone?: T;
+  status?: T;
+  clubMember?: T;
+  preferredDestinations?: T;
+  travelStyle?: T;
+  budget?:
+    | T
+    | {
+        min?: T;
+        max?: T;
+        currency?: T;
+      };
+  totalSpent?: T;
+  bookings?: T;
+  notes?: T;
+  socialMedia?:
+    | T
+    | {
+        instagram?: T;
+        facebook?: T;
+        twitter?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destination-categories_select".
+ */
+export interface DestinationCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  slugLock?: T;
+  description?: T;
+  icon?: T;
+  color?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destination-types_select".
+ */
+export interface DestinationTypesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  characteristics?:
+    | T
+    | {
+        characteristic?: T;
+        id?: T;
+      };
+  typicalActivities?:
+    | T
+    | {
+        activity?: T;
+        id?: T;
+      };
+  averageBudgetRange?:
+    | T
+    | {
+        min?: T;
+        max?: T;
+        currency?: T;
+        period?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experiences_select".
+ */
+export interface ExperiencesSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  featured?: T;
+  enable3DExplorer?: T;
+  enable3DStorytelling?: T;
+  description?: T;
+  shortDescription?: T;
+  heroImage?: T;
+  gallery?: T;
+  experienceType?: T;
+  duration?:
+    | T
+    | {
+        days?: T;
+        nights?: T;
+      };
+  priceRange?:
+    | T
+    | {
+        currency?: T;
+        startingFrom?: T;
+        pricingNote?: T;
+      };
+  destinations?:
+    | T
+    | {
+        destination?: T;
+        customLocation?:
+          | T
+          | {
+              title?: T;
+              coordinates?:
+                | T
+                | {
+                    lat?: T;
+                    lng?: T;
+                  };
+            };
+        days?: T;
+        description?: T;
+        highlights?:
+          | T
+          | {
+              activity?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  explorerConfig?:
+    | T
+    | {
+        centerLocation?: T;
+        customCenter?:
+          | T
+          | {
+              lat?: T;
+              lng?: T;
+            };
+        showPOIs?: T;
+        poiTypes?: T;
+        showDestinationMarkers?: T;
+        theme?: T;
+      };
+  storyChapters?:
+    | T
+    | {
+        title?: T;
+        content?: T;
+        useDestination?: T;
+        destinationIndex?: T;
+        customLocation?:
+          | T
+          | {
+              lat?: T;
+              lng?: T;
+            };
+        media?: T;
+        duration?: T;
+        cameraOptions?:
+          | T
+          | {
+              heading?: T;
+              pitch?: T;
+              range?: T;
+            };
+        id?: T;
+      };
+  storytellingConfig?:
+    | T
+    | {
+        autoPlay?: T;
+        showNavigation?: T;
+        theme?: T;
+      };
+  whatsIncluded?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  whatsNotIncluded?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  highlights?:
+    | T
+    | {
+        highlight?: T;
+        id?: T;
+      };
+  bestTimeToVisit?: T;
+  difficulty?: T;
+  groupSize?:
+    | T
+    | {
+        min?: T;
+        max?: T;
+      };
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+      };
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experience-types_select".
+ */
+export interface ExperienceTypesSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  icon?: T;
+  color?: T;
+  featured?: T;
+  sortOrder?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+        ogImage?: T;
+      };
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "flight-cache_select".
+ */
+export interface FlightCacheSelect<T extends boolean = true> {
+  flightCode?: T;
+  source?: T;
+  airline?: T;
+  aircraft?: T;
+  registration?: T;
+  departureAirport?: T;
+  departureAirportCode?: T;
+  arrivalAirport?: T;
+  arrivalAirportCode?: T;
+  departureGate?: T;
+  arrivalGate?: T;
+  departureTerminal?: T;
+  arrivalTerminal?: T;
+  baggage?: T;
+  status?: T;
+  distance?: T;
+  duration?: T;
+  route?: T;
+  altitude?: T;
+  speed?: T;
+  elapsedTime?: T;
+  remainingTime?: T;
+  gateDepartureTime?: T;
+  gateArrivalTime?: T;
+  takeoffTime?: T;
+  landingTime?: T;
+  scheduledDepartureTime?: T;
+  scheduledArrivalTime?: T;
+  taxiOut?: T;
+  taxiIn?: T;
+  averageDelay?: T;
+  airlineLogoUrl?: T;
+  friendlyFlightIdentifier?: T;
+  callsign?: T;
+  iataCode?: T;
+  departureCity?: T;
+  departureState?: T;
+  arrivalCity?: T;
+  arrivalState?: T;
+  flightProgressStatus?: T;
+  flightProgressTimeRemaining?: T;
+  totalTravelTime?: T;
+  flownDistance?: T;
+  remainingDistanceScraped?: T;
+  plannedSpeed?: T;
+  plannedAltitude?: T;
+  airlineIata?: T;
+  airlineIcao?: T;
+  departureCountry?: T;
+  arrivalCountry?: T;
+  statusCode?: T;
+  aircraftIata?: T;
+  rawData?: T;
+  lastUpdated?: T;
+  cacheExpiry?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads_select".
+ */
+export interface LeadsSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  email?: T;
+  phone?: T;
+  status?: T;
+  source?: T;
+  interestedDestinations?: T;
+  budget?:
+    | T
+    | {
+        min?: T;
+        max?: T;
+      };
+  travelDates?:
+    | T
+    | {
+        start?: T;
+        end?: T;
+        flexible?: T;
+      };
+  notes?: T;
+  lastContact?: T;
+  nextFollowUp?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "map-data-cache_select".
+ */
+export interface MapDataCacheSelect<T extends boolean = true> {
+  destinationId?: T;
+  cacheKey?: T;
+  dataType?: T;
+  coordinates?:
+    | T
+    | {
+        lat?: T;
+        lng?: T;
+      };
+  searchParams?:
+    | T
+    | {
+        radius?: T;
+        types?: T;
+      };
+  data?: T;
+  expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "religions_select".
+ */
+export interface ReligionsSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  parentReligion?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "routes_select".
+ */
+export interface RoutesSelect<T extends boolean = true> {
+  routeCode?: T;
+  airline?: T;
+  airline_code?: T;
+  sourceAirport?: T;
+  source_airport_code?: T;
+  destinationAirport?: T;
+  destination_airport_code?: T;
+  codeshare?: T;
+  stops?: T;
+  equipment?:
+    | T
+    | {
+        aircraft?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sales-funnel_select".
+ */
+export interface SalesFunnelSelect<T extends boolean = true> {
+  name?: T;
+  stage?: T;
+  lead?: T;
+  customer?: T;
+  estimatedValue?: T;
+  probability?: T;
+  expectedCloseDate?: T;
+  activities?:
+    | T
+    | {
+        type?: T;
+        date?: T;
+        notes?: T;
+        outcome?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "social-media-posts_select".
+ */
+export interface SocialMediaPostsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  platforms?: T;
+  media?: T;
+  status?: T;
+  scheduledDate?: T;
+  publishedDate?: T;
+  errors?:
+    | T
+    | {
+        platform?: T;
+        error?: T;
+        id?: T;
+      };
+  relatedContent?:
+    | T
+    | {
+        post?: T;
+        destination?: T;
+      };
+  hashtags?:
+    | T
+    | {
+        hashtag?: T;
+        id?: T;
+      };
+  analytics?:
+    | T
+    | {
+        impressions?: T;
+        engagements?: T;
+        clicks?: T;
+        shares?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "timezones_select".
+ */
+export interface TimezonesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  label?: T;
+  offset?: T;
+  offsetMinutes?: T;
+  isDST?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "travel-diaries_select".
+ */
+export interface TravelDiariesSelect<T extends boolean = true> {
+  title?: T;
+  member?: T;
+  destination?: T;
+  booking?: T;
+  travelDates?:
+    | T
+    | {
+        start?: T;
+        end?: T;
+      };
+  status?: T;
+  entries?:
+    | T
+    | {
+        date?: T;
+        title?: T;
+        content?: T;
+        photos?: T;
+        location?:
+          | T
+          | {
+              name?: T;
+              coordinates?:
+                | T
+                | {
+                    latitude?: T;
+                    longitude?: T;
+                  };
+            };
+        mood?: T;
+        weather?: T;
+        id?: T;
+      };
+  highlights?:
+    | T
+    | {
+        highlight?: T;
+        id?: T;
+      };
+  wouldRecommend?: T;
+  overallRating?: T;
+  publiclyVisible?: T;
+  featuredImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "travel-itineraries_select".
+ */
+export interface TravelItinerariesSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  user?: T;
+  enable3DStorytelling?: T;
+  description?: T;
+  coverImage?: T;
+  travelDates?:
+    | T
+    | {
+        startDate?: T;
+        endDate?: T;
+      };
+  groupType?: T;
+  budgetRange?: T;
+  storyChapters?:
+    | T
+    | {
+        title?: T;
+        content?: T;
+        dateTime?: T;
+        locationType?: T;
+        locationSearch?: T;
+        destination?: T;
+        coordinates?:
+          | T
+          | {
+              lat?: T;
+              lng?: T;
+            };
+        address?: T;
+        media?:
+          | T
+          | {
+              type?: T;
+              image?: T;
+              youtubeUrl?: T;
+              imageCredit?: T;
+            };
+        focusOptions?:
+          | T
+          | {
+              showFocus?: T;
+              focusRadius?: T;
+              showLocationMarker?: T;
+            };
+        cameraOptions?:
+          | T
+          | {
+              useCustomCamera?: T;
+              heading?: T;
+              pitch?: T;
+              roll?: T;
+            };
+        duration?: T;
+        id?: T;
+      };
+  storytellingConfig?:
+    | T
+    | {
+        theme?: T;
+        autoPlay?: T;
+        autoPlayDelay?: T;
+        showNavigation?: T;
+        showTimeline?: T;
+        transparentBackground?: T;
+      };
+  summary?:
+    | T
+    | {
+        totalDays?: T;
+        totalChapters?: T;
+      };
+  shareToken?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1551,7 +6168,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "header".
  */
 export interface Header {
-  id: string;
+  id: number;
   navItems?:
     | {
         link: {
@@ -1560,11 +6177,11 @@ export interface Header {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: string | Page;
+                value: number | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: string | Post;
+                value: number | Post;
               } | null);
           url?: string | null;
           label: string;
@@ -1580,7 +6197,7 @@ export interface Header {
  * via the `definition` "footer".
  */
 export interface Footer {
-  id: string;
+  id: number;
   navItems?:
     | {
         link: {
@@ -1589,11 +6206,11 @@ export interface Footer {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: string | Page;
+                value: number | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: string | Post;
+                value: number | Post;
               } | null);
           url?: string | null;
           label: string;
@@ -1601,6 +6218,57 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  webgl?: {
+    /**
+     * Enable WebGL features globally
+     */
+    enabled?: boolean | null;
+    quality?: ('auto' | 'low' | 'medium' | 'high') | null;
+    background?: {
+      type?: ('none' | 'gradient' | 'particles' | 'fluid' | 'whatamesh') | null;
+      /**
+       * Primary background color (hex format)
+       */
+      color1?: string | null;
+      /**
+       * Secondary background color (hex format)
+       */
+      color2?: string | null;
+      /**
+       * Tertiary background color (hex format)
+       */
+      color3?: string | null;
+      /**
+       * Quaternary background color (hex format)
+       */
+      color4?: string | null;
+      /**
+       * Background effect intensity
+       */
+      intensity?: number | null;
+    };
+  };
+  animations?: {
+    smoothScroll?: boolean | null;
+    pageTransitions?: boolean | null;
+    /**
+     * Respect prefers-reduced-motion setting
+     */
+    reducedMotion?: boolean | null;
+  };
+  glass?: {
+    enabled?: boolean | null;
+    variant?: ('clear' | 'frosted' | 'refractive') | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1652,6 +6320,44 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  webgl?:
+    | T
+    | {
+        enabled?: T;
+        quality?: T;
+        background?:
+          | T
+          | {
+              type?: T;
+              color1?: T;
+              color2?: T;
+              color3?: T;
+              color4?: T;
+              intensity?: T;
+            };
+      };
+  animations?:
+    | T
+    | {
+        smoothScroll?: T;
+        pageTransitions?: T;
+        reducedMotion?: T;
+      };
+  glass?:
+    | T
+    | {
+        enabled?: T;
+        variant?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskSchedulePublish".
  */
 export interface TaskSchedulePublish {
@@ -1661,14 +6367,14 @@ export interface TaskSchedulePublish {
     doc?:
       | ({
           relationTo: 'pages';
-          value: string | Page;
+          value: number | Page;
         } | null)
       | ({
           relationTo: 'posts';
-          value: string | Post;
+          value: number | Post;
         } | null);
     global?: string | null;
-    user?: (string | null) | User;
+    user?: (number | null) | User;
   };
   output?: unknown;
 }

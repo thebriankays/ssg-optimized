@@ -1,0 +1,29 @@
+// Type declarations for various file types
+declare module '*.css' {
+  const content: string
+  export default content
+}
+
+declare module '*.scss' {
+  const content: string
+  export default content
+}
+
+declare module '*.sass' {
+  const content: string
+  export default content
+}
+
+declare module '*.less' {
+  const content: string
+  export default content
+}
+
+declare module '*.svg'
+declare module '*.png'
+declare module '*.jpg'
+declare module '*.jpeg'
+declare module '*.gif'
+declare module '*.webp'
+declare module '*.ico'
+declare module '*.bmp'

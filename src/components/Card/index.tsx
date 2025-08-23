@@ -3,6 +3,7 @@ import { cn } from '@/utilities/ui'
 import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
+import { GlassContainer } from '@/components/ui/glass/GlassComponents'
 
 import type { Post } from '@/payload-types'
 
@@ -32,53 +33,73 @@ export const Card: React.FC<{
   return (
     <article
       className={cn(
-        'border border-border rounded-lg overflow-hidden bg-card hover:cursor-pointer',
+        'group cursor-pointer overflow-hidden',
         className,
       )}
       ref={card.ref}
     >
-      <div className="relative w-full ">
-        {!metaImage && <div className="">No image</div>}
-        {metaImage && typeof metaImage !== 'string' && <Media resource={metaImage} size="33vw" />}
-      </div>
-      <div className="p-4">
-        {showCategories && hasCategories && (
-          <div className="uppercase text-sm mb-4">
-            {showCategories && hasCategories && (
-              <div>
-                {categories?.map((category, index) => {
-                  if (typeof category === 'object') {
-                    const { title: titleFromCategory } = category
+      <GlassContainer 
+        preset="frosted" 
+        className="h-full p-0 overflow-hidden transition-transform duration-300 hover:scale-[1.02]"
+        interactive
+        glowOnHover
+      >
+        <div className="relative w-full aspect-video overflow-hidden">
+          {!metaImage && (
+            <div className="w-full h-full flex items-center justify-center bg-white/5">
+              <span className="text-white/30">No image</span>
+            </div>
+          )}
+          {metaImage && typeof metaImage !== 'string' && (
+            <div className="transition-transform duration-300 group-hover:scale-110">
+              <Media 
+                resource={metaImage} 
+                size="33vw"
+                enableWebGL={true}
+                parallaxSpeed={0.15}
+              />
+            </div>
+          )}
+        </div>
+        <div className="p-4">
+          {showCategories && hasCategories && (
+            <div className="uppercase text-sm mb-4 text-white/60">
+              {categories?.map((category, index) => {
+                if (typeof category === 'object') {
+                  const { title: titleFromCategory } = category
 
-                    const categoryTitle = titleFromCategory || 'Untitled category'
+                  const categoryTitle = titleFromCategory || 'Untitled category'
 
-                    const isLast = index === categories.length - 1
+                  const isLast = index === categories.length - 1
 
-                    return (
-                      <Fragment key={index}>
-                        {categoryTitle}
-                        {!isLast && <Fragment>, &nbsp;</Fragment>}
-                      </Fragment>
-                    )
-                  }
+                  return (
+                    <Fragment key={index}>
+                      {categoryTitle}
+                      {!isLast && <Fragment>, &nbsp;</Fragment>}
+                    </Fragment>
+                  )
+                }
 
-                  return null
-                })}
-              </div>
-            )}
-          </div>
-        )}
-        {titleToUse && (
-          <div className="prose">
-            <h3>
-              <Link className="not-prose" href={href} ref={link.ref}>
-                {titleToUse}
-              </Link>
-            </h3>
-          </div>
-        )}
-        {description && <div className="mt-2">{description && <p>{sanitizedDescription}</p>}</div>}
-      </div>
+                return null
+              })}
+            </div>
+          )}
+          {titleToUse && (
+            <div className="prose prose-invert">
+              <h3 className="text-white">
+                <Link className="not-prose hover:text-white/80 transition-colors" href={href} ref={link.ref}>
+                  {titleToUse}
+                </Link>
+              </h3>
+            </div>
+          )}
+          {description && (
+            <div className="mt-2">
+              <p className="text-white/70">{sanitizedDescription}</p>
+            </div>
+          )}
+        </div>
+      </GlassContainer>
     </article>
   )
 }

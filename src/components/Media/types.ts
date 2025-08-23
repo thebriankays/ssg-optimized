@@ -10,7 +10,7 @@ export interface Props {
   htmlElement?: ElementType | null
   pictureClassName?: string
   imgClassName?: string
-  onClick?: () => void
+  onClick?: (e?: React.MouseEvent) => void
   onLoad?: () => void
   loading?: 'lazy' | 'eager' // for NextImage only
   priority?: boolean // for NextImage only
@@ -19,4 +19,6 @@ export interface Props {
   size?: string // for NextImage only
   src?: StaticImageData // for static media
   videoClassName?: string
+  enableWebGL?: boolean // Enable WebGL enhancement
+  parallaxSpeed?: number // Parallax scroll speed for WebGL
 }

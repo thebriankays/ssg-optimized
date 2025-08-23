@@ -1,0 +1,190 @@
+.kinetic-images {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 600px;
+  overflow: hidden;
+  
+  &__scene {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+  
+  &__controls {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    
+    .glass-card {
+      pointer-events: all;
+    }
+  }
+  
+  &__control-panel {
+    h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+    }
+    
+    p {
+      margin: 0 0 20px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.4;
+    }
+    
+    h4 {
+      margin: 20px 0 10px;
+      font-size: 16px;
+      font-weight: 500;
+      color: white;
+      
+      &:first-of-type {
+        margin-top: 0;
+      }
+    }
+  }
+  
+  &__variants {
+    margin-bottom: 20px;
+  }
+  
+  &__variant-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  &__variant-button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    &.active {
+      background: rgba(0, 255, 136, 0.1);
+      border-color: rgba(0, 255, 136, 0.3);
+      
+      .label {
+        color: #00ff88;
+      }
+    }
+    
+    .label {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .description {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.3;
+    }
+  }
+  
+  &__toggle {
+    margin-bottom: 20px;
+    
+    label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      color: white;
+      
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #00ff88;
+      }
+    }
+  }
+  
+  &__stats {
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    
+    p {
+      margin: 0 0 5px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+  
+  // Instructions panel
+  .glass-card {
+    h4 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+    }
+    
+    ul {
+      li {
+        margin-bottom: 4px;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+  
+  // Mobile responsiveness
+  @media (max-width: 768px) {
+    &__control-panel {
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      min-width: auto;
+      padding: 15px;
+    }
+    
+    .glass-card:last-child {
+      bottom: 10px;
+      right: 10px;
+      left: 10px;
+      max-width: none;
+    }
+    
+    &__variant-buttons {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    
+    &__variant-button {
+      flex: 1;
+      min-width: 0;
+      
+      .description {
+        display: none;
+      }
+    }
+  }
+}

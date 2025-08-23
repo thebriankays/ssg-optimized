@@ -1,0 +1,352 @@
+'use client'
+
+import { useFrame, useThree } from '@react-three/fiber'
+import { useMemo, useRef } from 'react'
+import * as THREE from 'three'
+import { useCanvasStore } from '@/lib/stores/canvas-store'
+// Import shaders as strings
+const vertexShader = /* glsl */ `
+precision highp float;
+
+// Attributes
+attribute vec3 position;
+attribute vec3 normal;
+attribute vec2 uv;
+
+// Uniforms
+uniform mat4 projectionMatrix;
+uniform mat4 modelViewMatrix;
+uniform mat3 normalMatrix;
+
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform float u_ratio;
+uniform float u_pointSize;
+
+uniform vec3 u_color1;
+uniform vec3 u_color2;
+uniform vec3 u_color3;
+uniform vec3 u_color4;
+uniform vec4 u_active_colors;
+uniform vec3 u_baseColor;
+uniform float u_shadow_power;
+uniform float u_darken_top;
+
+// Wave layer structure
+struct WaveLayer {
+  float z;
+  vec2 freq;
+  float amp;
+  float speed;
+  float seed;
+};
+
+uniform WaveLayer u_waveLayers[3];
+
+// Varyings
+varying vec3 v_color;
+varying vec3 v_position;
+varying vec3 v_normal;
+varying vec2 v_uv;
+varying float v_distortion;
+
+// Simplex noise functions
+vec3 mod289(vec3 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+vec4 mod289(vec4 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+vec4 permute(vec4 x) {
+  return mod289(((x * 34.0) + 1.0) * x);
+}
+
+vec4 taylorInvSqrt(vec4 r) {
+  return 1.79284291400159 - 0.85373472095314 * r;
+}
+
+float snoise(vec3 v) {
+  const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+
+  vec3 i = floor(v + dot(v, C.yyy));
+  vec3 x0 = v - i + dot(i, C.xxx);
+
+  vec3 g = step(x0.yzx, x0.xyz);
+  vec3 l = 1.0 - g;
+  vec3 i1 = min(g.xyz, l.zxy);
+  vec3 i2 = max(g.xyz, l.zxy);
+
+  vec3 x1 = x0 - i1 + C.xxx;
+  vec3 x2 = x0 - i2 + C.yyy;
+  vec3 x3 = x0 - D.yyy;
+
+  i = mod289(i);
+  vec4 p = permute(permute(permute(
+    i.z + vec4(0.0, i1.z, i2.z, 1.0))
+    + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+    + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+
+  float n_ = 0.142857142857;
+  vec3 ns = n_ * D.wyz - D.xzx;
+
+  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_);
+
+  vec4 x = x_ * ns.x + ns.yyyy;
+  vec4 y = y_ * ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+
+  vec4 b0 = vec4(x.xy, y.xy);
+  vec4 b1 = vec4(x.zw, y.zw);
+
+  vec4 s0 = floor(b0) * 2.0 + 1.0;
+  vec4 s1 = floor(b1) * 2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+
+  vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+  vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+
+  vec3 p0 = vec3(a0.xy, h.x);
+  vec3 p1 = vec3(a0.zw, h.y);
+  vec3 p2 = vec3(a1.xy, h.z);
+  vec3 p3 = vec3(a1.zw, h.w);
+
+  vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+  p0 *= norm.x;
+  p1 *= norm.y;
+  p2 *= norm.z;
+  p3 *= norm.w;
+
+  vec4 m = max(0.6 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
+  m = m * m;
+  return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+}
+
+// Main vertex shader
+void main() {
+  v_uv = uv;
+  v_position = position;
+  
+  // Create base position
+  vec3 pos = position;
+  
+  // Time offset for animation
+  float time = u_time * 0.0001;
+  
+  // Calculate world position for noise
+  vec2 noiseCoord = vec2(pos.x * u_ratio, pos.y);
+  
+  // Apply multiple wave layers
+  float totalNoise = 0.0;
+  float totalWeight = 0.0;
+  
+  for (int i = 0; i < 3; i++) {
+    WaveLayer layer = u_waveLayers[i];
+    
+    vec3 noisePos = vec3(
+      noiseCoord.x * layer.freq.x + time * layer.speed,
+      noiseCoord.y * layer.freq.y,
+      layer.seed
+    );
+    
+    float noise = snoise(noisePos);
+    totalNoise += noise * layer.amp * layer.z;
+    totalWeight += layer.z;
+  }
+  
+  // Normalize and apply distortion
+  float distortion = totalNoise / totalWeight;
+  pos.z += distortion * 0.001;
+  v_distortion = distortion;
+  
+  // Calculate normal (approximate)
+  vec3 normal = normalize(vec3(0.0, 0.0, 1.0) + vec3(distortion * 0.001, distortion * 0.001, 0.0));
+  v_normal = normalMatrix * normal;
+  
+  // Color mixing based on position and noise
+  vec3 color = u_baseColor;
+  
+  float colorMix1 = smoothstep(-1.0, 1.0, sin(pos.x * 0.1 + distortion * 0.01));
+  float colorMix2 = smoothstep(-1.0, 1.0, cos(pos.y * 0.1 + distortion * 0.01));
+  float colorMix3 = smoothstep(-1.0, 1.0, sin((pos.x + pos.y) * 0.05 + time));
+  float colorMix4 = smoothstep(-1.0, 1.0, noise);
+  
+  if (u_active_colors.x > 0.5) color = mix(color, u_color1, colorMix1 * u_active_colors.x);
+  if (u_active_colors.y > 0.5) color = mix(color, u_color2, colorMix2 * u_active_colors.y);
+  if (u_active_colors.z > 0.5) color = mix(color, u_color3, colorMix3 * u_active_colors.z);
+  if (u_active_colors.w > 0.5) color = mix(color, u_color4, colorMix4 * u_active_colors.w);
+  
+  // Apply vertical gradient
+  float verticalGradient = smoothstep(-1.0, 1.0, pos.y);
+  color = mix(color * 0.8, color, verticalGradient);
+  
+  v_color = color;
+  
+  // Calculate final position
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  gl_PointSize = u_pointSize;
+}
+`
+
+const fragmentShader = /* glsl */ `
+precision highp float;
+
+// Uniforms
+uniform float u_darken_top;
+uniform float u_shadow_power;
+uniform vec2 u_resolution;
+
+// Varyings
+varying vec3 v_color;
+varying vec3 v_position;
+varying vec3 v_normal;
+varying vec2 v_uv;
+varying float v_distortion;
+
+void main() {
+  vec3 color = v_color;
+  
+  // Apply top darkening effect
+  if (u_darken_top > 0.5) {
+    float shadowCoord = clamp((v_position.y + 1.0) * 0.5, 0.0, 1.0);
+    float shadow = pow(shadowCoord, u_shadow_power);
+    color = mix(color * 0.3, color, shadow);
+  }
+  
+  // Add subtle noise texture
+  float noise = fract(sin(dot(v_uv * 100.0, vec2(12.9898, 78.233))) * 43758.5453);
+  color += (noise - 0.5) * 0.02;
+  
+  // Add subtle lighting based on distortion
+  float lightness = v_distortion * 0.0001;
+  color += vec3(lightness);
+  
+  // Ensure color stays in valid range
+  color = clamp(color, 0.0, 1.0);
+  
+  // Output with full opacity
+  gl_FragColor = vec4(color, 1.0);
+}
+`
+
+interface WhatameshProps {
+  colors?: string[]
+  amplitude?: number
+  speed?: number
+  density?: [number, number]
+  darkenTop?: boolean
+  seed?: number
+}
+
+export function Whatamesh({
+  colors = ['#c3e4ff', '#6ec3f4', '#eae2ff', '#b9beff'],
+  amplitude = 320,
+  speed = 1,
+  density = [0.06, 0.16],
+  darkenTop = true,
+  seed = 5,
+}: WhatameshProps) {
+  const meshRef = useRef<THREE.Mesh>(null)
+  const { size } = useThree()
+  const quality = useCanvasStore((state) => state.quality)
+  
+  // Adjust density based on quality
+  const meshDensity = useMemo(() => {
+    const qualityMultiplier = {
+      low: 0.5,
+      medium: 0.75,
+      high: 1,
+      ultra: 1.25,
+    }[quality]
+    
+    const width = Math.round(size.width * density[0] * qualityMultiplier)
+    const height = Math.round(size.height * density[1] * qualityMultiplier)
+    
+    return [Math.max(16, width), Math.max(16, height)]
+  }, [size, density, quality])
+  
+  const uniforms = useMemo(() => {
+    // Convert hex colors to Three.js Color instances
+    const colorArray = colors.map(hex => new THREE.Color(hex))
+    
+    return {
+      u_time: { value: 0 },
+      u_resolution: { value: new THREE.Vector2(size.width, size.height) },
+      u_ratio: { value: size.width / size.height },
+      u_pointSize: { value: 1 },
+      
+      // Colors
+      u_color1: { value: colorArray[0] || new THREE.Color('#c3e4ff') },
+      u_color2: { value: colorArray[1] || new THREE.Color('#6ec3f4') },
+      u_color3: { value: colorArray[2] || new THREE.Color('#eae2ff') },
+      u_color4: { value: colorArray[3] || new THREE.Color('#b9beff') },
+      u_active_colors: { value: new Float32Array([1, 1, 1, 1]) },
+      
+      // Animation parameters
+      u_baseColor: { value: new THREE.Color(0.11, 0.11, 0.11) },
+      
+      // Wave layers as separate uniforms (GLSL structs require this approach)
+      'u_waveLayers[0].z': { value: 0.3 },
+      'u_waveLayers[0].freq': { value: new THREE.Vector2(0.00014 * seed, 0.00029 * seed) },
+      'u_waveLayers[0].amp': { value: amplitude },
+      'u_waveLayers[0].speed': { value: 0.0005 * speed },
+      'u_waveLayers[0].seed': { value: seed + 0.5 },
+      
+      'u_waveLayers[1].z': { value: 0.1 },
+      'u_waveLayers[1].freq': { value: new THREE.Vector2(0.00013 * seed, 0.000281 * seed) },
+      'u_waveLayers[1].amp': { value: amplitude * 0.8 },
+      'u_waveLayers[1].speed': { value: 0.0003 * speed },
+      'u_waveLayers[1].seed': { value: seed + 0.8 },
+      
+      'u_waveLayers[2].z': { value: 0.2 },
+      'u_waveLayers[2].freq': { value: new THREE.Vector2(0.00015 * seed, 0.000287 * seed) },
+      'u_waveLayers[2].amp': { value: amplitude * 0.6 },
+      'u_waveLayers[2].speed': { value: 0.0004 * speed },
+      'u_waveLayers[2].seed': { value: seed + 1.2 },
+      
+      // Effects
+      u_darken_top: { value: darkenTop ? 1.0 : 0.0 },
+      u_shadow_power: { value: size.width < 600 ? 5.0 : 6.0 },
+    }
+  }, [colors, amplitude, speed, seed, darkenTop, size])
+  
+  // Animation loop
+  useFrame((state, delta) => {
+    if (!meshRef.current) return
+    
+    // Update time
+    uniforms.u_time.value += delta * 1000 * speed
+    
+    // Update resolution if size changes
+    if (uniforms.u_resolution.value.x !== size.width || uniforms.u_resolution.value.y !== size.height) {
+      uniforms.u_resolution.value.set(size.width, size.height)
+      uniforms.u_ratio.value = size.width / size.height
+      uniforms.u_shadow_power.value = size.width < 600 ? 5.0 : 6.0
+    }
+  })
+  
+  return (
+    <mesh
+      ref={meshRef}
+      position={[0, 0, -10]}
+      scale={[2, 2, 1]}
+    >
+      <planeGeometry
+        args={[size.width / 100, size.height / 100, meshDensity[0], meshDensity[1]]}
+      />
+      <shaderMaterial
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+        uniforms={uniforms}
+        vertexColors
+        transparent
+        depthWrite={false}
+      />
+    </mesh>
+  )
+}

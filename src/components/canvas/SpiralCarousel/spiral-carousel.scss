@@ -1,0 +1,132 @@
+.spiral-carousel {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 600px;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f0f 100%);
+  
+  &__scene {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+  
+  &__controls {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    
+    .glass-card {
+      pointer-events: all;
+    }
+  }
+  
+  &__info {
+    h3 {
+      margin: 0 0 15px;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+    }
+    
+    p {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.4;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+  
+  &__hover-info {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    
+    h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #00ff88;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.3;
+    }
+  }
+  
+  &__modal-backdrop {
+    backdrop-filter: blur(20px);
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  // Loading state
+  &--loading {
+    .spiral-carousel__scene {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      
+      &::after {
+        content: '';
+        width: 40px;
+        height: 40px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #00ff88;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-left: 15px;
+      }
+    }
+  }
+  
+  // Mobile optimizations
+  @media (max-width: 768px) {
+    &__info {
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      min-width: auto;
+      padding: 15px;
+    }
+    
+    &__modal-backdrop {
+      padding: 10px;
+      
+      .glass-card {
+        padding: 20px;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

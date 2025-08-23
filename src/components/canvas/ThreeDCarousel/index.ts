@@ -1,0 +1,1 @@
+export { ThreeDCarousel } from './ThreeDCarousel'

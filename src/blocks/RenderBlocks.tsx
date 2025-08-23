@@ -7,6 +7,15 @@ import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
+import { TravelDataGlobeBlock } from '@/blocks/TravelDataGlobe/Component'
+import { BackgroundBlock } from '@/blocks/Background/Component'
+import { WebGLTextBlock } from '@/blocks/WebGLText/Component'
+import { AreaExplorerBlock } from '@/blocks/AreaExplorer/Component'
+import { StorytellingBlock } from '@/blocks/Storytelling/Component'
+import { BannerBlock } from '@/blocks/Banner/Component'
+import { CodeBlock } from '@/blocks/Code/Component'
+import { DestinationDetailBlock } from '@/blocks/DestinationDetailBlock/Component'
+import { WhatameshBlock } from '@/blocks/Whatamesh/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -14,6 +23,15 @@ const blockComponents = {
   cta: CallToActionBlock,
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
+  'travel-data-globe': TravelDataGlobeBlock,
+  background: BackgroundBlock,
+  'webgl-text': WebGLTextBlock,
+  'area-explorer': AreaExplorerBlock,
+  storytelling: StorytellingBlock,
+  banner: BannerBlock,
+  code: CodeBlock,
+  destinationDetailBlock: DestinationDetailBlock,
+  whatamesh: WhatameshBlock,
 }
 
 export const RenderBlocks: React.FC<{
@@ -35,7 +53,6 @@ export const RenderBlocks: React.FC<{
             if (Block) {
               return (
                 <div className="my-16" key={index}>
-                  {/* @ts-expect-error there may be some mismatch between the expected types here */}
                   <Block {...block} disableInnerContainer />
                 </div>
               )

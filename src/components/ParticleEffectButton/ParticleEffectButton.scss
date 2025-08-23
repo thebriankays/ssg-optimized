@@ -1,0 +1,23 @@
+.particleEffectButton-particles {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .particleEffectButton-wrapper {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+  }
+  
+  .particleEffectButton-content:focus,
+  .particleEffectButton-content > *:focus {
+    outline: none;
+  }
+  
+  .particleEffectButton-canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    pointer-events: none;
+  }

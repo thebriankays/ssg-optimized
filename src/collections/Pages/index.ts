@@ -7,6 +7,16 @@ import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { WebGLCarouselBlock } from '../../blocks/WebGLCarouselBlock/config'
+import { WhatameshBlock } from '../../blocks/Whatamesh/config'
+import { ScrollingImagesBlock } from '../../blocks/ScrollingImagesBlock/config'
+import { TravelDataGlobe } from '../../blocks/TravelDataGlobe/config'
+import { WebGLText } from '../../blocks/WebGLText/config'
+import { DolphinsBlock } from '../../blocks/DolphinsBlock/config'
+import { AreaExplorer } from '../../blocks/AreaExplorer/config'
+import { Storytelling } from '../../blocks/Storytelling/config'
+import { Background } from '../../blocks/Background/config'
+import { DestinationDetailBlockConfig } from '../../blocks/DestinationDetailBlock/config'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -75,7 +85,23 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [
+                CallToAction, 
+                Content, 
+                MediaBlock, 
+                Archive, 
+                FormBlock, 
+                WebGLCarouselBlock,
+                WhatameshBlock,
+                ScrollingImagesBlock,
+                TravelDataGlobe,
+                WebGLText,
+                DolphinsBlock,
+                AreaExplorer,
+                Storytelling,
+                Background,
+                DestinationDetailBlockConfig
+              ],
               required: true,
               admin: {
                 initCollapsed: true,

@@ -1,0 +1,357 @@
+/* GSAPFontPicker.scss */
+.gsap-font-picker-wrapper {
+  position: relative;
+  width: 100%;
+  
+  .field-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--theme-text);
+  }
+  
+  .current-selection {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border: 1px solid var(--theme-border-color);
+    border-radius: 4px;
+    background: var(--theme-input-bg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      border-color: var(--theme-input-bg-focus);
+    }
+    
+    .selection-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      
+      .font-name {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--theme-text);
+      }
+      
+      .selection-details {
+        font-size: 12px;
+        color: var(--theme-text-muted);
+      }
+      
+      .placeholder {
+        color: var(--theme-text-muted);
+      }
+    }
+    
+    .dropdown-arrow {
+      color: var(--theme-text-muted);
+      font-size: 12px;
+      transition: transform 0.2s ease;
+    }
+  }
+  
+  .font-picker-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+  }
+  
+  .font-picker-container {
+    width: 90vw;
+    max-width: 600px;
+    background: var(--theme-bg);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    max-height: 80vh;
+    overflow: hidden;
+    
+    .picker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      
+      h3 {
+        margin: 0;
+        color: var(--theme-text);
+        font-size: 20px;
+        font-weight: 600;
+      }
+      
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--theme-text-muted);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background 0.2s ease;
+        
+        &:hover {
+          background: var(--theme-border-color);
+        }
+      }
+    }
+    
+    /* 3D Rolodex Styles - Based on Original CodePen */
+    .rolodex {
+      width: 100%;
+      height: 400px;
+      position: relative;
+      overflow: hidden;
+      perspective: 1800px;
+      display: grid;
+      place-content: center;
+      
+      /* Gradient fade masks like original */
+      &::before,
+      &::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        left: 0;
+        height: 30%;
+        z-index: 2;
+        pointer-events: none;
+      }
+      
+      &::before {
+        top: 0;
+        background: linear-gradient(
+          rgba(var(--theme-bg-rgb, 255, 255, 255), 1) 5%,
+          rgba(var(--theme-bg-rgb, 255, 255, 255), 0)
+        );
+      }
+      
+      &::after {
+        bottom: 0;
+        background: linear-gradient(
+          rgba(var(--theme-bg-rgb, 255, 255, 255), 0),
+          rgba(var(--theme-bg-rgb, 255, 255, 255), 1) 95%
+        );
+      }
+      
+      ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        
+        li,
+        .font-item {
+          line-height: 64px;
+          font-size: 24px;
+          letter-spacing: 2px;
+          text-align: center;
+          white-space: nowrap;
+          position: absolute;
+          width: 100%;
+          height: 64px;
+          backface-visibility: hidden;
+          transform-style: preserve-3d;
+          background: var(--theme-bg);
+          color: var(--theme-text);
+          cursor: pointer;
+          transition: none;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          will-change: transform;
+          
+          .font-preview-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            
+            .font-preview-text {
+              font-size: 24px;
+              font-weight: 400;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 90%;
+            }
+          }
+          
+          &:hover {
+            background: var(--theme-border-color);
+          }
+          
+          &.active {
+            color: var(--theme-text-highlight, #0066cc);
+            font-weight: 600;
+            background: var(--theme-input-bg-focus, rgba(0, 102, 204, 0.1));
+            box-shadow: 0 0 20px rgba(0, 102, 204, 0.2);
+          }
+        }
+        
+        /* Font-specific preview styles - each font displays in its own typeface */
+        
+        /* Local Fonts */
+        .font-preview-new-order .font-preview-text { font-family: var(--font-new-order), sans-serif; }
+        .font-preview-graphie .font-preview-text { font-family: var(--font-graphie), sans-serif; }
+        .font-preview-circular-std .font-preview-text { font-family: var(--font-circular-std), sans-serif; }
+        .font-preview-pangram-sans .font-preview-text { font-family: var(--font-pangram-sans), sans-serif; }
+        .font-preview-monument-extended .font-preview-text { font-family: var(--font-monument-extended), display; }
+        .font-preview-antique-olive .font-preview-text { font-family: var(--font-antique-olive), sans-serif; }
+        .font-preview-oakes-grotesk .font-preview-text { font-family: var(--font-oakes-grotesk), sans-serif; }
+        .font-preview-pp-neue-corp .font-preview-text { font-family: var(--font-pp-neue-corp), display; }
+        .font-preview-fk-grotesk-neue .font-preview-text { font-family: var(--font-fk-grotesk-neue), sans-serif; }
+        .font-preview-six-caps .font-preview-text { font-family: var(--font-six-caps), display; }
+        .font-preview-matter .font-preview-text { font-family: var(--font-matter), sans-serif; }
+        .font-preview-silka .font-preview-text { font-family: var(--font-silka), sans-serif; }
+        .font-preview-mrs-saint-delafield .font-preview-text { font-family: var(--font-mrs-saint-delafield), handwriting; }
+        .font-preview-parisienne .font-preview-text { font-family: var(--font-parisienne), handwriting; }
+        .font-preview-alien-robot .font-preview-text { font-family: var(--font-alien-robot), display; }
+        
+        /* Google Fonts - Use fallbacks until loaded */
+        .font-preview-inter .font-preview-text { font-family: var(--font-inter), "Inter", sans-serif; }
+        .font-preview-roboto .font-preview-text { font-family: var(--font-roboto), "Roboto", sans-serif; }
+        .font-preview-open-sans .font-preview-text { font-family: var(--font-open-sans), "Open Sans", sans-serif; }
+        .font-preview-montserrat .font-preview-text { font-family: var(--font-montserrat), "Montserrat", sans-serif; }
+        .font-preview-lato .font-preview-text { font-family: var(--font-lato), "Lato", sans-serif; }
+        .font-preview-raleway .font-preview-text { font-family: var(--font-raleway), "Raleway", sans-serif; }
+        .font-preview-oswald .font-preview-text { font-family: var(--font-oswald), "Oswald", display; }
+        .font-preview-saira-extra-condensed .font-preview-text { font-family: var(--font-saira-extra-condensed), "Saira Extra Condensed", display; }
+        .font-preview-playfair-display .font-preview-text { font-family: var(--font-playfair-display), "Playfair Display", serif; }
+        .font-preview-merriweather .font-preview-text { font-family: var(--font-merriweather), "Merriweather", serif; }
+        .font-preview-libre-baskerville .font-preview-text { font-family: var(--font-libre-baskerville), "Libre Baskerville", serif; }
+      }
+    }
+    
+    .picker-info {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--theme-text-muted);
+      font-size: 14px;
+      
+      p {
+        margin: 0 0 8px 0;
+      }
+      
+      .font-details {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        
+        .category {
+          background: var(--theme-border-color);
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 12px;
+          color: var(--theme-text);
+        }
+        
+        .weights {
+          font-size: 12px;
+        }
+      }
+    }
+    
+    .font-settings-compact {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--theme-border-color);
+      
+      .setting-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        
+        label {
+          font-size: 14px;
+          font-weight: 500;
+          color: var(--theme-text);
+        }
+        
+        select,
+        input {
+          padding: 6px 8px;
+          border: 1px solid var(--theme-border-color);
+          border-radius: 4px;
+          background: var(--theme-input-bg);
+          color: var(--theme-text);
+          font-size: 14px;
+          
+          &:focus {
+            outline: none;
+            border-color: var(--theme-input-bg-focus);
+          }
+        }
+        
+        input[type="number"] {
+          width: 60px;
+        }
+        
+        .size-unit {
+          font-size: 12px;
+          color: var(--theme-text-muted);
+        }
+      }
+    }
+  }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .gsap-font-picker-wrapper {
+  --theme-bg-rgb: 0, 0, 0;
+  
+  .rolodex {
+    &::before {
+      background: linear-gradient(
+        rgba(0, 0, 0, 1) 5%,
+        rgba(0, 0, 0, 0)
+      );
+    }
+    
+    &::after {
+      background: linear-gradient(
+        rgba(0, 0, 0, 0),
+        rgba(0, 0, 0, 1) 95%
+      );
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .font-picker-container {
+    width: 95vw;
+    padding: 16px;
+    max-height: 90vh;
+    
+    .rolodex {
+      height: 300px;
+      
+      ul li {
+        font-size: 20px;
+        line-height: 56px;
+        height: 56px;
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { cn } from '@/utilities/ui'
 import React from 'react'
 import RichText from '@/components/RichText'
+import { GlassContainer } from '@/components/ui/glass/GlassComponents'
 
 import type { ContentBlock as ContentBlockProps } from '@/payload-types'
 
@@ -26,14 +27,35 @@ export const ContentBlock: React.FC<ContentBlockProps> = (props) => {
 
             return (
               <div
-                className={cn(`col-span-4 lg:col-span-${colsSpanClasses[size!]}`, {
-                  'md:col-span-2': size !== 'full',
-                })}
+                className={cn(
+                  `col-span-4 lg:col-span-${colsSpanClasses[size!]}`,
+                  {
+                    'md:col-span-2': size !== 'full',
+                  }
+                )}
+                style={{
+                  animationDelay: `${index * 0.1}s`
+                }}
                 key={index}
               >
-                {richText && <RichText data={richText} enableGutter={false} />}
+                <GlassContainer 
+                  preset="frosted" 
+                  className="p-8 h-full animate-fade-in"
+                  animated
+                  interactive
+                >
+                  {richText && (
+                    <div className="prose prose-invert max-w-none">
+                      <RichText data={richText} enableGutter={false} />
+                    </div>
+                  )}
 
-                {enableLink && <CMSLink {...link} />}
+                  {enableLink && (
+                    <div className="mt-6">
+                      <CMSLink {...link} />
+                    </div>
+                  )}
+                </GlassContainer>
               </div>
             )
           })}

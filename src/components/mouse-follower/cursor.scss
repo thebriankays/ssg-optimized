@@ -1,0 +1,645 @@
+/* =====================================================
+   MOUSE FOLLOWER COMPLETE STYLES
+   Complete port from old website with all sizes
+   ===================================================== */
+
+// Import base Cuberto styles
+@import "mouse-follower/dist/mouse-follower.min.css";
+
+// Variables
+$cursor-base-size: 48px;
+$cursor-transition: transform 0.25s ease-in-out, opacity 0.1s, background-color 0.2s ease;
+$text-transition: opacity 0.3s ease;
+
+// Color variables
+$colors: (
+  'yellow': #ffd074,
+  'turquois': #15f0d1,
+  'green': #83B002,
+  'purple': #a374ff,
+  'white': #ffffff,
+  'black': #000000,
+);
+
+/* =====================================================
+   BASE CURSOR STYLES
+   ===================================================== */
+.mf-cursor {
+  --cursor-color: #ffffff;
+  will-change: transform;
+  mix-blend-mode: exclusion;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  backface-visibility: hidden;
+  
+  // Base circle
+  &:before {
+    content: "";
+    position: absolute;
+    top: -($cursor-base-size / 2);
+    left: -($cursor-base-size / 2);
+    display: block;
+    width: $cursor-base-size;
+    height: $cursor-base-size;
+    transform: scale(0.2);
+    background: currentColor;
+    border-radius: 50%;
+    transition: $cursor-transition;
+  }
+  
+  // Visible state
+  &.-visible:before {
+    transform: scale(1);
+  }
+  
+  // Hidden state
+  &.-hidden:before {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+// Dark theme support
+[data-theme='dark'] .mf-cursor {
+  --cursor-color: rgb(255, 255, 255);
+}
+
+/* =====================================================
+   SIZE VARIATIONS
+   ===================================================== */
+
+// Small size (NEW)
+.mf-cursor.-sm {
+  &::before {
+    transform: scale(0.75);
+  }
+  
+  &.-visible::before {
+    transform: scale(0.75);
+  }
+  
+  &.-text .mf-cursor-text {
+    font-size: 10px;
+    font-weight: 600;
+  }
+}
+
+// Medium size
+.mf-cursor.-md {
+  &::before {
+    transform: scale(1.5);
+  }
+  
+  &.-visible::before {
+    transform: scale(1.5);
+  }
+  
+  &.-text .mf-cursor-text {
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+// Large size
+.mf-cursor.-lg {
+  &::before {
+    transform: scale(2);
+  }
+  
+  &.-visible::before {
+    transform: scale(2);
+  }
+  
+  &.-text .mf-cursor-text {
+    font-size: 14px;
+    font-weight: 700;
+  }
+}
+
+// Extra large size
+.mf-cursor.-xl {
+  &::before {
+    transform: scale(4);
+  }
+  
+  &.-visible::before {
+    transform: scale(4);
+  }
+  
+  &.-text .mf-cursor-text {
+    font-size: 18px;
+    font-weight: 800;
+  }
+}
+
+// Extra extra large size
+.mf-cursor.-xxl {
+  &::before {
+    transform: scale(6.25);
+  }
+  
+  &.-visible::before {
+    transform: scale(6.25);
+  }
+  
+  &.-text .mf-cursor-text {
+    font-size: 28px;
+    font-weight: 800;
+  }
+}
+
+/* =====================================================
+   COLOR VARIATIONS
+   ===================================================== */
+@each $name, $color in $colors {
+  .mf-cursor.-color-#{$name} {
+    &::before {
+      background-color: $color !important;
+    }
+  }
+}
+
+/* =====================================================
+   BLEND MODES
+   ===================================================== */
+.mf-cursor {
+  &.-exclusion {
+    mix-blend-mode: exclusion;
+    
+    &::before {
+      background: white;
+    }
+  }
+  
+  &.-difference {
+    mix-blend-mode: difference;
+    
+    &::before {
+      background: white;
+    }
+  }
+  
+  &.-opaque {
+    mix-blend-mode: normal;
+  }
+}
+
+/* =====================================================
+   TEXT CURSOR
+   ===================================================== */
+.mf-cursor-text {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 0.76rem;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--cursor-color);
+  text-align: center;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  opacity: 0;
+  transition: $text-transition;
+  top: 50%;
+  left: 50%;
+  white-space: nowrap;
+  z-index: 10001;
+}
+
+// Show text when in text state
+.mf-cursor.-text {
+  .mf-cursor-text {
+    opacity: 1;
+  }
+  
+  // Ensure pointer events are disabled
+  pointer-events: none;
+}
+
+// Text with different sizes
+.mf-cursor {
+  &.-sm.-text {
+    &::before {
+      transform: scale(0.75);
+      opacity: 1;
+      background-color: currentColor;
+      mix-blend-mode: exclusion;
+    }
+    
+    .mf-cursor-text {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: black !important;
+      mix-blend-mode: exclusion;
+    }
+  }
+  
+  &.-md.-text {
+    &::before {
+      transform: scale(1.5);
+      opacity: 1;
+      background-color: currentColor;
+      mix-blend-mode: exclusion;
+    }
+    
+    .mf-cursor-text {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: black !important;
+      mix-blend-mode: exclusion;
+    }
+  }
+  
+  &.-lg.-text {
+    &::before {
+      transform: scale(2);
+      opacity: 1;
+      background-color: currentColor;
+      mix-blend-mode: exclusion;
+    }
+    
+    .mf-cursor-text {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: black !important;
+      mix-blend-mode: exclusion;
+    }
+  }
+  
+  &.-xl.-text {
+    &::before {
+      transform: scale(4);
+      opacity: 1;
+      background-color: currentColor;
+      mix-blend-mode: exclusion;
+    }
+    
+    .mf-cursor-text {
+      font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: black !important;
+      mix-blend-mode: exclusion;
+    }
+  }
+  
+  &.-xxl.-text {
+    &::before {
+      transform: scale(6.25);
+      opacity: 1;
+      background-color: currentColor;
+      mix-blend-mode: exclusion;
+    }
+    
+    .mf-cursor-text {
+      font-size: 28px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: black !important;
+      mix-blend-mode: exclusion;
+    }
+  }
+}
+
+/* =====================================================
+   DRAG CURSOR (Important for Carousels)
+   ===================================================== */
+.mf-cursor.-drag {
+  --cursor-color: #ffffff !important;
+  
+  &::before {
+    transform: scale(2) !important; // Large size like -lg
+    opacity: 1;
+    background-color: currentColor;
+    mix-blend-mode: exclusion;
+  }
+  
+  &.-visible::before {
+    transform: scale(2) !important;
+  }
+  
+  .mf-cursor-text {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    width: auto;
+    height: auto;
+    white-space: nowrap;
+    color: black !important;
+    mix-blend-mode: exclusion;
+    z-index: 999;
+    transform: translate(-50%, -50%);
+    top: 48%; // Slightly higher to make room for icon
+    left: 50%;
+    position: absolute;
+    opacity: 1; // Always visible
+  }
+  
+  // Drag icon using CSS (3 horizontal lines)
+  &::after {
+    content: "";
+    position: absolute;
+    top: calc(50% + 16px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 6px;
+    background: black;
+    border-radius: 3px;
+    box-shadow: 0 -8px 0 black, 0 8px 0 black;
+    mix-blend-mode: exclusion;
+    z-index: 999;
+    opacity: 0.8;
+  }
+}
+
+// Hide OS cursor when drag is active
+[data-cursor="drag"],
+[data-cursor="drag"]:active,
+[data-cursor*="-drag"],
+[data-cursor*="-drag"]:active,
+[data-cursor-text="DRAG"],
+[data-cursor-text="DRAG"]:active {
+  cursor: none !important;
+}
+
+/* =====================================================
+   ICON CURSOR
+   ===================================================== */
+.mf-cursor-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: white;
+  pointer-events: none;
+  
+  svg {
+    max-width: 100px !important;
+    max-height: 100px !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+  }
+}
+
+.mf-cursor.-icon {
+  .mf-cursor-icon {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    mix-blend-mode: exclusion;
+  }
+}
+
+/* =====================================================
+   MEDIA CURSOR (Images/Videos)
+   ===================================================== */
+.mf-cursor-media {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  top: -200px;
+  left: -200px;
+  pointer-events: none;
+  z-index: 10;
+  
+  img {
+    max-width: 100px !important;
+    max-height: 100px !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+  }
+}
+
+.mf-cursor.-exclusion .mf-cursor-media {
+  z-index: 20 !important;
+}
+
+.mf-cursor-media-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  transform: scale(0.696);
+  opacity: 1;
+  transition: all 0.25s ease-in-out;
+  
+  svg, img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+  }
+  
+  svg {
+    width: 25%;
+    height: 25%;
+    object-fit: contain;
+  }
+  
+  img {
+    width: 110%;
+    height: 110%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  
+  // Eyes specifically - smaller than other images
+  img[src$="eyes.svg"] {
+    width: 25%;
+    height: 25%;
+    object-fit: contain;
+    border-radius: 0;
+    fill: black;
+  }
+}
+
+.mf-cursor.-media {
+  .mf-cursor-media-box {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: scale(0.696) !important;
+  }
+  
+  .mf-cursor-media {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  &:before {
+    display: none !important;
+  }
+}
+
+// Custom media with background image
+.mf-cursor.-media-image.-text {
+  &::before {
+    background-color: transparent !important;
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
+    mix-blend-mode: normal !important;
+    transform: scale(3.5);
+    opacity: 0.9;
+  }
+  
+  .mf-cursor-text {
+    mix-blend-mode: normal !important;
+    color: white !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    font-size: 22px;
+    font-weight: 800;
+    z-index: 1000;
+  }
+}
+
+/* =====================================================
+   CUSTOM BRACKETS ANIMATION
+   ===================================================== */
+.mf-cursor-brackets {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 1;
+  visibility: visible;
+  animation: rotate-brackets 12s linear infinite;
+}
+
+@keyframes rotate-brackets {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.mf-cursor-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.mf-cursor-bracket {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  
+  span {
+    position: absolute;
+    display: block;
+    transition: all 0.3s ease;
+  }
+  
+  &--tl {
+    top: 0; left: 0;
+    span:first-child { top: 0; left: 0; width: 100%; height: 2px; background: #fedc5d; }
+    span:last-child { top: 0; left: 0; width: 2px; height: 100%; background: #fedc5d; }
+  }
+  
+  &--tr {
+    top: 0; right: 0;
+    span:first-child { top: 0; right: 0; width: 100%; height: 2px; background: #fd6a6b; }
+    span:last-child { top: 0; right: 0; width: 2px; height: 100%; background: #fd6a6b; }
+  }
+  
+  &--bl {
+    bottom: 0; left: 0;
+    span:first-child { bottom: 0; left: 0; width: 100%; height: 2px; background: #5d62fb; }
+    span:last-child { bottom: 0; left: 0; width: 2px; height: 100%; background: #5d62fb; }
+  }
+  
+  &--br {
+    bottom: 0; right: 0;
+    span:first-child { bottom: 0; right: 0; width: 100%; height: 2px; background: #fedc5d; }
+    span:last-child { bottom: 0; right: 0; width: 2px; height: 100%; background: #fedc5d; }
+  }
+}
+
+// Hide brackets in media state
+.mf-cursor.-media .mf-cursor-brackets {
+  display: none;
+}
+
+/* =====================================================
+   CURSOR INNER
+   ===================================================== */
+.mf-cursor-inner {
+  transition: transform 0.2s ease-out;
+  will-change: transform;
+}
+
+/* =====================================================
+   GLOBAL CURSOR SETTINGS
+   ===================================================== */
+
+// Hide system cursor globally
+body {
+  cursor: none !important;
+}
+
+// Allow auto cursor for inputs
+input, textarea, select {
+  cursor: auto !important;
+}
+
+// Ensure content is visible
+#__next, main, section {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* =====================================================
+   POINTER STATE
+   ===================================================== */
+.mf-cursor.-pointer {
+  &::before {
+    transform: scale(0.5);
+  }
+  
+  &.-visible::before {
+    transform: scale(0.5);
+  }
+}
+
+/* =====================================================
+   ACTIVE STATE
+   ===================================================== */
+.mf-cursor.-active {
+  &::before {
+    transform: scale(0.8);
+    transition-duration: 0.1s;
+  }
+}

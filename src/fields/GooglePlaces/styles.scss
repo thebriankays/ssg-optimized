@@ -1,0 +1,69 @@
+// src/fields/GooglePlaces/styles.scss
+@import '~@payloadcms/ui/scss';
+
+.google-places-field {
+  width: 100%;
+  margin-bottom: var(--base);
+
+  &__label {
+    display: block;
+    margin-bottom: calc(var(--base) / 2);
+    font-family: var(--font-body);
+    color: var(--theme-elevation-800);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 2);
+  }
+
+  &__input {
+    width: 100%;
+    padding: calc(var(--base) / 2);
+    font-family: var(--font-body);
+    font-size: var(--font-size-base);
+    color: var(--theme-elevation-800);
+    background: var(--theme-input-bg);
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: var(--style-radius-s);
+    transition: all var(--style-transition-speed-fast) ease-in-out;
+
+    &:hover {
+      border-color: var(--theme-elevation-300);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--theme-elevation-400);
+      box-shadow: 0 0 0 2px var(--theme-elevation-100);
+    }
+
+    &::placeholder {
+      color: var(--theme-elevation-400);
+    }
+  }
+
+  &__details {
+    background: var(--theme-elevation-50);
+    padding: calc(var(--base) / 2);
+    border-radius: var(--style-radius-s);
+    border: 1px solid var(--theme-elevation-100);
+  }
+
+  &__detail {
+    margin-bottom: calc(var(--base) / 4);
+    font-family: var(--font-body);
+    font-size: var(--font-size-base);
+    color: var(--theme-elevation-800);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    strong {
+      color: var(--theme-elevation-600);
+      font-weight: 600;
+    }
+  }
+}

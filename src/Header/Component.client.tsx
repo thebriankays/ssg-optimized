@@ -3,6 +3,7 @@ import { useHeaderTheme } from '@/providers/HeaderTheme'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { GlassNav, GlassContainer } from '@/components/ui/glass/GlassComponents'
 
 import type { Header } from '@/payload-types'
 
@@ -14,8 +15,8 @@ interface HeaderClientProps {
 }
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
-  /* Storing the value in a useState to avoid hydration errors */
   const [theme, setTheme] = useState<string | null>(null)
+  const [scrolled, setScrolled] = useState(false)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
   const pathname = usePathname()
 
@@ -29,14 +30,37 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headerTheme])
 
+  // Handle scroll state for glass effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    handleScroll()
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
   return (
-    <header className="container relative z-20   " {...(theme ? { 'data-theme': theme } : {})}>
-      <div className="py-8 flex justify-between">
-        <Link href="/">
-          <Logo loading="eager" priority="high" className="invert dark:invert-0" />
-        </Link>
-        <HeaderNav data={data} />
+    <GlassNav fixed transparent={!scrolled} className="header-glass">
+      <div className="container relative z-20" {...(theme ? { 'data-theme': theme } : {})}>
+        <div className="py-4 flex justify-between items-center">
+          <Link href="/" className="flex items-center">
+            <GlassContainer 
+              preset="clear" 
+              className="p-2 hover:scale-105 transition-transform"
+              interactive
+              glowOnHover
+            >
+              <Logo loading="eager" priority="high" className="invert dark:invert-0" />
+            </GlassContainer>
+          </Link>
+          <HeaderNav data={data} />
+        </div>
       </div>
-    </header>
+    </GlassNav>
   )
 }

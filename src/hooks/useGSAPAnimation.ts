@@ -1,0 +1,1 @@
+export { useGSAPAnimation } from './animation/useGSAPAnimation'

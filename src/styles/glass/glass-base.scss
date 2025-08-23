@@ -1,0 +1,77 @@
+// Glass variables
+:root {
+  --glass-blur: 10px;
+  --glass-saturation: 180%;
+  --glass-opacity: 0.1;
+  --glass-border-opacity: 0.2;
+  --glass-shadow-opacity: 0.1;
+  --glass-refraction: 1.1;
+  
+  // Light theme
+  --glass-bg: rgba(255, 255, 255, var(--glass-opacity));
+  --glass-border: rgba(255, 255, 255, var(--glass-border-opacity));
+  --glass-shadow: rgba(0, 0, 0, var(--glass-shadow-opacity));
+  
+  // Dark theme
+  @media (prefers-color-scheme: dark) {
+    --glass-bg: rgba(0, 0, 0, var(--glass-opacity));
+    --glass-border: rgba(255, 255, 255, var(--glass-border-opacity));
+    --glass-shadow: rgba(255, 255, 255, var(--glass-shadow-opacity));
+  }
+}
+
+// Base glass mixin
+@mixin glass-base {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  border: 1px solid var(--glass-border);
+  position: relative;
+  
+  // Fallback for browsers without backdrop-filter
+  @supports not (backdrop-filter: blur(1px)) {
+    background: rgba(255, 255, 255, 0.9);
+  }
+}
+
+// Glass variants
+@mixin glass-clear {
+  @include glass-base;
+  --glass-blur: 2px;
+  --glass-opacity: 0.05;
+  --glass-border-opacity: 0.1;
+}
+
+@mixin glass-frosted {
+  @include glass-base;
+  --glass-blur: 20px;
+  --glass-opacity: 0.15;
+  --glass-border-opacity: 0.3;
+}
+
+@mixin glass-refractive {
+  @include glass-base;
+  --glass-blur: 5px;
+  --glass-opacity: 0.2;
+  filter: contrast(1.1) brightness(1.05);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(
+      45deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    animation: glass-shimmer 3s infinite;
+  }
+}
+
+@keyframes glass-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
