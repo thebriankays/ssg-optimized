@@ -2,7 +2,7 @@
 
 import React, { useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { ViewportScrollScene } from '@14islands/r3f-scroll-rig'
+import { ViewportScrollScene, UseCanvas } from '@14islands/r3f-scroll-rig'
 
 // Dynamic import for client-side only rendering
 const Whatamesh = dynamic(
@@ -43,18 +43,20 @@ export const WhatameshWrapper: React.FC<WhatameshWrapperProps> = ({
   
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-      >
-        {() => (
-          <Whatamesh
-            colors={colors}
-            amplitude={amplitude}
-            speed={speed}
-            darkenTop={darkenTop}
-          />
-        )}
-      </ViewportScrollScene>
+      <UseCanvas>
+        <ViewportScrollScene
+          track={containerRef as React.MutableRefObject<HTMLElement>}
+        >
+          {() => (
+            <Whatamesh
+              colors={colors}
+              amplitude={amplitude}
+              speed={speed}
+              darkenTop={darkenTop}
+            />
+          )}
+        </ViewportScrollScene>
+      </UseCanvas>
     </div>
   )
 }
