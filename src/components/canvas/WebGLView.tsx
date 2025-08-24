@@ -68,7 +68,11 @@ export function WebGLView({
   const SceneComponent = viewport ? ViewportScrollScene : ScrollScene
 
   return (
-    <div ref={setRefs} className={`webgl-view ${className}`} data-webgl-id={persistId || id}>
+    <>
+      {/* DOM element for tracking - stays visible */}
+      <div ref={setRefs} className={`webgl-view ${className}`} data-webgl-id={persistId || id} />
+      
+      {/* WebGL content only - gets tunneled */}
       <UseCanvas key={persistId || id}>
         <SceneComponent
           track={trackRef}
@@ -86,6 +90,6 @@ export function WebGLView({
           )}
         </SceneComponent>
       </UseCanvas>
-    </div>
+    </>
   )
 }

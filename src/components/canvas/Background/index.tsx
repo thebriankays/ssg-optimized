@@ -1,6 +1,6 @@
 'use client'
 
-import { ViewportScrollScene } from '@/components/canvas/ViewportScrollScene'
+import { ViewportScrollScene, UseCanvas } from '@14islands/r3f-scroll-rig'
 import { useEffect, useState, useRef } from 'react'
 import { Whatamesh } from './Whatamesh'
 import { useAppStore } from '@/lib/stores/app-store'
@@ -45,24 +45,19 @@ export function Background({
   }
   
   return (
-    <div ref={containerRef} className={`background-wrapper ${className}`}>
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-        className="background-scene"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: -1,
-          pointerEvents: 'none',
-        }}
-        hideOffscreen={false}
-      >
-        {() => (
-          <>
-            {settings.type === 'whatamesh' && (
+    <>
+      {/* DOM element for tracking - stays visible */}
+      <div ref={containerRef} className={`background-wrapper ${className}`} />
+      
+      {/* WebGL content - only this gets tunneled */}
+      <UseCanvas>
+        <ViewportScrollScene
+          track={containerRef as React.MutableRefObject<HTMLElement>}
+          hideOffscreen={false}
+        >
+          {() => (
+            <>
+              {settings.type === 'whatamesh' && (
           <Whatamesh
             colors={[
               settings.color1,
@@ -101,10 +96,11 @@ export function Background({
             <meshBasicMaterial color="blue" />
           </mesh>
         )}
-          </>
-        )}
-      </ViewportScrollScene>
-    </div>
+            </>
+          )}
+        </ViewportScrollScene>
+      </UseCanvas>
+    </>
   )
 }
 

@@ -42,7 +42,11 @@ export const WhatameshWrapper: React.FC<WhatameshWrapperProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
+    <>
+      {/* DOM element for tracking - stays visible */}
+      <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+      
+      {/* WebGL content only - gets tunneled to canvas */}
       <UseCanvas>
         <ViewportScrollScene
           track={containerRef as React.MutableRefObject<HTMLElement>}
@@ -57,6 +61,6 @@ export const WhatameshWrapper: React.FC<WhatameshWrapperProps> = ({
           )}
         </ViewportScrollScene>
       </UseCanvas>
-    </div>
+    </>
   )
 }
