@@ -1,3 +1,6 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { TravelDataGlobe } from './TravelDataGlobe'
 import { processTopoJSON, simplifyCountryFeatures } from './utils/dataProcessing'
 import type { 
@@ -5,8 +8,10 @@ import type {
   VisaRequirement, 
   Airport, 
   MichelinRestaurant,
-  Country 
+  Country,
+  GeoFeature 
 } from './types'
+import './travel-data-globe.scss'
 
 interface TravelDataGlobeWrapperProps {
   advisories: TravelAdvisory[]
@@ -22,7 +27,7 @@ interface TravelDataGlobeWrapperProps {
   }
 }
 
-export async function TravelDataGlobeWrapper({
+export function TravelDataGlobeWrapper({
   advisories,
   visaRequirements,
   airports,
@@ -31,14 +36,38 @@ export async function TravelDataGlobeWrapper({
   className,
   glassSettings,
 }: TravelDataGlobeWrapperProps) {
-  // Load and process topology data
-  const topology = await fetch('/countries-110m.json').then(res => res.json())
-  const features = processTopoJSON(topology)
-  const simplifiedFeatures = simplifyCountryFeatures(features)
+  const [features, setFeatures] = useState<GeoFeature[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  
+  useEffect(() => {
+    // Load and process topology data
+    const loadTopology = async () => {
+      try {
+        const topology = await fetch('/countries-110m.json').then(res => res.json())
+        const processedFeatures = processTopoJSON(topology)
+        const simplifiedFeatures = simplifyCountryFeatures(processedFeatures)
+        setFeatures(simplifiedFeatures)
+      } catch (error) {
+        console.error('Failed to load topology data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadTopology()
+  }, [])
+  
+  if (isLoading || features.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black text-white">
+        <div>Loading globe data...</div>
+      </div>
+    )
+  }
   
   return (
     <TravelDataGlobe
-      features={simplifiedFeatures}
+      features={features}
       advisories={advisories}
       visaRequirements={visaRequirements}
       airports={airports}

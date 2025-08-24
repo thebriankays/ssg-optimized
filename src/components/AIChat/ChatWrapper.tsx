@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { useChat } from 'ai/react'
+// import { useChat } from 'ai' // TODO: Fix useChat import - not exported from main ai package
 import { gsap } from 'gsap'
+import { useGSAPAnimation } from '@/hooks/useGSAPAnimation'
 import { ChatMessage } from './ChatMessage'
 import { ChatInput } from './ChatInput'
 import { AIOrb } from '../AIOrb/AIOrb'
@@ -13,7 +14,12 @@ export function ChatWrapper() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat()
+  // Placeholder for useChat - TODO: Fix AI SDK integration
+  const messages: any[] = []
+  const input = ''
+  const handleInputChange = () => {}
+  const handleSubmit = () => {}
+  const isLoading = false
 
   // Initial robot state
   useEffect(() => {
@@ -103,7 +109,7 @@ export function ChatWrapper() {
     }
   }, [messages])
 
-  useEffect(() => {
+  useGSAPAnimation(() => {
     if (chatContainerRef.current) {
       gsap.fromTo(
         chatContainerRef.current,
@@ -143,7 +149,7 @@ export function ChatWrapper() {
         <form className="w-full h-full flex items-center px-4" onSubmit={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          handleSubmit(e)
+          handleSubmit()
         }}>
           <textarea
             className="w-full h-full bg-transparent text-gray-800 px-4 py-3 focus:outline-none resize-none placeholder-gray-500"

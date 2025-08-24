@@ -1,21 +1,17 @@
-import React, { useRef } from 'react'
+import React from 'react'
 
 import type { CallToActionBlock as CTABlockProps } from '@/payload-types'
 
 import RichText from '@/components/RichText'
 import { CMSLink } from '@/components/Link'
 import { GlassContainer } from '@/components/ui/glass/GlassComponents'
-import { UseCanvas, ScrollScene } from '@14islands/r3f-scroll-rig'
-import { LiquidGlassEffect } from '@/components/canvas/LiquidGlassEffect'
 
 export const CallToActionBlock: React.FC<CTABlockProps> = ({ 
   links, 
   richText
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
-
   return (
-    <div className="container" ref={containerRef}>
+    <div className="container">
       <GlassContainer 
         preset="frosted"
         className="p-8 flex flex-col gap-8 md:flex-row md:justify-between md:items-center"
@@ -28,25 +24,15 @@ export const CallToActionBlock: React.FC<CTABlockProps> = ({
         </div>
         <div className="flex flex-col gap-4">
           {(links || []).map(({ link }, i) => {
-            return <CMSLink key={i} size="lg" {...link} />
+            // Filter out null appearance values
+            const linkProps = {
+              ...link,
+              appearance: link?.appearance || undefined,
+            }
+            return <CMSLink key={i} size="lg" {...linkProps} />
           })}
         </div>
       </GlassContainer>
-
-      {/* WebGL Enhancement */}
-      {typeof window !== 'undefined' && (
-        <UseCanvas>
-          <ScrollScene track={containerRef}>
-            {() => (
-              <LiquidGlassEffect 
-                intensity={0.5}
-                speed={0.2}
-                followMouse={false}
-              />
-            )}
-          </ScrollScene>
-        </UseCanvas>
-      )}
     </div>
   )
 }

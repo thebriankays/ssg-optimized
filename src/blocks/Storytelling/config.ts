@@ -3,228 +3,227 @@ import type { Block } from 'payload'
 export const Storytelling: Block = {
   slug: 'storytelling',
   labels: {
-    singular: 'Storytelling',
-    plural: 'Storytelling Blocks',
+    singular: '3D Storytelling',
+    plural: '3D Storytelling Blocks',
   },
   fields: [
     {
-      name: 'sections',
-      type: 'array',
-      label: 'Story Sections',
-      required: true,
-      minRows: 1,
-      fields: [
+      type: 'tabs',
+      tabs: [
         {
-          name: 'type',
-          type: 'select',
-          label: 'Section Type',
-          required: true,
-          options: [
-            { label: 'Intro', value: 'intro' },
-            { label: 'Chapter', value: 'chapter' },
-            { label: 'Quote', value: 'quote' },
-            { label: 'Parallax', value: 'parallax' },
-            { label: 'Outro', value: 'outro' },
-          ],
-          defaultValue: 'chapter',
-        },
-        {
-          name: 'title',
-          type: 'text',
-          label: 'Title',
-          admin: {
-            condition: (data, siblingData) => ['intro', 'chapter', 'outro'].includes(siblingData?.type),
-          },
-        },
-        {
-          name: 'subtitle',
-          type: 'text',
-          label: 'Subtitle',
-          admin: {
-            condition: (data, siblingData) => ['intro', 'quote'].includes(siblingData?.type),
-          },
-        },
-        {
-          name: 'content',
-          type: 'richText',
-          label: 'Content',
-          admin: {
-            condition: (data, siblingData) => siblingData?.type === 'chapter',
-          },
-        },
-        {
-          name: 'quote',
-          type: 'textarea',
-          label: 'Quote Text',
-          admin: {
-            condition: (data, siblingData) => siblingData?.type === 'quote',
-          },
-        },
-        {
-          name: 'simpleContent',
-          type: 'textarea',
-          label: 'Content',
-          admin: {
-            condition: (data, siblingData) => ['intro', 'outro'].includes(siblingData?.type),
-          },
-        },
-        {
-          name: 'media',
-          type: 'group',
-          label: 'Media',
+          label: 'Story Details',
           fields: [
             {
-              name: 'type',
-              type: 'select',
-              label: 'Media Type',
-              options: [
-                { label: 'None', value: 'none' },
-                { label: 'Image', value: 'image' },
-                { label: 'Video', value: 'video' },
-                { label: 'WebGL', value: 'webgl' },
-              ],
-              defaultValue: 'none',
-            },
-            {
-              name: 'image',
-              type: 'upload',
-              label: 'Image',
-              relationTo: 'media',
-              admin: {
-                condition: (data, siblingData) => siblingData?.type === 'image',
-              },
-            },
-            {
-              name: 'video',
-              type: 'upload',
-              label: 'Video',
-              relationTo: 'media',
-              admin: {
-                condition: (data, siblingData) => siblingData?.type === 'video',
-              },
-            },
-            {
-              name: 'webglComponent',
-              type: 'select',
-              label: 'WebGL Component',
-              options: [
-                { label: 'Spiral', value: 'spiral' },
-                { label: 'Particles', value: 'particles' },
-                { label: 'Waves', value: 'waves' },
-              ],
-              admin: {
-                condition: (data, siblingData) => siblingData?.type === 'webgl',
-              },
-            },
-            {
-              name: 'webglProps',
-              type: 'json',
-              label: 'WebGL Props',
-              admin: {
-                condition: (data, siblingData) => siblingData?.type === 'webgl',
-                description: 'JSON object with props to pass to the WebGL component',
-              },
-            },
-          ],
-        },
-        {
-          name: 'layout',
-          type: 'select',
-          label: 'Layout',
-          options: [
-            { label: 'Center', value: 'center' },
-            { label: 'Left', value: 'left' },
-            { label: 'Right', value: 'right' },
-            { label: 'Fullscreen', value: 'fullscreen' },
-          ],
-          defaultValue: 'center',
-          admin: {
-            condition: (data, siblingData) => siblingData?.type === 'chapter',
-          },
-        },
-        {
-          name: 'animation',
-          type: 'group',
-          label: 'Animation Settings',
-          fields: [
-            {
-              name: 'type',
-              type: 'select',
-              label: 'Animation Type',
-              options: [
-                { label: 'None', value: 'none' },
-                { label: 'Fade', value: 'fade' },
-                { label: 'Slide', value: 'slide' },
-                { label: 'Scale', value: 'scale' },
-                { label: 'Parallax', value: 'parallax' },
-              ],
-              defaultValue: 'fade',
-            },
-            {
-              name: 'duration',
-              type: 'number',
-              label: 'Duration (seconds)',
-              defaultValue: 1,
-              min: 0.1,
-              max: 5,
-              admin: {
-                step: 0.1,
-              },
-            },
-            {
-              name: 'delay',
-              type: 'number',
-              label: 'Delay (seconds)',
-              defaultValue: 0,
-              min: 0,
-              max: 2,
-              admin: {
-                step: 0.1,
-              },
-            },
-          ],
-        },
-        {
-          name: 'background',
-          type: 'group',
-          label: 'Background Settings',
-          fields: [
-            {
-              name: 'color',
+              name: 'title',
               type: 'text',
-              label: 'Background Color',
-              admin: {
-                description: 'CSS color value (e.g., #000000, rgba(0,0,0,0.5))',
-              },
+              label: 'Story Title',
+              required: true,
             },
             {
-              name: 'gradient',
+              name: 'date',
               type: 'text',
-              label: 'Background Gradient',
+              label: 'Date/Period',
               admin: {
-                description: 'CSS gradient (e.g., linear-gradient(to bottom, #000, #333))',
+                description: 'e.g., "1967" or "Summer 2024"',
               },
             },
             {
-              name: 'image',
+              name: 'description',
+              type: 'textarea',
+              label: 'Story Description',
+            },
+            {
+              name: 'createdBy',
+              type: 'text',
+              label: 'Author/Creator',
+            },
+            {
+              name: 'coverImage',
               type: 'upload',
-              label: 'Background Image',
+              label: 'Cover Image',
               relationTo: 'media',
             },
             {
-              name: 'blur',
-              type: 'number',
-              label: 'Background Blur (px)',
-              min: 0,
-              max: 20,
-              defaultValue: 0,
+              name: 'imageCredit',
+              type: 'text',
+              label: 'Cover Image Credit',
+            },
+          ],
+        },
+        {
+          label: 'Chapters',
+          fields: [
+            {
+              name: 'chapters',
+              type: 'array',
+              label: 'Story Chapters',
+              minRows: 1,
+              admin: {
+                description: 'Add chapters to your story. Each chapter represents a location in your narrative.',
+              },
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  label: 'Chapter Title',
+                  required: true,
+                },
+                {
+                  name: 'content',
+                  type: 'textarea',
+                  label: 'Chapter Content',
+                  admin: {
+                    description: 'The main text content for this chapter',
+                  },
+                },
+                {
+                  name: 'dateTime',
+                  type: 'text',
+                  label: 'Date/Time',
+                  admin: {
+                    description: 'e.g., "Aug 10-12 1967"',
+                  },
+                },
+                {
+                  name: 'location',
+                  type: 'point',
+                  label: 'Location',
+                  required: true,
+                  admin: {
+                    description: 'The geographic location for this chapter',
+                  },
+                },
+                {
+                  name: 'address',
+                  type: 'text',
+                  label: 'Address/Place Name',
+                  admin: {
+                    description: 'e.g., "The Fillmore | 1805 Geary Blvd"',
+                  },
+                },
+                {
+                  name: 'chapterImage',
+                  type: 'upload',
+                  label: 'Chapter Image',
+                  relationTo: 'media',
+                },
+                {
+                  name: 'imageCredit',
+                  type: 'text',
+                  label: 'Image Credit',
+                },
+                {
+                  type: 'collapsible',
+                  label: 'Camera Settings',
+                  fields: [
+                    {
+                      name: 'cameraZoom',
+                      type: 'number',
+                      label: 'Zoom Level',
+                      defaultValue: 17,
+                      min: 10,
+                      max: 22,
+                      admin: {
+                        description: 'Map zoom level (10=far, 22=close)',
+                      },
+                    },
+                    {
+                      name: 'cameraTilt',
+                      type: 'number',
+                      label: 'Tilt (degrees)',
+                      defaultValue: 65,
+                      min: 0,
+                      max: 80,
+                      admin: {
+                        description: 'Camera tilt angle (0=top-down, 80=oblique)',
+                      },
+                    },
+                    {
+                      name: 'cameraHeading',
+                      type: 'number',
+                      label: 'Heading (degrees)',
+                      defaultValue: 0,
+                      min: 0,
+                      max: 360,
+                      admin: {
+                        description: 'Camera rotation (0=north, 90=east, 180=south, 270=west)',
+                      },
+                    },
+                  ],
+                },
+                {
+                  type: 'collapsible',
+                  label: 'Focus Options',
+                  fields: [
+                    {
+                      name: 'showLocationMarker',
+                      type: 'checkbox',
+                      label: 'Show Location Marker',
+                      defaultValue: true,
+                      admin: {
+                        description: 'Display a pin at the exact location',
+                      },
+                    },
+                    {
+                      name: 'showFocusRadius',
+                      type: 'checkbox',
+                      label: 'Show Focus Radius',
+                      defaultValue: false,
+                      admin: {
+                        description: 'Display a circular area highlight',
+                      },
+                    },
+                    {
+                      name: 'focusRadius',
+                      type: 'number',
+                      label: 'Focus Radius (meters)',
+                      defaultValue: 3000,
+                      min: 500,
+                      max: 10000,
+                      admin: {
+                        description: 'Radius of the focus area',
+                        condition: (data, siblingData) => siblingData?.showFocusRadius,
+                        step: 500,
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Appearance',
+          fields: [
+            {
+              name: 'theme',
+              type: 'radio',
+              label: 'Theme',
+              options: [
+                { label: 'Light', value: 'light' },
+                { label: 'Dark', value: 'dark' },
+              ],
+              defaultValue: 'dark',
             },
             {
-              name: 'overlay',
-              type: 'text',
-              label: 'Overlay Color',
+              name: 'autoPlay',
+              type: 'checkbox',
+              label: 'Auto-play chapters',
+              defaultValue: false,
               admin: {
-                description: 'Color overlay for background image',
+                description: 'Automatically advance through chapters',
+              },
+            },
+            {
+              name: 'autoPlayDelay',
+              type: 'number',
+              label: 'Auto-play Delay (seconds)',
+              defaultValue: 5,
+              min: 3,
+              max: 30,
+              admin: {
+                description: 'Time to stay on each chapter',
+                condition: (data, siblingData) => siblingData?.autoPlay,
               },
             },
           ],

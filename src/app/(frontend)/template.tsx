@@ -14,12 +14,6 @@ export default function Template({ children }: TemplateProps) {
       id="page-content"
       key={pathname}
       className="min-h-screen"
-      style={{
-        // Initial state - will be animated by PageTransitionManager
-        opacity: 0,
-        transform: 'translateY(12px)',
-        pointerEvents: 'none'
-      }}
     >
       {children}
     </div>

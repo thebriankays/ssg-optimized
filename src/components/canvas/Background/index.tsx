@@ -4,6 +4,7 @@ import { ViewportScrollScene } from '@/components/canvas/ViewportScrollScene'
 import { useEffect, useState, useRef } from 'react'
 import { Whatamesh } from './Whatamesh'
 import { useAppStore } from '@/lib/stores/app-store'
+import './background.scss'
 
 interface BackgroundSettings {
   type: 'none' | 'gradient' | 'particles' | 'fluid' | 'whatamesh'
@@ -57,6 +58,7 @@ export function Background({
           zIndex: -1,
           pointerEvents: 'none',
         }}
+        hideOffscreen={false}
       >
         {() => (
           <>

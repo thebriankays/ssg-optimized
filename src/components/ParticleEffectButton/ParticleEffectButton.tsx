@@ -5,7 +5,7 @@ import raf from 'raf'
 import { cn } from '@/utilities/ui'
 import './ParticleEffectButton.scss'
 import { AnimeInstance } from 'animejs'
-import anime from 'animejs'
+import * as anime from 'animejs'
 
 /**
  * Helper: random offset

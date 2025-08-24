@@ -1,12 +1,18 @@
 'use client'
 
 import { useRef, useEffect, useState, useMemo } from 'react'
-import { Text } from '@react-three/drei'
+import { extend } from '@react-three/fiber'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useGSAPAnimation } from '@/hooks/useGSAPAnimation'
 import { gsap } from 'gsap'
 import type { WebGLTextConfig } from './types'
+// @ts-ignore
+import { Text as TroikaText } from 'troika-three-text'
+import { WebGLTextShader } from './WebGLTextShader'
+
+// Extend THREE namespace with troika text
+extend({ TroikaText })
 
 interface WebGLTextProps extends WebGLTextConfig {
   position?: [number, number, number]
@@ -15,6 +21,7 @@ interface WebGLTextProps extends WebGLTextConfig {
   onClick?: () => void
   onPointerOver?: () => void
   onPointerOut?: () => void
+  useShader?: boolean
 }
 
 export function WebGLText({
@@ -40,6 +47,7 @@ export function WebGLText({
   onClick,
   onPointerOver,
   onPointerOut,
+  useShader = false,
   ...troikaProps
 }: WebGLTextProps) {
   const textRef = useRef<any>(null)
@@ -168,24 +176,14 @@ export function WebGLText({
     }
   }, [isHovered])
   
-  return (
-    <group
-      ref={groupRef}
-      position={position}
-      rotation={rotation}
-      scale={scale}
-    >
-      <Text
-        ref={textRef}
-        font={font}
-        fontSize={fontSize}
-        color={color}
-        letterSpacing={letterSpacing}
-        lineHeight={lineHeight}
-        maxWidth={maxWidth}
-        textAlign={textAlign}
-        anchorX={anchorX}
-        anchorY={anchorY}
+  // Use shader version for specific animation types
+  if (useShader || animation.type === 'reveal' || animation.type === 'wave' || animation.type === 'glow') {
+    return (
+      <group
+        ref={groupRef}
+        position={position}
+        rotation={rotation}
+        scale={scale}
         onClick={onClick}
         onPointerOver={(e) => {
           e.stopPropagation()
@@ -197,32 +195,75 @@ export function WebGLText({
           setIsHovered(false)
           onPointerOut?.()
         }}
-        {...troikaProps}
       >
-        {displayText}
-      </Text>
-      
-      {/* Optional outline/stroke effect */}
-      {troikaProps.outlineWidth && (
-        <Text
+        <WebGLTextShader
+          text={text}
           font={font}
-          fontSize={fontSize * 1.02}
-          position={[0, 0, -0.01]}
-          color={troikaProps.outlineColor || '#000000'}
-          letterSpacing={letterSpacing}
-          lineHeight={lineHeight}
+          fontSize={fontSize}
+          color={color}
+          position={[0, 0, 0]}
+          animation={animation}
           maxWidth={maxWidth}
           textAlign={textAlign}
           anchorX={anchorX}
           anchorY={anchorY}
-          fillOpacity={0}
-          strokeColor={troikaProps.outlineColor || '#000000'}
-          strokeWidth={troikaProps.outlineWidth}
-          strokeOpacity={troikaProps.outlineOpacity || 1}
-        >
-          {displayText}
-        </Text>
-      )}
+          letterSpacing={letterSpacing}
+          lineHeight={lineHeight}
+        />
+      </group>
+    )
+  }
+  
+  return (
+    <group
+      ref={groupRef}
+      position={position}
+      rotation={rotation}
+      scale={scale}
+    >
+      {/* @ts-expect-error R3F primitive for troika */}
+      <troikaText
+        ref={textRef}
+        text={displayText}
+        font={font}
+        fontSize={fontSize}
+        color={color}
+        letterSpacing={letterSpacing}
+        lineHeight={lineHeight}
+        maxWidth={maxWidth}
+        textAlign={textAlign}
+        anchorX={anchorX}
+        anchorY={anchorY}
+        // Material properties
+        material-color={materialProps.color}
+        material-transparent={materialProps.transparent}
+        material-opacity={materialProps.opacity}
+        material-metalness={'metalness' in materialProps ? materialProps.metalness : undefined}
+        material-roughness={'roughness' in materialProps ? materialProps.roughness : undefined}
+        material-emissive={'emissive' in materialProps ? materialProps.emissive : undefined}
+        material-emissiveIntensity={'emissiveIntensity' in materialProps ? materialProps.emissiveIntensity : undefined}
+        // Stroke/outline properties (troika native support)
+        strokeColor={troikaProps.outlineColor}
+        strokeWidth={troikaProps.outlineWidth ? troikaProps.outlineWidth : 0}
+        strokeOpacity={troikaProps.outlineOpacity || 1}
+        fillOpacity={troikaProps.outlineWidth && !troikaProps.fillOpacity ? 1 : troikaProps.fillOpacity}
+        // Events
+        onClick={onClick}
+        onPointerOver={(e: any) => {
+          e.stopPropagation()
+          setIsHovered(true)
+          onPointerOver?.()
+        }}
+        onPointerOut={(e: any) => {
+          e.stopPropagation()
+          setIsHovered(false)
+          onPointerOut?.()
+        }}
+        // Troika specific optimizations
+        gpuAccelerate={true}
+        sdfGlyphSize={64}
+        {...troikaProps}
+      />
     </group>
   )
 }

@@ -1,276 +1,468 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
-import { motion, useScroll, useTransform, useInView } from 'framer-motion'
-import { useGSAPAnimation } from '@/hooks/useGSAPAnimation'
-import { gsap } from 'gsap'
-import { WebGLView } from '@/components/canvas/WebGLView'
-import { GlassCard } from '@/components/ui/glass/GlassCard'
-import type { StorySection } from './types'
-import dynamic from 'next/dynamic'
+import { useRef, useState, useCallback, useEffect } from 'react'
+import { Loader } from '@googlemaps/js-api-loader'
+import * as TWEEN from '@tweenjs/tween.js'
+import './storytelling.scss'
 
-// Dynamic WebGL component imports
-const WebGLComponents: Record<string, any> = {
-  'spiral': dynamic(() => import('@/components/canvas/Spiral').then(m => m.Spiral)),
-  'particles': dynamic(() => import('@/components/canvas/Particles').then(m => m.Particles)),
-  'waves': dynamic(() => import('@/components/canvas/Waves').then(m => m.Waves)),
+export interface StoryChapter {
+  id: string | number
+  title: string
+  content?: string
+  dateTime?: string
+  imageUrl?: string
+  imageCredit?: string
+  coords: { lat: number; lng: number }
+  address?: string
+  cameraOptions?: {
+    position?: { x: number; y: number; z: number }
+    heading?: number
+    pitch?: number
+    roll?: number
+    zoom?: number
+    tilt?: number
+  }
+  focusOptions?: {
+    focusRadius?: number
+    showFocus?: boolean
+    showLocationMarker?: boolean
+  }
 }
 
-interface StorySectionProps {
-  section: StorySection
-  index: number
-}
-
-function StorySectionComponent({ section, index }: StorySectionProps) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { amount: 0.3 })
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  })
-  
-  // Parallax transforms
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '20%'])
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0])
-  const scale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.8, 1, 1, 0.8])
-  
-  // GSAP animation
-  useGSAPAnimation(() => {
-    if (!ref.current) return
-    
-    gsap.fromTo(ref.current, {
-      opacity: 0,
-      y: 50,
-      scale: 0.95,
-    }, {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: section.animation?.duration || 1,
-      delay: section.animation?.delay || 0,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: ref.current,
-        start: 'top 80%',
-        end: 'bottom 20%',
-        toggleActions: 'play none none reverse',
-      },
-    })
-  }, [])
-  
-  const WebGLComponent = section.media?.webglComponent 
-    ? WebGLComponents[section.media.webglComponent] 
-    : null
-  
-  return (
-    <motion.section
-      ref={ref}
-      className={`storytelling__section storytelling__section--${section.type} storytelling__section--${section.layout || 'center'}`}
-      style={{
-        y: section.animation?.type === 'parallax' ? y : 0,
-        opacity: section.animation?.type === 'fade' ? opacity : 1,
-        scale: section.animation?.type === 'scale' ? scale : 1,
-        background: section.background?.gradient || section.background?.color,
-      }}
-    >
-      {/* Background */}
-      {section.background?.image && (
-        <div 
-          className="storytelling__background"
-          style={{
-            backgroundImage: `url(${section.background.image})`,
-            filter: section.background.blur ? `blur(${section.background.blur}px)` : undefined,
-          }}
-        >
-          {section.background.overlay && (
-            <div 
-              className="storytelling__background-overlay"
-              style={{ background: section.background.overlay }}
-            />
-          )}
-        </div>
-      )}
-      
-      {/* Content */}
-      <div className="storytelling__content">
-        {section.type === 'intro' && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="storytelling__intro"
-          >
-            {section.subtitle && (
-              <span className="storytelling__subtitle">{section.subtitle}</span>
-            )}
-            {section.title && (
-              <h1 className="storytelling__title">{section.title}</h1>
-            )}
-            {section.content && (
-              <p className="storytelling__text">{section.content}</p>
-            )}
-          </motion.div>
-        )}
-        
-        {section.type === 'chapter' && (
-          <GlassCard
-            variant="frosted"
-            className="storytelling__chapter"
-          >
-            {section.title && (
-              <h2 className="storytelling__chapter-title">{section.title}</h2>
-            )}
-            {section.content && (
-              <div 
-                className="storytelling__chapter-content"
-                dangerouslySetInnerHTML={{ __html: section.content }}
-              />
-            )}
-          </GlassCard>
-        )}
-        
-        {section.type === 'quote' && (
-          <motion.blockquote
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.8 }}
-            className="storytelling__quote"
-          >
-            {section.content && (
-              <p className="storytelling__quote-text">{section.content}</p>
-            )}
-            {section.subtitle && (
-              <cite className="storytelling__quote-author">{section.subtitle}</cite>
-            )}
-          </motion.blockquote>
-        )}
-        
-        {section.type === 'parallax' && section.media && (
-          <div className="storytelling__parallax">
-            {section.media.type === 'image' && section.media.src && (
-              <motion.img
-                src={section.media.src}
-                alt={section.title || ''}
-                style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '-20%']) }}
-                className="storytelling__parallax-image"
-              />
-            )}
-            {section.media.type === 'video' && section.media.src && (
-              <motion.video
-                src={section.media.src}
-                autoPlay
-                loop
-                muted
-                playsInline
-                style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '-20%']) }}
-                className="storytelling__parallax-video"
-              />
-            )}
-          </div>
-        )}
-      </div>
-      
-      {/* WebGL Media */}
-      {section.media?.type === 'webgl' && WebGLComponent && (
-        <div className="storytelling__webgl" style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-        }}>
-          <WebGLView>
-            <WebGLComponent {...(section.media.webglProps || {})} />
-          </WebGLView>
-        </div>
-      )}
-      
-      {/* Regular Media */}
-      {section.media?.type === 'image' && section.media.src && section.type !== 'parallax' && (
-        <motion.div 
-          className="storytelling__media"
-          initial={{ opacity: 0, x: section.layout === 'left' ? -50 : 50 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
-          <img src={section.media.src} alt={section.title || ''} />
-        </motion.div>
-      )}
-      
-      {section.media?.type === 'video' && section.media.src && section.type !== 'parallax' && (
-        <motion.div 
-          className="storytelling__media"
-          initial={{ opacity: 0, x: section.layout === 'left' ? -50 : 50 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
-          <video
-            src={section.media.src}
-            autoPlay
-            loop
-            muted
-            playsInline
-          />
-        </motion.div>
-      )}
-    </motion.section>
-  )
+export interface StorytellingConfig {
+  properties: {
+    title: string
+    date?: string
+    description?: string
+    createdBy?: string
+    imageUrl?: string
+    imageCredit?: string
+    cameraOptions?: any
+  }
+  chapters: StoryChapter[]
+  appearance?: {
+    theme?: 'light' | 'dark'
+  }
 }
 
 interface StorytellingProps {
-  sections: StorySection[]
+  config: StorytellingConfig
+  apiKey: string
+  mapId: string
   className?: string
 }
 
-export function Storytelling({ sections, className = '' }: StorytellingProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [activeSection, setActiveSection] = useState(0)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  })
+export function Storytelling({ config, apiKey, mapId, className = '' }: StorytellingProps) {
+  const mapRef = useRef<google.maps.Map | null>(null)
+  const mapContainerRef = useRef<HTMLDivElement>(null)
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([])
+  const animationRef = useRef<number | null>(null)
+  const focusCircleRef = useRef<google.maps.Circle | null>(null)
   
-  // Update active section based on scroll
+  const [currentChapterIndex, setCurrentChapterIndex] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [showLocationMarker, setShowLocationMarker] = useState(true)
+  const [showFocusRadius, setShowFocusRadius] = useState(false)
+  const [focusRadius, setFocusRadius] = useState(3000)
+  
+  const currentChapter = config.chapters[currentChapterIndex]
+
+  // Animation loop for TWEEN
   useEffect(() => {
-    const unsubscribe = scrollYProgress.on('change', (progress) => {
-      const sectionIndex = Math.floor(progress * sections.length)
-      setActiveSection(Math.min(sectionIndex, sections.length - 1))
-    })
+    const animate = (time: number) => {
+      TWEEN.update(time)
+      animationRef.current = requestAnimationFrame(animate)
+    }
+    animationRef.current = requestAnimationFrame(animate)
     
-    return unsubscribe
-  }, [scrollYProgress, sections.length])
-  
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [])
+
+  // Initialize Google Maps
+  useEffect(() => {
+    const initializeMap = async () => {
+      const loader = new Loader({
+        apiKey,
+        version: 'weekly',
+        libraries: ['places', 'marker'],
+        mapIds: [mapId],
+      })
+
+      try {
+        const google = await loader.load()
+        
+        if (!mapContainerRef.current) return
+
+        // Get initial location from first chapter or default
+        const initialLocation = config.chapters[0]?.coords || { lat: 40.7128, lng: -74.0060 }
+
+        // Create map with 3D tiles
+        const map = new google.maps.Map(mapContainerRef.current, {
+          center: initialLocation,
+          zoom: 17,
+          tilt: 65,
+          heading: 0,
+          mapId: mapId, // Required for 3D tiles
+          disableDefaultUI: true,
+          gestureHandling: 'greedy',
+          // Enable 3D controls
+          tiltInteractionEnabled: true,
+          headingInteractionEnabled: true,
+        })
+        
+        mapRef.current = map
+
+        // Create markers for all chapters
+        await createChapterMarkers()
+
+        // Fly to first chapter
+        if (config.chapters.length > 0) {
+          flyToChapter(0)
+        }
+      } catch (error) {
+        console.error('Error loading Google Maps:', error)
+      }
+    }
+
+    initializeMap()
+
+    return () => {
+      clearMarkers()
+      if (focusCircleRef.current) {
+        focusCircleRef.current.setMap(null)
+      }
+    }
+  }, [apiKey, mapId])
+
+  // Create markers for all chapters
+  const createChapterMarkers = useCallback(async () => {
+    if (!mapRef.current) return
+
+    clearMarkers()
+    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary
+
+    config.chapters.forEach((chapter, index) => {
+      if (!chapter.coords) return
+
+      const isActive = index === currentChapterIndex
+      const marker = new AdvancedMarkerElement({
+        map: mapRef.current,
+        position: chapter.coords,
+        title: chapter.title,
+        content: createMarkerContent(chapter, index + 1, isActive),
+      })
+
+      marker.addListener('click', () => {
+        goToChapter(index)
+      })
+
+      markersRef.current.push(marker)
+    })
+  }, [config.chapters, currentChapterIndex])
+
+  // Create marker content
+  const createMarkerContent = (chapter: StoryChapter, number: number, isActive: boolean) => {
+    const content = document.createElement('div')
+    content.className = `story-marker ${isActive ? 'active' : ''}`
+    content.innerHTML = `
+      <div class="marker-number">${number}</div>
+      <div class="marker-label">${chapter.title}</div>
+    `
+    return content
+  }
+
+  // Clear markers
+  const clearMarkers = useCallback(() => {
+    markersRef.current.forEach(marker => {
+      marker.map = null
+    })
+    markersRef.current = []
+  }, [])
+
+  // Fly to chapter with animation
+  const flyToChapter = useCallback((index: number) => {
+    const chapter = config.chapters[index]
+    if (!chapter || !mapRef.current) return
+
+    const from = {
+      center: mapRef.current.getCenter()?.toJSON() || chapter.coords,
+      zoom: mapRef.current.getZoom() || 17,
+      tilt: mapRef.current.getTilt() || 65,
+      heading: mapRef.current.getHeading() || 0,
+    }
+
+    const to = {
+      center: chapter.coords,
+      zoom: chapter.cameraOptions?.zoom || 17,
+      tilt: chapter.cameraOptions?.tilt || (chapter.cameraOptions?.pitch ? -chapter.cameraOptions.pitch : 65),
+      heading: chapter.cameraOptions?.heading || 0,
+    }
+
+    new TWEEN.Tween(from)
+      .to(to, 3000)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .onUpdate((state) => {
+        mapRef.current?.moveCamera(state)
+      })
+      .onComplete(() => {
+        // Update focus radius if needed
+        updateFocusRadius(chapter)
+        // Update markers to show active state
+        createChapterMarkers()
+      })
+      .start()
+  }, [config.chapters, createChapterMarkers])
+
+  // Update focus radius visualization
+  const updateFocusRadius = useCallback((chapter: StoryChapter) => {
+    if (!mapRef.current) return
+
+    // Remove existing circle
+    if (focusCircleRef.current) {
+      focusCircleRef.current.setMap(null)
+      focusCircleRef.current = null
+    }
+
+    // Add new circle if enabled
+    const showFocus = chapter.focusOptions?.showFocus ?? showFocusRadius
+    const radius = chapter.focusOptions?.focusRadius ?? focusRadius
+
+    if (showFocus) {
+      focusCircleRef.current = new google.maps.Circle({
+        map: mapRef.current,
+        center: chapter.coords,
+        radius: radius,
+        fillColor: '#4285F4',
+        fillOpacity: 0.1,
+        strokeColor: '#4285F4',
+        strokeOpacity: 0.3,
+        strokeWeight: 2,
+      })
+    }
+  }, [showFocusRadius, focusRadius])
+
+  // Go to specific chapter
+  const goToChapter = useCallback((index: number) => {
+    if (index >= 0 && index < config.chapters.length) {
+      setCurrentChapterIndex(index)
+      flyToChapter(index)
+    }
+  }, [config.chapters.length, flyToChapter])
+
+  // Navigation functions
+  const nextChapter = useCallback(() => {
+    goToChapter(currentChapterIndex + 1)
+  }, [currentChapterIndex, goToChapter])
+
+  const prevChapter = useCallback(() => {
+    goToChapter(currentChapterIndex - 1)
+  }, [currentChapterIndex, goToChapter])
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (!isPlaying) return
+
+    const timer = setTimeout(() => {
+      if (currentChapterIndex < config.chapters.length - 1) {
+        nextChapter()
+      } else {
+        setIsPlaying(false)
+      }
+    }, 5000) // 5 seconds per chapter
+
+    return () => clearTimeout(timer)
+  }, [isPlaying, currentChapterIndex, config.chapters.length, nextChapter])
+
+  // Save camera position (for edit mode)
+  const saveCameraPosition = useCallback(() => {
+    if (!mapRef.current) return
+
+    const camera = {
+      center: mapRef.current.getCenter()?.toJSON(),
+      zoom: mapRef.current.getZoom(),
+      tilt: mapRef.current.getTilt(),
+      heading: mapRef.current.getHeading(),
+    }
+
+    console.log('Camera position saved:', camera)
+    // In a real implementation, this would save to the config
+  }, [])
+
   return (
-    <div ref={containerRef} className={`storytelling ${className}`}>
-      {/* Progress indicator */}
-      <motion.div 
-        className="storytelling__progress"
-        style={{
-          scaleX: scrollYProgress,
-        }}
-      />
-      
-      {/* Navigation dots */}
-      <div className="storytelling__nav">
-        {sections.map((section, index) => (
+    <div className={`storytelling ${className} theme-${config.appearance?.theme || 'dark'}`}>
+      {/* 3D Map */}
+      <div ref={mapContainerRef} className="storytelling__map" />
+
+      {/* Story Panel */}
+      <div className="storytelling__panel">
+        {/* Cover Page */}
+        {currentChapterIndex === 0 && config.properties && (
+          <div className="story-cover">
+            {config.properties.imageUrl && (
+              <img 
+                src={config.properties.imageUrl} 
+                alt={config.properties.title}
+                className="cover-image"
+              />
+            )}
+            <h1 className="story-title">{config.properties.title}</h1>
+            {config.properties.date && (
+              <div className="story-date">{config.properties.date}</div>
+            )}
+            {config.properties.description && (
+              <p className="story-description">{config.properties.description}</p>
+            )}
+            {config.properties.createdBy && (
+              <div className="story-author">By {config.properties.createdBy}</div>
+            )}
+            <button 
+              onClick={() => goToChapter(1)}
+              className="start-button"
+            >
+              Begin Interactive Story
+            </button>
+          </div>
+        )}
+
+        {/* Chapter Content */}
+        {currentChapter && (
+          <div className="chapter-content">
+            {currentChapter.imageUrl && (
+              <img 
+                src={currentChapter.imageUrl} 
+                alt={currentChapter.title}
+                className="chapter-image"
+              />
+            )}
+            <h2 className="chapter-title">{currentChapter.title}</h2>
+            {currentChapter.dateTime && (
+              <div className="chapter-date">{currentChapter.dateTime}</div>
+            )}
+            {currentChapter.content && (
+              <div className="chapter-text">{currentChapter.content}</div>
+            )}
+            {currentChapter.address && (
+              <div className="chapter-address">{currentChapter.address}</div>
+            )}
+            {currentChapter.imageCredit && (
+              <div className="image-credit">Photo: {currentChapter.imageCredit}</div>
+            )}
+          </div>
+        )}
+
+        {/* Navigation Controls */}
+        <div className="story-navigation">
           <button
-            key={section.id}
-            className={`storytelling__nav-dot ${index === activeSection ? 'active' : ''}`}
-            onClick={() => {
-              const element = document.querySelector(`#story-section-${index}`)
-              element?.scrollIntoView({ behavior: 'smooth' })
-            }}
-            aria-label={`Go to ${section.title || `section ${index + 1}`}`}
-          />
-        ))}
-      </div>
-      
-      {/* Sections */}
-      {sections.map((section, index) => (
-        <div key={section.id} id={`story-section-${index}`}>
-          <StorySectionComponent section={section} index={index} />
+            onClick={prevChapter}
+            disabled={currentChapterIndex === 0}
+            className="nav-button prev"
+          >
+            ← Previous
+          </button>
+          
+          <div className="chapter-indicator">
+            {currentChapterIndex + 1} / {config.chapters.length}
+          </div>
+          
+          <button
+            onClick={nextChapter}
+            disabled={currentChapterIndex === config.chapters.length - 1}
+            className="nav-button next"
+          >
+            Next →
+          </button>
         </div>
-      ))}
+
+        {/* Play Controls */}
+        <div className="play-controls">
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="play-button"
+          >
+            {isPlaying ? '⏸ Pause' : '▶ Play'}
+          </button>
+        </div>
+
+        {/* Chapter List */}
+        <div className="chapter-list">
+          {config.chapters.map((chapter, index) => (
+            <div
+              key={chapter.id || index}
+              className={`chapter-item ${index === currentChapterIndex ? 'active' : ''}`}
+              onClick={() => goToChapter(index)}
+            >
+              <div className="chapter-number">{index + 1}</div>
+              <div className="chapter-name">{chapter.title}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Edit Controls (Admin Mode) */}
+      {isEditMode && (
+        <div className="edit-controls">
+          <h3>Edit Chapter</h3>
+          
+          <label className="control-toggle">
+            <input
+              type="checkbox"
+              checked={showLocationMarker}
+              onChange={(e) => setShowLocationMarker(e.target.checked)}
+            />
+            <span>Display Location Marker</span>
+          </label>
+
+          <label className="control-toggle">
+            <input
+              type="checkbox"
+              checked={showFocusRadius}
+              onChange={(e) => {
+                setShowFocusRadius(e.target.checked)
+                updateFocusRadius(currentChapter)
+              }}
+            />
+            <span>Display Radius Focus</span>
+          </label>
+
+          {showFocusRadius && (
+            <div className="radius-control">
+              <label>Focus Radius: {focusRadius}m</label>
+              <input
+                type="range"
+                min="500"
+                max="10000"
+                step="500"
+                value={focusRadius}
+                onChange={(e) => {
+                  setFocusRadius(Number(e.target.value))
+                  updateFocusRadius(currentChapter)
+                }}
+              />
+            </div>
+          )}
+
+          <button onClick={saveCameraPosition} className="save-button">
+            Save Camera Position
+          </button>
+          
+          <button onClick={() => setIsEditMode(false)} className="leave-edit-button">
+            Leave Edit Mode
+          </button>
+        </div>
+      )}
+
+      {/* Edit Mode Toggle */}
+      <button
+        onClick={() => setIsEditMode(!isEditMode)}
+        className="edit-toggle"
+      >
+        {isEditMode ? '✓' : '✏️'} Edit
+      </button>
     </div>
   )
 }

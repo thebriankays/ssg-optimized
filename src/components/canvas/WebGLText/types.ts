@@ -30,9 +30,13 @@ export interface WebGLTextConfig {
   metalness?: number
   roughness?: number
   animation?: {
-    type: 'none' | 'typewriter' | 'fade' | 'wave' | 'glitch'
+    type: 'none' | 'typewriter' | 'fade' | 'wave' | 'glitch' | 'reveal' | 'glow'
     duration?: number
     delay?: number
     stagger?: number
+    loop?: boolean
   }
+  // Shader options
+  useShader?: boolean
+  enablePostProcessing?: boolean
 }

@@ -8,10 +8,10 @@ import { useCanvasStore } from '@/lib/stores/canvas-store'
 const vertexShader = /* glsl */ `
 precision highp float;
 
-// Attributes
-attribute vec3 position;
-attribute vec3 normal;
-attribute vec2 uv;
+// Three.js built-in attributes are automatically available
+// attribute vec3 position; // Provided by Three.js
+// attribute vec3 normal;   // Provided by Three.js  
+// attribute vec2 uv;       // Provided by Three.js
 
 // Uniforms
 uniform mat4 projectionMatrix;
@@ -32,16 +32,24 @@ uniform vec3 u_baseColor;
 uniform float u_shadow_power;
 uniform float u_darken_top;
 
-// Wave layer structure
-struct WaveLayer {
-  float z;
-  vec2 freq;
-  float amp;
-  float speed;
-  float seed;
-};
+// Wave layer uniforms (GLSL ES doesn't support struct arrays well)
+uniform float u_waveLayer0_z;
+uniform vec2 u_waveLayer0_freq;
+uniform float u_waveLayer0_amp;
+uniform float u_waveLayer0_speed;
+uniform float u_waveLayer0_seed;
 
-uniform WaveLayer u_waveLayers[3];
+uniform float u_waveLayer1_z;
+uniform vec2 u_waveLayer1_freq;
+uniform float u_waveLayer1_amp;
+uniform float u_waveLayer1_speed;
+uniform float u_waveLayer1_seed;
+
+uniform float u_waveLayer2_z;
+uniform vec2 u_waveLayer2_freq;
+uniform float u_waveLayer2_amp;
+uniform float u_waveLayer2_speed;
+uniform float u_waveLayer2_seed;
 
 // Varyings
 varying vec3 v_color;
@@ -145,19 +153,35 @@ void main() {
   float totalNoise = 0.0;
   float totalWeight = 0.0;
   
-  for (int i = 0; i < 3; i++) {
-    WaveLayer layer = u_waveLayers[i];
-    
-    vec3 noisePos = vec3(
-      noiseCoord.x * layer.freq.x + time * layer.speed,
-      noiseCoord.y * layer.freq.y,
-      layer.seed
-    );
-    
-    float noise = snoise(noisePos);
-    totalNoise += noise * layer.amp * layer.z;
-    totalWeight += layer.z;
-  }
+  // Layer 0
+  vec3 noisePos0 = vec3(
+    noiseCoord.x * u_waveLayer0_freq.x + time * u_waveLayer0_speed,
+    noiseCoord.y * u_waveLayer0_freq.y,
+    u_waveLayer0_seed
+  );
+  float noise0 = snoise(noisePos0);
+  totalNoise += noise0 * u_waveLayer0_amp * u_waveLayer0_z;
+  totalWeight += u_waveLayer0_z;
+  
+  // Layer 1
+  vec3 noisePos1 = vec3(
+    noiseCoord.x * u_waveLayer1_freq.x + time * u_waveLayer1_speed,
+    noiseCoord.y * u_waveLayer1_freq.y,
+    u_waveLayer1_seed
+  );
+  float noise1 = snoise(noisePos1);
+  totalNoise += noise1 * u_waveLayer1_amp * u_waveLayer1_z;
+  totalWeight += u_waveLayer1_z;
+  
+  // Layer 2
+  vec3 noisePos2 = vec3(
+    noiseCoord.x * u_waveLayer2_freq.x + time * u_waveLayer2_speed,
+    noiseCoord.y * u_waveLayer2_freq.y,
+    u_waveLayer2_seed
+  );
+  float noise2 = snoise(noisePos2);
+  totalNoise += noise2 * u_waveLayer2_amp * u_waveLayer2_z;
+  totalWeight += u_waveLayer2_z;
   
   // Normalize and apply distortion
   float distortion = totalNoise / totalWeight;
@@ -174,7 +198,7 @@ void main() {
   float colorMix1 = smoothstep(-1.0, 1.0, sin(pos.x * 0.1 + distortion * 0.01));
   float colorMix2 = smoothstep(-1.0, 1.0, cos(pos.y * 0.1 + distortion * 0.01));
   float colorMix3 = smoothstep(-1.0, 1.0, sin((pos.x + pos.y) * 0.05 + time));
-  float colorMix4 = smoothstep(-1.0, 1.0, noise);
+  float colorMix4 = smoothstep(-1.0, 1.0, noise0);
   
   if (u_active_colors.x > 0.5) color = mix(color, u_color1, colorMix1 * u_active_colors.x);
   if (u_active_colors.y > 0.5) color = mix(color, u_color2, colorMix2 * u_active_colors.y);
@@ -251,6 +275,15 @@ export function Whatamesh({
   darkenTop = true,
   seed = 5,
 }: WhatameshProps) {
+  console.log('Whatamesh component rendering with props:', {
+    colors,
+    amplitude,
+    speed,
+    density,
+    darkenTop,
+    seed
+  })
+  
   const meshRef = useRef<THREE.Mesh>(null)
   const { size } = useThree()
   const quality = useCanvasStore((state) => state.quality)
@@ -290,24 +323,26 @@ export function Whatamesh({
       // Animation parameters
       u_baseColor: { value: new THREE.Color(0.11, 0.11, 0.11) },
       
-      // Wave layers as separate uniforms (GLSL structs require this approach)
-      'u_waveLayers[0].z': { value: 0.3 },
-      'u_waveLayers[0].freq': { value: new THREE.Vector2(0.00014 * seed, 0.00029 * seed) },
-      'u_waveLayers[0].amp': { value: amplitude },
-      'u_waveLayers[0].speed': { value: 0.0005 * speed },
-      'u_waveLayers[0].seed': { value: seed + 0.5 },
+      // Wave layer 0
+      u_waveLayer0_z: { value: 0.3 },
+      u_waveLayer0_freq: { value: new THREE.Vector2(0.00014 * seed, 0.00029 * seed) },
+      u_waveLayer0_amp: { value: amplitude },
+      u_waveLayer0_speed: { value: 0.0005 * speed },
+      u_waveLayer0_seed: { value: seed + 0.5 },
       
-      'u_waveLayers[1].z': { value: 0.1 },
-      'u_waveLayers[1].freq': { value: new THREE.Vector2(0.00013 * seed, 0.000281 * seed) },
-      'u_waveLayers[1].amp': { value: amplitude * 0.8 },
-      'u_waveLayers[1].speed': { value: 0.0003 * speed },
-      'u_waveLayers[1].seed': { value: seed + 0.8 },
+      // Wave layer 1
+      u_waveLayer1_z: { value: 0.1 },
+      u_waveLayer1_freq: { value: new THREE.Vector2(0.00013 * seed, 0.000281 * seed) },
+      u_waveLayer1_amp: { value: amplitude * 0.8 },
+      u_waveLayer1_speed: { value: 0.0003 * speed },
+      u_waveLayer1_seed: { value: seed + 0.8 },
       
-      'u_waveLayers[2].z': { value: 0.2 },
-      'u_waveLayers[2].freq': { value: new THREE.Vector2(0.00015 * seed, 0.000287 * seed) },
-      'u_waveLayers[2].amp': { value: amplitude * 0.6 },
-      'u_waveLayers[2].speed': { value: 0.0004 * speed },
-      'u_waveLayers[2].seed': { value: seed + 1.2 },
+      // Wave layer 2
+      u_waveLayer2_z: { value: 0.2 },
+      u_waveLayer2_freq: { value: new THREE.Vector2(0.00015 * seed, 0.000287 * seed) },
+      u_waveLayer2_amp: { value: amplitude * 0.6 },
+      u_waveLayer2_speed: { value: 0.0004 * speed },
+      u_waveLayer2_seed: { value: seed + 1.2 },
       
       // Effects
       u_darken_top: { value: darkenTop ? 1.0 : 0.0 },
@@ -330,22 +365,35 @@ export function Whatamesh({
     }
   })
   
+  // Calculate the proper scale to fill the viewport
+  const aspect = size.width / size.height
+  const distance = 5 // Camera distance
+  const vFov = 45 * (Math.PI / 180) // Convert FOV to radians
+  const planeHeight = 2 * Math.tan(vFov / 2) * distance
+  const planeWidth = planeHeight * aspect
+  
   return (
     <mesh
-      ref={meshRef}
-      position={[0, 0, -10]}
-      scale={[2, 2, 1]}
+      ref={(mesh) => {
+        meshRef.current = mesh
+        if (mesh) {
+          console.log('Whatamesh mesh created and added to scene:', mesh)
+        }
+      }}
+      position={[0, 0, -2]}
+      renderOrder={-1000}
     >
       <planeGeometry
-        args={[size.width / 100, size.height / 100, meshDensity[0], meshDensity[1]]}
+        args={[planeWidth * 1.2, planeHeight * 1.2, meshDensity[0], meshDensity[1]]}
       />
       <shaderMaterial
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
         uniforms={uniforms}
         vertexColors
-        transparent
+        transparent={false}
         depthWrite={false}
+        depthTest={false}
       />
     </mesh>
   )

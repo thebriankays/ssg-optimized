@@ -46,7 +46,7 @@ import { TravelDiaries } from './collections/TravelDiaries'
 import { TravelItineraries } from './collections/TravelItineraries'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
-import { SiteSettings } from './payload/globals/SiteSettings'
+import { SiteSettings } from './globals/SiteSettings'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
@@ -56,6 +56,7 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
+    user: Users.slug,
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below.
@@ -67,7 +68,6 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
-    user: Users.slug,
     livePreview: {
       breakpoints: [
         {
@@ -99,10 +99,10 @@ export default buildConfig({
     },
   }),
   collections: [
-    Pages, 
-    Posts, 
-    Media, 
-    Categories, 
+    Pages,
+    Posts,
+    Media,
+    Categories,
     Users,
     TravelAdvisories,
     VisaRequirements,
@@ -136,7 +136,7 @@ export default buildConfig({
     SocialMediaPosts,
     Timezones,
     TravelDiaries,
-    TravelItineraries
+    TravelItineraries,
   ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, SiteSettings],

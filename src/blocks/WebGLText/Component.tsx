@@ -1,26 +1,6 @@
 import React from 'react'
-import dynamic from 'next/dynamic'
 import type { WebGLTextBlock as WebGLTextBlockType } from '../types'
-
-// Dynamic import for client-side only rendering
-const WebGLTextClient = dynamic(
-  () => import('./Component.client').then(mod => mod.WebGLTextClient),
-  { 
-    ssr: false,
-    loading: () => (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        height: '400px',
-        background: '#000',
-        color: '#fff'
-      }}>
-        <div>Loading 3D text...</div>
-      </div>
-    )
-  }
-)
+import { WebGLTextWrapper } from './ComponentWrapper'
 
 export const WebGLTextBlock: React.FC<WebGLTextBlockType> = ({
   text,
@@ -79,10 +59,38 @@ export const WebGLTextBlock: React.FC<WebGLTextBlockType> = ({
     backgroundColor: layout?.backgroundColor || 'transparent',
   }
   
+  // Determine text element based on font size for semantic HTML
+  const TextElement = 
+    (typography?.fontSize || 24) >= 48 ? 'h1' :
+    (typography?.fontSize || 24) >= 36 ? 'h2' :
+    (typography?.fontSize || 24) >= 24 ? 'h3' :
+    'p'
+  
   return (
-    <WebGLTextClient
-      config={textConfig}
-      style={containerStyle}
-    />
+    <div className="webgl-text-wrapper relative">
+      {/* SEO-friendly DOM text for accessibility and search engines */}
+      <TextElement 
+        className="sr-only"
+        style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: 0,
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0,0,0,0)',
+          whiteSpace: 'nowrap',
+          border: 0,
+        }}
+      >
+        {text}
+      </TextElement>
+      
+      {/* WebGL version */}
+      <WebGLTextWrapper
+        config={textConfig}
+        style={containerStyle}
+      />
+    </div>
   )
 }

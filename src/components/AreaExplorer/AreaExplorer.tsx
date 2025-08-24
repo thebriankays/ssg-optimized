@@ -1,352 +1,473 @@
 'use client'
 
 import { useRef, useState, useCallback, useEffect } from 'react'
-import { APIProvider, Map, AdvancedMarker, Marker } from '@vis.gl/react-google-maps'
-import { ViewportScrollScene } from '@14islands/r3f-scroll-rig'
-import { GoogleMaps3DTiles } from './GoogleMaps3DTiles'
-import { useAnimationFrame } from '@/hooks/useAnimationFrame'
-import { GlassCard } from '@/components/ui/glass/GlassCard'
-import { motion, AnimatePresence } from 'framer-motion'
-import type { Location, POI, Tour, AreaExplorerConfig } from './types'
+import { Loader } from '@googlemaps/js-api-loader'
+import * as TWEEN from '@tweenjs/tween.js'
+import './area-explorer.scss'
+
+export interface AreaExplorerConfig {
+  location: {
+    coordinates: { lat: number; lng: number }
+    name?: string
+    description?: string
+  }
+  camera: {
+    orbitType: 'fixed-orbit' | 'dynamic-orbit'
+    speed: number // revolutions per minute
+  }
+  poi: {
+    types: string[]
+    density: number
+    searchRadius: number
+  }
+}
 
 interface AreaExplorerProps {
   config: AreaExplorerConfig
-  pois?: POI[]
-  tours?: Tour[]
   apiKey: string
+  mapId: string
   className?: string
-  onPOIClick?: (poi: POI) => void
-  onLocationChange?: (location: Location) => void
 }
 
-export function AreaExplorer({
-  config,
-  pois = [],
-  tours = [],
-  apiKey,
-  className = '',
-  onPOIClick,
-  onLocationChange,
-}: AreaExplorerProps) {
+interface CameraState {
+  center: google.maps.LatLngLiteral
+  zoom: number
+  tilt: number
+  heading: number
+}
+
+export function AreaExplorer({ config, apiKey, mapId, className = '' }: AreaExplorerProps) {
   const mapRef = useRef<google.maps.Map | null>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const [selectedPOI, setSelectedPOI] = useState<POI | null>(null)
-  const [selectedTour, setSelectedTour] = useState<Tour | null>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentWaypointIndex, setCurrentWaypointIndex] = useState(0)
-  const [tourProgress, setTourProgress] = useState(0)
-  const [showControls, setShowControls] = useState(true)
-  const [show3D, setShow3D] = useState(config.enable3D !== false)
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([])
+  const animationRef = useRef<number | null>(null)
+  const orbitTweenRef = useRef<TWEEN.Tween<any> | null>(null)
   
-  // Handle POI selection
-  const handlePOIClick = useCallback((poi: POI) => {
-    setSelectedPOI(poi)
-    onPOIClick?.(poi)
+  const [activeTypes, setActiveTypes] = useState<string[]>(config.poi.types)
+  const [places, setPlaces] = useState<google.maps.places.PlaceResult[]>([])
+  const [selectedPlace, setSelectedPlace] = useState<google.maps.places.PlaceResult | null>(null)
+  const [isOrbiting, setIsOrbiting] = useState(true)
+  const [currentLocation, setCurrentLocation] = useState(config.location.coordinates)
+
+  // Animation loop for TWEEN
+  useEffect(() => {
+    const animate = (time: number) => {
+      TWEEN.update(time)
+      animationRef.current = requestAnimationFrame(animate)
+    }
+    animationRef.current = requestAnimationFrame(animate)
     
-    // Pan to POI location
-    if (mapRef.current) {
-      mapRef.current.panTo({ 
-        lat: poi.location.lat, 
-        lng: poi.location.lng 
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [])
+
+  // Initialize Google Maps
+  useEffect(() => {
+    const initializeMap = async () => {
+      const loader = new Loader({
+        apiKey,
+        version: 'weekly',
+        libraries: ['places', 'marker'],
+        mapIds: [mapId],
       })
-      mapRef.current.setZoom(18)
-    }
-  }, [onPOIClick])
-  
-  // Start tour
-  const startTour = useCallback((tour: Tour) => {
-    setSelectedTour(tour)
-    setIsPlaying(true)
-    setCurrentWaypointIndex(0)
-    setTourProgress(0)
-  }, [])
-  
-  // Stop tour
-  const stopTour = useCallback(() => {
-    setIsPlaying(false)
-    setSelectedTour(null)
-    setCurrentWaypointIndex(0)
-    setTourProgress(0)
-  }, [])
-  
-  // Tour animation
-  useAnimationFrame((deltaTime) => {
-    if (!isPlaying || !selectedTour || !mapRef.current) return
-    
-    const currentWaypoint = selectedTour.waypoints[currentWaypointIndex]
-    const nextWaypoint = selectedTour.waypoints[currentWaypointIndex + 1]
-    
-    if (!currentWaypoint) {
-      stopTour()
-      return
-    }
-    
-    // Update progress
-    const waypointDuration = currentWaypoint.duration || 5
-    const transitionDuration = currentWaypoint.transitionDuration || 3
-    const totalDuration = waypointDuration + (nextWaypoint ? transitionDuration : 0)
-    
-    setTourProgress((prev) => {
-      const newProgress = prev + (deltaTime / 1000) / totalDuration
-      
-      if (newProgress >= 1) {
-        // Move to next waypoint
-        if (nextWaypoint) {
-          setCurrentWaypointIndex(currentWaypointIndex + 1)
-          
-          // Pan to next waypoint
-          mapRef.current?.panTo({
-            lat: nextWaypoint.location.lat,
-            lng: nextWaypoint.location.lng
+
+      try {
+        const google = await loader.load()
+        
+        if (!mapContainerRef.current) return
+
+        // Create map with 3D tiles
+        const map = new google.maps.Map(mapContainerRef.current, {
+          center: config.location.coordinates,
+          zoom: 17,
+          tilt: 65,
+          heading: 0,
+          mapId: mapId, // Required for 3D tiles
+          disableDefaultUI: true,
+          gestureHandling: 'greedy',
+          // Enable 3D controls
+          tiltInteractionEnabled: true,
+          headingInteractionEnabled: true,
+        })
+        
+        mapRef.current = map
+        placesServiceRef.current = new google.maps.places.PlacesService(map)
+
+        // Initialize autocomplete
+        if (searchInputRef.current) {
+          const autocomplete = new google.maps.places.Autocomplete(searchInputRef.current, {
+            fields: ['geometry', 'name', 'formatted_address'],
           })
           
-          return 0
-        } else {
-          // Tour finished
-          stopTour()
-          return 1
+          autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace()
+            if (place.geometry?.location) {
+              const lat = place.geometry.location.lat()
+              const lng = place.geometry.location.lng()
+              const newLocation = { lat, lng }
+              setCurrentLocation(newLocation)
+              flyToLocation(newLocation, 2000)
+              searchNearbyPlaces(newLocation)
+            }
+          })
         }
+
+        // Start orbit if enabled
+        if (isOrbiting) {
+          startOrbit()
+        }
+
+        // Initial place search
+        searchNearbyPlaces(config.location.coordinates)
+      } catch (error) {
+        console.error('Error loading Google Maps:', error)
       }
-      
-      return newProgress
+    }
+
+    initializeMap()
+
+    return () => {
+      stopOrbit()
+      clearMarkers()
+    }
+  }, [apiKey, mapId, config.location.coordinates])
+
+  // Fly to location with smooth animation
+  const flyToLocation = useCallback((location: { lat: number; lng: number }, duration: number = 2000) => {
+    if (!mapRef.current) return
+
+    const from: CameraState = {
+      center: mapRef.current.getCenter()?.toJSON() || config.location.coordinates,
+      zoom: mapRef.current.getZoom() || 17,
+      tilt: mapRef.current.getTilt() || 65,
+      heading: mapRef.current.getHeading() || 0,
+    }
+
+    const to: CameraState = {
+      center: location,
+      zoom: 18,
+      tilt: 65,
+      heading: from.heading,
+    }
+
+    new TWEEN.Tween(from)
+      .to(to, duration)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .onUpdate((state) => {
+        mapRef.current?.moveCamera(state)
+      })
+      .start()
+  }, [config.location.coordinates])
+
+  // Start orbit animation
+  const startOrbit = useCallback(() => {
+    if (!mapRef.current || orbitTweenRef.current) return
+
+    const orbitSpeed = config.camera.speed * 6 // degrees per second
+    let currentHeading = mapRef.current.getHeading() || 0
+
+    const updateOrbit = () => {
+      if (!mapRef.current || !isOrbiting) return
+
+      currentHeading = (currentHeading + orbitSpeed / 60) % 360 // 60fps
+
+      let tilt = 65
+      let zoom = 17
+
+      if (config.camera.orbitType === 'dynamic-orbit') {
+        // Add sine wave variation for dynamic orbit
+        const time = Date.now() / 1000
+        const sinePhase = (time * config.camera.speed * 0.1) % (2 * Math.PI)
+        tilt = 65 + 10 * Math.sin(sinePhase) // Vary tilt ±10 degrees
+        zoom = 17 + 0.5 * Math.sin(sinePhase) // Vary zoom ±0.5
+      }
+
+      mapRef.current.moveCamera({
+        heading: currentHeading,
+        tilt,
+        zoom,
+      })
+
+      requestAnimationFrame(updateOrbit)
+    }
+
+    updateOrbit()
+  }, [config.camera.orbitType, config.camera.speed, isOrbiting])
+
+  // Stop orbit
+  const stopOrbit = useCallback(() => {
+    if (orbitTweenRef.current) {
+      orbitTweenRef.current.stop()
+      orbitTweenRef.current = null
+    }
+  }, [])
+
+  // Clear markers
+  const clearMarkers = useCallback(() => {
+    markersRef.current.forEach(marker => {
+      marker.map = null
     })
-  }, isPlaying)
-  
-  return (
-    <APIProvider apiKey={apiKey}>
-      <div className={`area-explorer ${className}`} ref={mapContainerRef}>
-        {/* 2D Map */}
-        <div className="area-explorer__map">
-          <Map
-            mapId={config.mapId}
-            defaultCenter={{
-              lat: config.defaultLocation.lat,
-              lng: config.defaultLocation.lng
-            }}
-            defaultZoom={15}
-            defaultTilt={config.defaultLocation.tilt || 60}
-            defaultHeading={config.defaultLocation.heading || 0}
-            disableDefaultUI={true}
-            gestureHandling={config.gestureHandling || 'greedy'}
-            onCameraChanged={(event) => {
-              mapRef.current = event.map
-              if (event.detail) {
-                const { center, zoom, tilt, heading } = event.detail
-                if (center) {
-                  onLocationChange?.({
-                    lat: center.lat,
-                    lng: center.lng,
-                    altitude: 0,
-                    heading: heading || 0,
-                    tilt: tilt || 0,
-                    range: zoom ? 1000 * Math.pow(2, 20 - zoom) : 1000,
-                  })
-                }
-              }
-            }}
-          >
-            {/* POI Markers */}
-            {pois.map((poi) => (
-              <AdvancedMarker
-                key={poi.id}
-                position={{ lat: poi.location.lat, lng: poi.location.lng }}
-                onClick={() => handlePOIClick(poi)}
-                title={poi.name}
-              >
-                <div className="area-explorer__marker">
-                  {poi.icon && (
-                    <img 
-                      src={poi.icon} 
-                      alt={poi.name}
-                      style={{ width: 32, height: 32 }}
-                    />
-                  )}
-                  <span>{poi.name}</span>
-                </div>
-              </AdvancedMarker>
-            ))}
-            
-            {/* Tour waypoint markers */}
-            {selectedTour && selectedTour.waypoints.map((waypoint, index) => (
-              <Marker
-                key={`waypoint-${index}`}
-                position={{ lat: waypoint.location.lat, lng: waypoint.location.lng }}
-                title={waypoint.name || `Waypoint ${index + 1}`}
-                opacity={index === currentWaypointIndex ? 1 : 0.5}
-              />
-            ))}
-          </Map>
-        </div>
+    markersRef.current = []
+  }, [])
+
+  // Search for nearby places
+  const searchNearbyPlaces = useCallback((location: { lat: number; lng: number }) => {
+    if (!placesServiceRef.current || !mapRef.current) return
+
+    clearMarkers()
+    const allPlaces: google.maps.places.PlaceResult[] = []
+    let completedRequests = 0
+
+    activeTypes.forEach((type) => {
+      const request: google.maps.places.PlaceSearchRequest = {
+        location: new google.maps.LatLng(location.lat, location.lng),
+        radius: config.poi.searchRadius,
+        type: type as any,
+      }
+
+      placesServiceRef.current!.nearbySearch(request, (results, status) => {
+        completedRequests++
         
-        {/* 3D Overlay */}
-        {show3D && mapContainerRef.current && (
-          <ViewportScrollScene
-            track={mapContainerRef as React.MutableRefObject<HTMLElement>}
-            hideOffscreen={false}
-          >
-            {() => (
-              <GoogleMaps3DTiles
-                apiKey={apiKey}
-                center={{
-                  lat: config.defaultLocation.lat,
-                  lng: config.defaultLocation.lng,
-                }}
-                zoom={15}
-                tilt={config.defaultLocation.tilt || 60}
-                heading={config.defaultLocation.heading || 0}
-              />
-            )}
-          </ViewportScrollScene>
-        )}
-        
-        {/* Controls */}
-        <AnimatePresence>
-          {showControls && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="area-explorer__controls"
-            >
-              <GlassCard
-                variant="frosted"
-                className="area-explorer__panel"
-              >
-                {/* 3D Toggle */}
-                <div className="area-explorer__3d-toggle">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={show3D}
-                      onChange={(e) => setShow3D(e.target.checked)}
-                    />
-                    Show 3D View
-                  </label>
-                </div>
-                
-                {/* Tour Selection */}
-                {tours.length > 0 && (
-                  <div className="area-explorer__tours">
-                    <h3>Guided Tours</h3>
-                    <div className="area-explorer__tour-list">
-                      {tours.map((tour) => (
-                        <button
-                          key={tour.id}
-                          onClick={() => startTour(tour)}
-                          disabled={isPlaying}
-                          className={`area-explorer__tour-item ${
-                            selectedTour?.id === tour.id ? 'active' : ''
-                          }`}
-                        >
-                          <span className="name">{tour.name}</span>
-                          {tour.duration && (
-                            <span className="duration">
-                              {Math.round(tour.duration / 60)}min
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* POI List */}
-                {pois.length > 0 && (
-                  <div className="area-explorer__pois">
-                    <h3>Points of Interest</h3>
-                    <div className="area-explorer__poi-list">
-                      {pois.map((poi) => (
-                        <button
-                          key={poi.id}
-                          onClick={() => handlePOIClick(poi)}
-                          className={`area-explorer__poi-item ${
-                            selectedPOI?.id === poi.id ? 'active' : ''
-                          }`}
-                        >
-                          <span className="name">{poi.name}</span>
-                          {poi.category && (
-                            <span className="category">{poi.category}</span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Tour Controls */}
-                {isPlaying && selectedTour && (
-                  <div className="area-explorer__tour-controls">
-                    <div className="area-explorer__tour-info">
-                      <h4>{selectedTour.name}</h4>
-                      <p>
-                        {selectedTour.waypoints[currentWaypointIndex]?.name || 
-                         `Waypoint ${currentWaypointIndex + 1}`}
-                      </p>
-                    </div>
-                    <div className="area-explorer__tour-progress">
-                      <div 
-                        className="progress-bar"
-                        style={{ width: `${tourProgress * 100}%` }}
-                      />
-                    </div>
-                    <button
-                      onClick={stopTour}
-                      className="area-explorer__stop-button"
-                    >
-                      Stop Tour
-                    </button>
-                  </div>
-                )}
-              </GlassCard>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        
-        {/* Toggle Controls Button */}
-        <button
-          onClick={() => setShowControls(!showControls)}
-          className="area-explorer__toggle"
-        >
-          {showControls ? 'Hide' : 'Show'} Controls
-        </button>
-        
-        {/* POI Detail Panel */}
-        <AnimatePresence>
-          {selectedPOI && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="area-explorer__detail"
-            >
-              <GlassCard variant="frosted">
-                <button
-                  onClick={() => setSelectedPOI(null)}
-                  className="area-explorer__close"
-                >
-                  ×
-                </button>
-                
-                {selectedPOI.image && (
-                  <img 
-                    src={selectedPOI.image} 
-                    alt={selectedPOI.name}
-                    className="area-explorer__detail-image"
-                  />
-                )}
-                
-                <h3>{selectedPOI.name}</h3>
-                {selectedPOI.category && (
-                  <span className="category">{selectedPOI.category}</span>
-                )}
-                {selectedPOI.description && (
-                  <p>{selectedPOI.description}</p>
-                )}
-              </GlassCard>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+          const limitedResults = results.slice(0, Math.ceil(config.poi.density / activeTypes.length))
+          allPlaces.push(...limitedResults)
+        }
+
+        if (completedRequests === activeTypes.length) {
+          // All requests completed
+          const finalPlaces = allPlaces.slice(0, config.poi.density)
+          setPlaces(finalPlaces)
+          createMarkers(finalPlaces)
+        }
+      })
+    })
+  }, [activeTypes, config.poi.density, config.poi.searchRadius])
+
+  // Create markers for places
+  const createMarkers = useCallback(async (places: google.maps.places.PlaceResult[]) => {
+    if (!mapRef.current) return
+
+    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary
+
+    places.forEach((place) => {
+      if (!place.geometry?.location) return
+
+      const marker = new AdvancedMarkerElement({
+        map: mapRef.current,
+        position: place.geometry.location,
+        title: place.name,
+        content: createMarkerContent(place),
+      })
+
+      marker.addListener('click', () => {
+        handlePlaceClick(place)
+      })
+
+      markersRef.current.push(marker)
+    })
+  }, [])
+
+  // Create marker content
+  const createMarkerContent = (place: google.maps.places.PlaceResult) => {
+    const content = document.createElement('div')
+    content.className = 'marker-content'
+    content.innerHTML = `
+      <div class="marker-pin">
+        <div class="marker-label">${place.name}</div>
       </div>
-    </APIProvider>
+    `
+    return content
+  }
+
+  // Toggle POI type
+  const toggleType = useCallback((type: string) => {
+    setActiveTypes((prev) => {
+      const newTypes = prev.includes(type) 
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
+      
+      // Re-search with new types
+      setTimeout(() => searchNearbyPlaces(currentLocation), 0)
+      
+      return newTypes
+    })
+  }, [currentLocation, searchNearbyPlaces])
+
+  // Handle place selection
+  const handlePlaceClick = useCallback((place: google.maps.places.PlaceResult) => {
+    setSelectedPlace(place)
+    if (place.geometry?.location) {
+      const lat = place.geometry.location.lat()
+      const lng = place.geometry.location.lng()
+      flyToLocation({ lat, lng }, 1500)
+    }
+  }, [flyToLocation])
+
+  // Handle orbit toggle
+  useEffect(() => {
+    if (isOrbiting) {
+      startOrbit()
+    } else {
+      stopOrbit()
+    }
+  }, [isOrbiting, startOrbit, stopOrbit])
+
+  return (
+    <div className={`area-explorer ${className}`}>
+      {/* 3D Map */}
+      <div ref={mapContainerRef} className="area-explorer__map" />
+
+      {/* Control Panel */}
+      <div className="area-explorer__sidebar">
+        <div className="control-panel">
+          <h2>{config.location.name || 'Area Explorer'}</h2>
+          {config.location.description && (
+            <p className="location-description">{config.location.description}</p>
+          )}
+
+          {/* Location Search */}
+          <div className="section">
+            <h3>Location Search</h3>
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search for a location..."
+              className="search-input"
+            />
+          </div>
+
+          {/* POI Types */}
+          <div className="section">
+            <h3>Points of Interest</h3>
+            <div className="poi-types">
+              {config.poi.types.map((type) => (
+                <button
+                  key={type}
+                  className={`poi-type-btn ${activeTypes.includes(type) ? 'active' : ''}`}
+                  onClick={() => toggleType(type)}
+                >
+                  {type.replace(/_/g, ' ')}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Camera Controls */}
+          <div className="section">
+            <h3>Camera Controls</h3>
+            <label className="control-toggle">
+              <input
+                type="checkbox"
+                checked={isOrbiting}
+                onChange={(e) => setIsOrbiting(e.target.checked)}
+              />
+              <span>Auto Orbit</span>
+            </label>
+            <div className="camera-info">
+              <div>Orbit Type: <strong>{config.camera.orbitType.replace('-', ' ')}</strong></div>
+              <div>Speed: <strong>{config.camera.speed} RPM</strong></div>
+            </div>
+          </div>
+
+          {/* Camera Actions */}
+          <div className="section">
+            <div className="camera-actions">
+              <button
+                onClick={() => {
+                  if (mapRef.current) {
+                    const heading = mapRef.current.getHeading() || 0
+                    mapRef.current.moveCamera({ heading: heading - 30 })
+                  }
+                }}
+                className="action-btn"
+              >
+                ⟲ Rotate Left
+              </button>
+              <button
+                onClick={() => {
+                  if (mapRef.current) {
+                    const heading = mapRef.current.getHeading() || 0
+                    mapRef.current.moveCamera({ heading: heading + 30 })
+                  }
+                }}
+                className="action-btn"
+              >
+                Rotate Right ⟳
+              </button>
+              <button
+                onClick={() => {
+                  if (mapRef.current) {
+                    const tilt = mapRef.current.getTilt() || 65
+                    mapRef.current.moveCamera({ tilt: Math.min(80, tilt + 10) })
+                  }
+                }}
+                className="action-btn"
+              >
+                Tilt Up
+              </button>
+              <button
+                onClick={() => {
+                  if (mapRef.current) {
+                    const tilt = mapRef.current.getTilt() || 65
+                    mapRef.current.moveCamera({ tilt: Math.max(0, tilt - 10) })
+                  }
+                }}
+                className="action-btn"
+              >
+                Tilt Down
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Places List */}
+      {places.length > 0 && (
+        <div className="area-explorer__places">
+          <h3>Nearby Places ({places.length})</h3>
+          <div className="places-list">
+            {places.map((place, index) => (
+              <div
+                key={`${place.place_id}-${index}`}
+                className={`place-item ${selectedPlace?.place_id === place.place_id ? 'active' : ''}`}
+                onClick={() => handlePlaceClick(place)}
+              >
+                <div className="place-name">{place.name}</div>
+                {place.rating && (
+                  <div className="place-rating">★ {place.rating}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Selected Place Details */}
+      {selectedPlace && (
+        <div className="area-explorer__detail">
+          <button
+            className="close-btn"
+            onClick={() => setSelectedPlace(null)}
+          >
+            ×
+          </button>
+          <h2>{selectedPlace.name}</h2>
+          <p className="place-address">{selectedPlace.vicinity}</p>
+          {selectedPlace.rating && (
+            <div className="rating">
+              ★ {selectedPlace.rating} 
+              {selectedPlace.user_ratings_total && (
+                <span> ({selectedPlace.user_ratings_total} reviews)</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }

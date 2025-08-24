@@ -2,21 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import mouse follower styles */
-@import '@/components/mouse-follower/mouse-follower.scss';
+/* Glass styles are now imported from @/components/ui/glass/glass-styles.scss */
 
-/* Import glass styles */
-@import '@/styles/glass/components.scss';
-
-/* Import block styles */
-@import '@/styles/blocks/background.scss';
-
-/* Import component styles */
-@import '@/components/TravelDataGlobe/travel-data-globe.scss';
-@import '@/components/AreaExplorer/area-explorer.scss';
-@import '@/components/Storytelling/storytelling.scss';
-@import '@/components/canvas/SpiralCarousel/spiral-carousel.scss';
-@import '@/components/canvas/KineticImages/kinetic-images.scss';
 
 @layer base {
   h1,
@@ -73,17 +60,32 @@
   * {
     @apply border-border;
   }
+  html {
+    /* Ensure html doesn't block the body gradient */
+    background: transparent;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    /* Body background is defined later with the animated gradient */
   }
 }
 
 /* WebGL Canvas Styles */
-.canvas-event-source {
+.app-content-wrapper {
   position: relative;
   width: 100%;
   min-height: 100vh;
   z-index: 1;
+  /* Ensure it doesn't block the canvas background */
+  background: transparent;
+  pointer-events: auto;
+}
+
+/* Page content visibility */
+#page-content {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 .webgl-view {
@@ -225,10 +227,36 @@ html.lenis {
 
 /* Default all content to dark mode */
 body {
-  @apply bg-background text-foreground;
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #0f0f23 100%);
+  @apply text-foreground;
+  /* Beautiful gradient fallback that matches our Whatamesh colors */
+  background: linear-gradient(
+    135deg,
+    #dca8d8 0%,    /* light purple */
+    #a3d3f9 25%,   /* light blue */
+    #fcd6d6 50%,   /* light pink */
+    #eae2ff 75%,   /* light lavender */
+    #dca8d8 100%   /* back to purple for smooth loop */
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   min-height: 100vh;
 }
+
+/* Animate the gradient for a subtle effect */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* When WebGL loads and is ready, the canvas will cover this background */
+/* The canvas has position: fixed and will overlay the body gradient */
 
 /* Header Glass */
 .header-glass {

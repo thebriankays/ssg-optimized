@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { cn } from '@/utilities/ui'
-import AnimatedFlag from '@/components/AnimatedFlag'
+import { AnimatedFlag } from '@/components/canvas/AnimatedFlag/AnimatedFlag'
 import { GlassContainer } from '@/components/ui/glass/GlassComponents'
 import type { Destination, Media } from '@/payload-types'
 // Import the simplified component and its font object from the correct path
@@ -27,7 +27,7 @@ const DestinationInfo: React.FC<DestinationInfoProps> = ({
   separatorLinesColor = 'rgba(255, 255, 255, 0.1)',
 }) => {
   const getCountryData = () => {
-    return destination.countryData || destination.locationData?.countryData
+    return (destination as any).countryData || (destination.locationData as any)?.countryData
   }
 
   const countryData = getCountryData()
@@ -204,7 +204,7 @@ export const DestinationDetailBlockClient: React.FC<DestinationDetailBlockProps>
           {/* Left side - Flag */}
           <div className="flex justify-center">
             <AnimatedFlag 
-              imageSrc={flagImageUrl} 
+              flagTexture={flagImageUrl} 
               {...flagSettings}
             />
           </div>

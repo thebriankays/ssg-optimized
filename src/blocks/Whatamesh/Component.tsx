@@ -1,34 +1,13 @@
 import React from 'react'
-import dynamic from 'next/dynamic'
 import type { WhatameshBlock as WhatameshBlockType } from '@/payload-types'
-
-// Dynamic import for client-side only rendering
-const Whatamesh = dynamic(
-  () => import('@/components/canvas/Background/Whatamesh').then(mod => ({ default: mod.Whatamesh })),
-  { 
-    ssr: false,
-    loading: () => (
-      <div style={{ 
-        width: '100%', 
-        height: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        background: '#000',
-        color: '#fff'
-      }}>
-        <div>Loading whatamesh...</div>
-      </div>
-    )
-  }
-)
+import { WhatameshWrapper } from './ComponentWrapper'
 
 export const WhatameshBlock: React.FC<WhatameshBlockType> = ({
   colors = [
-    { color: '#000000' },
-    { color: '#1a1a1a' },
-    { color: '#2a2a2a' },
-    { color: '#3a3a3a' },
+    { color: '#dca8d8' }, // light purple
+    { color: '#a3d3f9' }, // light blue
+    { color: '#fcd6d6' }, // light pink
+    { color: '#eae2ff' }, // light lavender
   ],
   amplitude = 320,
   speed = 1,
@@ -36,10 +15,10 @@ export const WhatameshBlock: React.FC<WhatameshBlockType> = ({
 }) => {
   // Transform the colors array from the block format to the component format
   const colorStrings = colors?.map(colorObj => colorObj.color) || [
-    '#000000',
-    '#1a1a1a', 
-    '#2a2a2a',
-    '#3a3a3a'
+    '#dca8d8', // light purple
+    '#a3d3f9', // light blue
+    '#fcd6d6', // light pink
+    '#eae2ff'  // light lavender
   ]
 
   return (
@@ -49,7 +28,7 @@ export const WhatameshBlock: React.FC<WhatameshBlockType> = ({
       height: '100vh',
       overflow: 'hidden'
     }}>
-      <Whatamesh
+      <WhatameshWrapper
         colors={colorStrings}
         amplitude={amplitude || undefined}
         speed={speed || undefined}

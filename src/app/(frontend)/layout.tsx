@@ -14,9 +14,9 @@ import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
 import { GlobalBackground } from '@/components/GlobalBackground'
 import { PageTransitionManager } from '@/components/transitions/PageTransitionManager'
-
-import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
+import './globals.css'
+import '@/components/ui/glass/glass-styles.scss'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
@@ -37,11 +37,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
           
           <GlobalBackground />
-          <PageTransitionManager />
           
           <Header />
           {children}
           <Footer />
+          <PageTransitionManager />
         </Providers>
       </body>
     </html>
@@ -56,3 +56,4 @@ export const metadata: Metadata = {
     creator: '@payloadcms',
   },
 }
+

@@ -3,8 +3,8 @@
    Complete port from old website with all sizes
    ===================================================== */
 
-// Import base Cuberto styles
-@import "mouse-follower/dist/mouse-follower.min.css";
+// Base Cuberto styles are already included in the main package
+// Commenting out the import as it's causing webpack issues and we have custom styles
 
 // Variables
 $cursor-base-size: 48px;

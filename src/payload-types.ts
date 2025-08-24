@@ -405,145 +405,131 @@ export interface Page {
       }
     | DolphinsBlock
     | {
-        title: string;
-        description?: string | null;
+        locationName?: string | null;
+        locationDescription?: string | null;
         /**
-         * Your Google Maps API key with Maps JavaScript API and Map3D enabled
+         * Latitude and longitude for the initial map center (default: NYC)
+         *
+         * @minItems 2
+         * @maxItems 2
          */
-        googleMapsApiKey: string;
-        mapSettings: {
-          /**
-           * Google Maps Map ID configured for 3D maps
-           */
-          mapId: string;
-          defaultLocation: {
-            lat: number;
-            lng: number;
-            altitude?: number | null;
-            heading?: number | null;
-            tilt?: number | null;
-            range?: number | null;
-          };
-          gestureHandling?: ('greedy' | 'cooperative' | 'none' | 'auto') | null;
-        };
-        pois?:
-          | {
-              name: string;
-              description?: string | null;
-              category?:
-                | ('landmark' | 'restaurant' | 'hotel' | 'museum' | 'park' | 'shopping' | 'entertainment' | 'other')
-                | null;
-              location: {
-                lat: number;
-                lng: number;
-                altitude?: number | null;
-              };
-              image?: (number | null) | Media;
-              /**
-               * URL to a 3D model file (GLTF/GLB) for the marker
-               */
-              icon?: string | null;
-              id?: string | null;
-            }[]
+        location?: [number, number] | null;
+        cameraOrbitType?: ('fixed-orbit' | 'dynamic-orbit') | null;
+        /**
+         * Revolutions per minute for auto-orbit
+         */
+        cameraSpeed?: number | null;
+        /**
+         * Types of places to display on the map
+         */
+        poiTypes?:
+          | (
+              | 'tourist_attraction'
+              | 'restaurant'
+              | 'cafe'
+              | 'bar'
+              | 'lodging'
+              | 'museum'
+              | 'park'
+              | 'shopping_mall'
+              | 'movie_theater'
+              | 'parking'
+              | 'bus_station'
+              | 'school'
+              | 'hospital'
+              | 'bank'
+              | 'atm'
+              | 'gas_station'
+              | 'pharmacy'
+              | 'gym'
+              | 'spa'
+            )[]
           | null;
-        tours?:
-          | {
-              name: string;
-              description?: string | null;
-              waypoints?:
-                | {
-                    name?: string | null;
-                    description?: string | null;
-                    location: {
-                      lat: number;
-                      lng: number;
-                      altitude?: number | null;
-                      heading?: number | null;
-                      tilt?: number | null;
-                      range?: number | null;
-                    };
-                    /**
-                     * How long to stay at this waypoint
-                     */
-                    duration?: number | null;
-                    /**
-                     * How long to transition to the next waypoint
-                     */
-                    transitionDuration?: number | null;
-                    id?: string | null;
-                  }[]
-                | null;
-              id?: string | null;
-            }[]
-          | null;
+        /**
+         * Maximum number of POIs to display
+         */
+        poiDensity?: number | null;
+        /**
+         * Radius in meters to search for POIs
+         */
+        poiSearchRadius?: number | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'area-explorer';
       }
     | {
-        sections: {
-          type: 'intro' | 'chapter' | 'quote' | 'parallax' | 'outro';
-          title?: string | null;
-          subtitle?: string | null;
-          content?: {
-            root: {
-              type: string;
-              children: {
-                type: string;
-                version: number;
-                [k: string]: unknown;
-              }[];
-              direction: ('ltr' | 'rtl') | null;
-              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-              indent: number;
-              version: number;
-            };
-            [k: string]: unknown;
-          } | null;
-          quote?: string | null;
-          simpleContent?: string | null;
-          media?: {
-            type?: ('none' | 'image' | 'video' | 'webgl') | null;
-            image?: (number | null) | Media;
-            video?: (number | null) | Media;
-            webglComponent?: ('spiral' | 'particles' | 'waves') | null;
-            /**
-             * JSON object with props to pass to the WebGL component
-             */
-            webglProps?:
-              | {
-                  [k: string]: unknown;
-                }
-              | unknown[]
-              | string
-              | number
-              | boolean
-              | null;
-          };
-          layout?: ('center' | 'left' | 'right' | 'fullscreen') | null;
-          animation?: {
-            type?: ('none' | 'fade' | 'slide' | 'scale' | 'parallax') | null;
-            duration?: number | null;
-            delay?: number | null;
-          };
-          background?: {
-            /**
-             * CSS color value (e.g., #000000, rgba(0,0,0,0.5))
-             */
-            color?: string | null;
-            /**
-             * CSS gradient (e.g., linear-gradient(to bottom, #000, #333))
-             */
-            gradient?: string | null;
-            image?: (number | null) | Media;
-            blur?: number | null;
-            /**
-             * Color overlay for background image
-             */
-            overlay?: string | null;
-          };
-          id?: string | null;
-        }[];
+        title: string;
+        /**
+         * e.g., "1967" or "Summer 2024"
+         */
+        date?: string | null;
+        description?: string | null;
+        createdBy?: string | null;
+        coverImage?: (number | null) | Media;
+        imageCredit?: string | null;
+        /**
+         * Add chapters to your story. Each chapter represents a location in your narrative.
+         */
+        chapters?:
+          | {
+              title: string;
+              /**
+               * The main text content for this chapter
+               */
+              content?: string | null;
+              /**
+               * e.g., "Aug 10-12 1967"
+               */
+              dateTime?: string | null;
+              /**
+               * The geographic location for this chapter
+               *
+               * @minItems 2
+               * @maxItems 2
+               */
+              location: [number, number];
+              /**
+               * e.g., "The Fillmore | 1805 Geary Blvd"
+               */
+              address?: string | null;
+              chapterImage?: (number | null) | Media;
+              imageCredit?: string | null;
+              /**
+               * Map zoom level (10=far, 22=close)
+               */
+              cameraZoom?: number | null;
+              /**
+               * Camera tilt angle (0=top-down, 80=oblique)
+               */
+              cameraTilt?: number | null;
+              /**
+               * Camera rotation (0=north, 90=east, 180=south, 270=west)
+               */
+              cameraHeading?: number | null;
+              /**
+               * Display a pin at the exact location
+               */
+              showLocationMarker?: boolean | null;
+              /**
+               * Display a circular area highlight
+               */
+              showFocusRadius?: boolean | null;
+              /**
+               * Radius of the focus area
+               */
+              focusRadius?: number | null;
+              id?: string | null;
+            }[]
+          | null;
+        theme?: ('light' | 'dark') | null;
+        /**
+         * Automatically advance through chapters
+         */
+        autoPlay?: boolean | null;
+        /**
+         * Time to stay on each chapter
+         */
+        autoPlayDelay?: number | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'storytelling';
@@ -588,6 +574,7 @@ export interface Page {
         blockName?: string | null;
         blockType: 'background';
       }
+    | DestinationDetailBlock
   )[];
   meta?: {
     title?: string | null;
@@ -1209,137 +1196,92 @@ export interface DolphinsBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "travel-advisories".
+ * via the `definition` "DestinationDetailBlock".
  */
-export interface TravelAdvisory {
-  id: number;
-  title: string;
-  pubDate?: string | null;
-  /**
-   * Link to official advisory source
-   */
-  link?: string | null;
-  threatLevel: '1' | '2' | '3' | '4';
-  /**
-   * Country name extracted from the advisory
-   */
-  countryTag?: string | null;
-  /**
-   * Link to country in our system
-   */
-  country?: (number | null) | Country;
-  category?: ('advisory' | 'alert' | 'warning') | null;
-  /**
-   * Summary of the advisory
-   */
-  description?: string | null;
-  /**
-   * Regional threat levels within the country
-   */
-  regions?:
-    | {
-        region?: string | null;
-        level?: ('1' | '2' | '3' | '4') | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Whether this advisory is currently active
-   */
-  isActive?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "countries".
- */
-export interface Country {
-  id: number;
-  name: string;
-  /**
-   * ISO-3166-1 alpha-2 (US, FR, etc.)
-   */
-  code: string;
-  /**
-   * ISO-3166-1 alpha-3 (USA, FRA, etc.)
-   */
-  code3?: string | null;
-  /**
-   * ISO-3166-1 numeric (840, etc.)
-   */
-  isoCode?: string | null;
-  continent: 'africa' | 'antarctica' | 'asia' | 'europe' | 'north-america' | 'oceania-australia' | 'south-america';
-  /**
-   * Geographic region within continent
-   */
-  region?: string | null;
-  subregion?: string | null;
-  capital?: string | null;
-  /**
-   * Filename in /public/flags (auto-set from code)
-   */
-  flag?: string | null;
-  /**
-   * Primary country-code domain (.fr, .us, etc.)
-   */
-  webDomain?: string | null;
-  /**
-   * International dialing code (+1, +33, etc.)
-   */
-  dialingCode?: string | null;
-  /**
-   * What to call people from this country (American, French, etc.)
-   */
-  demonym?: string | null;
-  /**
-   * Official and commonly spoken languages
-   */
-  languages?: (number | Language)[] | null;
-  /**
-   * Religions practiced in the country with percentages
-   */
-  religions?:
-    | {
-        religion: number | Religion;
-        /**
-         * Percentage of population
-         */
-        percentage?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  timezones?: (number | Timezone)[] | null;
-  currencies?: (number | Currency)[] | null;
-  /**
-   * Countries that share a land border
-   */
-  neighboringCountries?: (number | Country)[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "languages".
- */
-export interface Language {
-  id: number;
-  name: string;
-  /**
-   * ISO 639-1 language code (e.g., en, fr, es)
-   */
-  code: string;
-  nativeName?: string | null;
-  /**
-   * All destinations where this language is spoken
-   */
-  destinations?: {
-    docs?: (number | Destination)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
+export interface DestinationDetailBlock {
+  background?: {
+    /**
+     * Select the type of background for this block
+     */
+    backgroundType?: ('color' | 'transparent' | 'image') | null;
+    /**
+     * Select a background color for the entire component
+     */
+    backgroundColor?: string | null;
+    /**
+     * Select a background image for the entire component
+     */
+    backgroundImage?: (number | null) | Media;
   };
-  updatedAt: string;
-  createdAt: string;
+  /**
+   * Select the destination to display details for
+   */
+  destination: number | Destination;
+  flagSettings?: {
+    /**
+     * Override the destination flag image (optional)
+     */
+    flagImage?: (number | null) | Media;
+    /**
+     * Speed of the flag animation (0-20)
+     */
+    animationSpeed?: number | null;
+    /**
+     * Show wireframe mode
+     */
+    wireframe?: boolean | null;
+    /**
+     * Number of segments for flag geometry (8-256)
+     */
+    segments?: number | null;
+    /**
+     * Wave frequency X (0-12)
+     */
+    frequencyX?: number | null;
+    /**
+     * Wave frequency Y (0-12)
+     */
+    frequencyY?: number | null;
+    /**
+     * Wave strength (0.05-0.3)
+     */
+    strength?: number | null;
+    /**
+     * Show interactive controls overlay
+     */
+    showControls?: boolean | null;
+  };
+  /**
+   * Optional custom title (defaults to "Quick Look")
+   */
+  customTitle?: string | null;
+  /**
+   * Text color for field values and content
+   */
+  textColor?: string | null;
+  /**
+   * Custom text for the section title (defaults to "Quick Look")
+   */
+  quickLookText?: string | null;
+  /**
+   * Color for the "Quick Look" section title
+   */
+  quickLookColor?: string | null;
+  /**
+   * Color for the destination name (e.g., "Montego Bay, Jamaica")
+   */
+  destinationTitleColor?: string | null;
+  /**
+   * Color for field labels (Country, Capital, etc.)
+   */
+  fieldLabelsColor?: string | null;
+  /**
+   * Color for the lines between fields
+   */
+  separatorLinesColor?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'destinationDetailBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1534,54 +1476,86 @@ export interface Destination {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "currencies".
+ * via the `definition` "countries".
  */
-export interface Currency {
+export interface Country {
   id: number;
   name: string;
   /**
-   * ISO 4217 currency code (e.g., USD, EUR, GBP)
+   * ISO-3166-1 alpha-2 (US, FR, etc.)
    */
   code: string;
-  symbol: string;
   /**
-   * Exchange rate to USD (updated via API)
+   * ISO-3166-1 alpha-3 (USA, FRA, etc.)
    */
-  exchangeRate?: number | null;
+  code3?: string | null;
   /**
-   * Last time the exchange rate was updated
+   * ISO-3166-1 numeric (840, etc.)
    */
-  exchangeRateUpdatedAt?: string | null;
+  isoCode?: string | null;
+  continent: 'africa' | 'antarctica' | 'asia' | 'europe' | 'north-america' | 'oceania-australia' | 'south-america';
   /**
-   * All destinations using this currency
+   * Geographic region within continent
    */
-  destinations?: {
-    docs?: (number | Destination)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
+  region?: string | null;
+  subregion?: string | null;
+  capital?: string | null;
+  /**
+   * Filename in /public/flags (auto-set from code)
+   */
+  flag?: string | null;
+  /**
+   * Primary country-code domain (.fr, .us, etc.)
+   */
+  webDomain?: string | null;
+  /**
+   * International dialing code (+1, +33, etc.)
+   */
+  dialingCode?: string | null;
+  /**
+   * What to call people from this country (American, French, etc.)
+   */
+  demonym?: string | null;
+  /**
+   * Official and commonly spoken languages
+   */
+  languages?: (number | Language)[] | null;
+  /**
+   * Religions practiced in the country with percentages
+   */
+  religions?:
+    | {
+        religion: number | Religion;
+        /**
+         * Percentage of population
+         */
+        percentage?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  timezones?: (number | Timezone)[] | null;
+  currencies?: (number | Currency)[] | null;
+  /**
+   * Countries that share a land border
+   */
+  neighboringCountries?: (number | Country)[] | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "regions".
+ * via the `definition` "languages".
  */
-export interface Region {
+export interface Language {
   id: number;
   name: string;
   /**
-   * Short region / state code (optional)
+   * ISO 639-1 language code (e.g., en, fr, es)
    */
-  code?: string | null;
-  country: number | Country;
+  code: string;
+  nativeName?: string | null;
   /**
-   * Administrative level
-   */
-  type: 'state' | 'province' | 'region' | 'territory' | 'district';
-  capital?: string | null;
-  /**
-   * All destinations in this region
+   * All destinations where this language is spoken
    */
   destinations?: {
     docs?: (number | Destination)[];
@@ -1644,6 +1618,108 @@ export interface Timezone {
    * Whether this timezone observes daylight saving time
    */
   isDST?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "currencies".
+ */
+export interface Currency {
+  id: number;
+  name: string;
+  /**
+   * ISO 4217 currency code (e.g., USD, EUR, GBP)
+   */
+  code: string;
+  symbol: string;
+  /**
+   * Exchange rate to USD (updated via API)
+   */
+  exchangeRate?: number | null;
+  /**
+   * Last time the exchange rate was updated
+   */
+  exchangeRateUpdatedAt?: string | null;
+  /**
+   * All destinations using this currency
+   */
+  destinations?: {
+    docs?: (number | Destination)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions".
+ */
+export interface Region {
+  id: number;
+  name: string;
+  /**
+   * Short region / state code (optional)
+   */
+  code?: string | null;
+  country: number | Country;
+  /**
+   * Administrative level
+   */
+  type: 'state' | 'province' | 'region' | 'territory' | 'district';
+  capital?: string | null;
+  /**
+   * All destinations in this region
+   */
+  destinations?: {
+    docs?: (number | Destination)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "travel-advisories".
+ */
+export interface TravelAdvisory {
+  id: number;
+  title: string;
+  pubDate?: string | null;
+  /**
+   * Link to official advisory source
+   */
+  link?: string | null;
+  threatLevel: '1' | '2' | '3' | '4';
+  /**
+   * Country name extracted from the advisory
+   */
+  countryTag?: string | null;
+  /**
+   * Link to country in our system
+   */
+  country?: (number | null) | Country;
+  category?: ('advisory' | 'alert' | 'warning') | null;
+  /**
+   * Summary of the advisory
+   */
+  description?: string | null;
+  /**
+   * Regional threat levels within the country
+   */
+  regions?:
+    | {
+        region?: string | null;
+        level?: ('1' | '2' | '3' | '4') | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Whether this advisory is currently active
+   */
+  isActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -4081,111 +4157,47 @@ export interface PagesSelect<T extends boolean = true> {
         'area-explorer'?:
           | T
           | {
-              title?: T;
-              description?: T;
-              googleMapsApiKey?: T;
-              mapSettings?:
-                | T
-                | {
-                    mapId?: T;
-                    defaultLocation?:
-                      | T
-                      | {
-                          lat?: T;
-                          lng?: T;
-                          altitude?: T;
-                          heading?: T;
-                          tilt?: T;
-                          range?: T;
-                        };
-                    gestureHandling?: T;
-                  };
-              pois?:
-                | T
-                | {
-                    name?: T;
-                    description?: T;
-                    category?: T;
-                    location?:
-                      | T
-                      | {
-                          lat?: T;
-                          lng?: T;
-                          altitude?: T;
-                        };
-                    image?: T;
-                    icon?: T;
-                    id?: T;
-                  };
-              tours?:
-                | T
-                | {
-                    name?: T;
-                    description?: T;
-                    waypoints?:
-                      | T
-                      | {
-                          name?: T;
-                          description?: T;
-                          location?:
-                            | T
-                            | {
-                                lat?: T;
-                                lng?: T;
-                                altitude?: T;
-                                heading?: T;
-                                tilt?: T;
-                                range?: T;
-                              };
-                          duration?: T;
-                          transitionDuration?: T;
-                          id?: T;
-                        };
-                    id?: T;
-                  };
+              locationName?: T;
+              locationDescription?: T;
+              location?: T;
+              cameraOrbitType?: T;
+              cameraSpeed?: T;
+              poiTypes?: T;
+              poiDensity?: T;
+              poiSearchRadius?: T;
               id?: T;
               blockName?: T;
             };
         storytelling?:
           | T
           | {
-              sections?:
+              title?: T;
+              date?: T;
+              description?: T;
+              createdBy?: T;
+              coverImage?: T;
+              imageCredit?: T;
+              chapters?:
                 | T
                 | {
-                    type?: T;
                     title?: T;
-                    subtitle?: T;
                     content?: T;
-                    quote?: T;
-                    simpleContent?: T;
-                    media?:
-                      | T
-                      | {
-                          type?: T;
-                          image?: T;
-                          video?: T;
-                          webglComponent?: T;
-                          webglProps?: T;
-                        };
-                    layout?: T;
-                    animation?:
-                      | T
-                      | {
-                          type?: T;
-                          duration?: T;
-                          delay?: T;
-                        };
-                    background?:
-                      | T
-                      | {
-                          color?: T;
-                          gradient?: T;
-                          image?: T;
-                          blur?: T;
-                          overlay?: T;
-                        };
+                    dateTime?: T;
+                    location?: T;
+                    address?: T;
+                    chapterImage?: T;
+                    imageCredit?: T;
+                    cameraZoom?: T;
+                    cameraTilt?: T;
+                    cameraHeading?: T;
+                    showLocationMarker?: T;
+                    showFocusRadius?: T;
+                    focusRadius?: T;
                     id?: T;
                   };
+              theme?: T;
+              autoPlay?: T;
+              autoPlayDelay?: T;
               id?: T;
               blockName?: T;
             };
@@ -4208,6 +4220,7 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        destinationDetailBlock?: T | DestinationDetailBlockSelect<T>;
       };
   meta?:
     | T
@@ -4376,6 +4389,41 @@ export interface DolphinsBlockSelect<T extends boolean = true> {
   animationSpeed?: T;
   waterColor?: T;
   skyColor?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DestinationDetailBlock_select".
+ */
+export interface DestinationDetailBlockSelect<T extends boolean = true> {
+  background?:
+    | T
+    | {
+        backgroundType?: T;
+        backgroundColor?: T;
+        backgroundImage?: T;
+      };
+  destination?: T;
+  flagSettings?:
+    | T
+    | {
+        flagImage?: T;
+        animationSpeed?: T;
+        wireframe?: T;
+        segments?: T;
+        frequencyX?: T;
+        frequencyY?: T;
+        strength?: T;
+        showControls?: T;
+      };
+  customTitle?: T;
+  textColor?: T;
+  quickLookText?: T;
+  quickLookColor?: T;
+  destinationTitleColor?: T;
+  fieldLabelsColor?: T;
+  separatorLinesColor?: T;
   id?: T;
   blockName?: T;
 }

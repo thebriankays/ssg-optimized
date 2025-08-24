@@ -1,29 +1,8 @@
 import React from 'react'
-import dynamic from 'next/dynamic'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { TravelDataGlobeBlock as TravelDataGlobeBlockType } from '../types'
-
-// Dynamic import for client-side only rendering
-const TravelDataGlobeClient = dynamic(
-  () => import('./Component.client').then(mod => mod.TravelDataGlobeClient),
-  { 
-    ssr: false,
-    loading: () => (
-      <div style={{ 
-        width: '100%', 
-        height: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        background: '#000',
-        color: '#fff'
-      }}>
-        <div>Loading globe...</div>
-      </div>
-    )
-  }
-)
+import { TravelDataGlobeWrapper } from './ComponentWrapper'
 
 export const TravelDataGlobeBlock: React.FC<TravelDataGlobeBlockType> = async ({
   title,
@@ -73,10 +52,10 @@ export const TravelDataGlobeBlock: React.FC<TravelDataGlobeBlockType> = async ({
   const transformedData = {
     advisories: advisories.docs.map(doc => ({
       id: doc.id.toString(),
-      countryName: doc.country as string,
-      countryCode: doc.countryCode as string,
+      countryName: typeof doc.country === 'object' && doc.country ? doc.country.name : (doc.countryTag || ''),
+      countryCode: typeof doc.country === 'object' && doc.country ? doc.country.code : '',
       level: parseInt(doc.threatLevel) as 1 | 2 | 3 | 4,
-      summary: doc.description as string,
+      summary: doc.title || '',
       updatedAt: doc.updatedAt,
     })),
     visaRequirements: visaRequirements.docs.map(doc => ({
@@ -88,26 +67,26 @@ export const TravelDataGlobeBlock: React.FC<TravelDataGlobeBlockType> = async ({
     })),
     airports: airports.docs.map(doc => ({
       id: doc.id.toString(),
-      name: doc.name as string,
-      code: doc.iata as string,
-      city: (typeof doc.city === 'string' ? doc.city : (doc.city as any)?.name) as string,
-      country: (typeof doc.country === 'string' ? doc.country : (doc.country as any)?.name) as string,
-      countryCode: doc.countryCode as string,
-      latitude: doc.latitude as number,
-      longitude: doc.longitude as number,
-      type: doc.type as 'international' | 'domestic',
+      name: doc.name,
+      code: doc.iata || '',
+      city: doc.city,
+      country: typeof doc.country === 'object' && doc.country ? doc.country.name : '',
+      countryCode: typeof doc.country === 'object' && doc.country ? doc.country.code : '',
+      latitude: doc.latitude,
+      longitude: doc.longitude,
+      type: 'international' as 'international' | 'domestic', // Default since type isn't in the schema
     })),
     restaurants: restaurants.docs.map(doc => ({
       id: doc.id.toString(),
-      name: doc.name as string,
-      city: doc.city as string,
-      country: (typeof doc.country === 'string' ? doc.country : (doc.country as any)?.name) as string,
-      countryCode: doc.countryCode as string,
-      latitude: doc.latitude as number,
-      longitude: doc.longitude as number,
-      stars: doc.michelinStars as 1 | 2 | 3,
-      cuisine: doc.cuisine as string | undefined,
-      chef: doc.chef as string | undefined,
+      name: doc.name,
+      city: doc.location?.city || '',
+      country: typeof doc.country === 'object' && doc.country ? doc.country.name : '',
+      countryCode: typeof doc.country === 'object' && doc.country ? doc.country.code : '',
+      latitude: doc.location?.latitude || 0,
+      longitude: doc.location?.longitude || 0,
+      stars: (doc.rating || 1) as 1 | 2 | 3,
+      cuisine: doc.cuisine || undefined,
+      chef: undefined, // Chef field doesn't exist in MichelinRestaurant
     })),
     countries: countries.docs.map(doc => ({
       id: doc.id.toString(),
@@ -126,7 +105,7 @@ export const TravelDataGlobeBlock: React.FC<TravelDataGlobeBlockType> = async ({
       {title && <h2 className="travel-data-globe-block__title">{title}</h2>}
       {description && <p className="travel-data-globe-block__description">{description}</p>}
       
-      <TravelDataGlobeClient
+      <TravelDataGlobeWrapper
         {...transformedData}
         defaultView={defaultView || 'advisories'}
         globeSettings={globeSettings}

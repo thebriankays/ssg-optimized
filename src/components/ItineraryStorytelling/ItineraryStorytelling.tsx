@@ -1,4 +1,5 @@
 // ItineraryStorytelling.tsx - Component to display 3D storytelling view for travel itineraries
+'use client'
 import React from 'react'
 import dynamic from 'next/dynamic'
 import type { TravelItinerary } from '@/payload-types'
@@ -42,12 +43,12 @@ export const ItineraryStorytelling: React.FC<ItineraryStorytellingProps> = ({
 
   // Get API keys from environment
   const googleApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  const cesiumToken = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN
+  const googleMapId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID
 
-  if (!googleApiKey) {
+  if (!googleApiKey || !googleMapId) {
     return (
       <div className={`itinerary-storytelling-error ${className || ''}`}>
-        <p>Google Maps API key is not configured.</p>
+        <p>Google Maps API key or Map ID is not configured.</p>
       </div>
     )
   }
@@ -156,7 +157,7 @@ export const ItineraryStorytelling: React.FC<ItineraryStorytellingProps> = ({
       <Storytelling 
         config={config} 
         apiKey={googleApiKey}
-        cesiumToken={cesiumToken}
+        mapId={googleMapId}
         className={itinerary.storytellingConfig?.theme === 'light' ? 'theme-light' : ''}
       />
     </div>

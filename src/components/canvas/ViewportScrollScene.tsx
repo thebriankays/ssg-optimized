@@ -4,7 +4,8 @@ import {
   ScrollScene, 
   ViewportScrollScene as R3FViewportScrollScene,
   ScrollSceneChildProps,
-  ViewportScrollSceneChildProps 
+  ViewportScrollSceneChildProps,
+  UseCanvas 
 } from '@14islands/r3f-scroll-rig'
 import { RefObject } from 'react'
 
@@ -32,7 +33,7 @@ export function ViewportScrollScene({
   style,
   inViewportMargin = "0%",
   inViewportThreshold = 0,
-  hideOffscreen = true,
+  hideOffscreen = false,
   visible = true,
   debug = false,
   priority = 1,
@@ -42,22 +43,22 @@ export function ViewportScrollScene({
   orthographic = false,
 }: ViewportScrollSceneProps) {
   return (
-    <R3FViewportScrollScene
-      track={track}
-      className={className}
-      style={style}
-      inViewportMargin={inViewportMargin}
-      inViewportThreshold={inViewportThreshold}
-      hideOffscreen={hideOffscreen}
-      visible={visible}
-      debug={debug}
-      priority={priority}
-      hud={hud}
-      camera={camera}
-      margin={margin}
-      orthographic={orthographic}
-    >
-      {children}
-    </R3FViewportScrollScene>
+    <UseCanvas>
+      <R3FViewportScrollScene
+        track={track}
+        inViewportMargin={inViewportMargin}
+        inViewportThreshold={inViewportThreshold}
+        hideOffscreen={hideOffscreen}
+        visible={visible}
+        debug={debug}
+        priority={priority}
+        hud={hud}
+        camera={camera}
+        margin={margin}
+        orthographic={orthographic}
+      >
+        {children}
+      </R3FViewportScrollScene>
+    </UseCanvas>
   )
 }

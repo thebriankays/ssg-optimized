@@ -9,6 +9,7 @@ import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997e
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { LinkFeatureClient as LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { default as default_ab754fc32442c02c126925d0ed04cd07 } from '@/fields/ColorPicker/ColorPickerClient'
 import { OverviewComponent as OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
@@ -17,6 +18,17 @@ import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 }
 import { SlugComponent as SlugComponent_92cc057d0a2abb4f6cf0307edf59f986 } from '@/fields/slug/SlugComponent'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { default as default_c477714e119f5d026d4d1a0ee4b722b1 } from '@/components/BulkAddButton/FlagCell'
+import { default as default_898bd914cb2f17dd2f6f5c814bdc740f } from '@/fields/GooglePlaces/GooglePlacesFieldExtended'
+import { default as default_ff9f2acb59dabef41f6e95fb18b700d3 } from '@/components/BulkAddButton/CountryCell'
+import { default as default_b6983606a70f3ad5a7d99132abff5d45 } from '@/components/BulkAddButton/LanguagesCell'
+import { default as default_1a10acf99c27819f1b2777d0272ed276 } from '@/components/MapCenterPicker/MapCenterPicker'
+import { default as default_a09b6f1bddcad2eace9fb2dd1d618406 } from '@/components/BulkAddButton/BulkAddButton'
+import { CurrencyAdmin as CurrencyAdmin_160a60e658412107b5e4cd848a3b6808 } from '@/components/CurrencyAdmin'
+import { default as default_1b8c3be827333680fcc442db3a4297ef } from '@/components/admin/fields/StoryChapterField/GenerateChaptersButton'
+import { default as default_b75b9da359ef5cde49aaf148c8b237be } from '@/components/admin/fields/StoryChapterField/DestinationSelect'
+import { default as default_d2ac97d4deb9ea8b162d975a40d12a2b } from '@/components/admin/SeedExperienceTypesButton'
+import { default as default_355ecf8c86a73b89c8a37a8793535e32 } from '@/components/admin/GeocodeLocationButton'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { RowLabel as RowLabel_ec255a65fa6fa8d1faeb09cf35284224 } from '@/Header/RowLabel'
@@ -36,6 +48,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#LinkFeatureClient": LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/fields/ColorPicker/ColorPickerClient#default": default_ab754fc32442c02c126925d0ed04cd07,
   "@payloadcms/plugin-seo/client#OverviewComponent": OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaTitleComponent": MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
@@ -44,6 +57,17 @@ export const importMap = {
   "@/fields/slug/SlugComponent#SlugComponent": SlugComponent_92cc057d0a2abb4f6cf0307edf59f986,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlocksFeatureClient": BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/BulkAddButton/FlagCell#default": default_c477714e119f5d026d4d1a0ee4b722b1,
+  "@/fields/GooglePlaces/GooglePlacesFieldExtended#default": default_898bd914cb2f17dd2f6f5c814bdc740f,
+  "@/components/BulkAddButton/CountryCell#default": default_ff9f2acb59dabef41f6e95fb18b700d3,
+  "@/components/BulkAddButton/LanguagesCell#default": default_b6983606a70f3ad5a7d99132abff5d45,
+  "@/components/MapCenterPicker/MapCenterPicker#default": default_1a10acf99c27819f1b2777d0272ed276,
+  "@/components/BulkAddButton/BulkAddButton#default": default_a09b6f1bddcad2eace9fb2dd1d618406,
+  "@/components/CurrencyAdmin#CurrencyAdmin": CurrencyAdmin_160a60e658412107b5e4cd848a3b6808,
+  "@/components/admin/fields/StoryChapterField/GenerateChaptersButton#default": default_1b8c3be827333680fcc442db3a4297ef,
+  "@/components/admin/fields/StoryChapterField/DestinationSelect#default": default_b75b9da359ef5cde49aaf148c8b237be,
+  "@/components/admin/SeedExperienceTypesButton#default": default_d2ac97d4deb9ea8b162d975a40d12a2b,
+  "@/components/admin/GeocodeLocationButton#default": default_355ecf8c86a73b89c8a37a8793535e32,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
   "@/Header/RowLabel#RowLabel": RowLabel_ec255a65fa6fa8d1faeb09cf35284224,

@@ -28,7 +28,15 @@
       "Bash(rm:*)",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(tail:*)",
+      "Bash(npx next:*)",
+      "Bash(npx payload:*)",
+      "Bash(curl:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(pnpm dev:*)"
     ],
     "deny": []
   }

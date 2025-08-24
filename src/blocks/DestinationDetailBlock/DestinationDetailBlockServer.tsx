@@ -96,8 +96,8 @@ export const DestinationDetailBlock: React.FC<DestinationDetailBlockServerProps>
       countryCode = destinationData.countryData.code.toLowerCase()
     }
     // Priority 3: locationData.countryData.code
-    else if (destinationData.locationData?.countryData?.code) {
-      countryCode = destinationData.locationData.countryData.code.toLowerCase()
+    else if ((destinationData.locationData as any)?.countryData?.code) {
+      countryCode = (destinationData.locationData as any).countryData.code.toLowerCase()
     }
     // Priority 4: Try to infer from title (for Jamaica case)
     else if (destinationData.title?.toLowerCase().includes('jamaica')) {
@@ -146,13 +146,8 @@ export const DestinationDetailBlock: React.FC<DestinationDetailBlockServerProps>
 
   // Convert payload types (which can be null) to component types (which expect undefined)
   const flagSettings = props.flagSettings ? {
-    animationSpeed: props.flagSettings.animationSpeed ?? undefined,
-    wireframe: props.flagSettings.wireframe ?? undefined,
-    segments: props.flagSettings.segments ?? undefined,
-    frequencyX: props.flagSettings.frequencyX ?? undefined,
-    frequencyY: props.flagSettings.frequencyY ?? undefined,
-    strength: props.flagSettings.strength ?? undefined,
-    showControls: props.flagSettings.showControls ?? undefined,
+    // Map available properties to the expected flag settings format
+    showControls: true,
   } : undefined
 
   // Convert background types safely

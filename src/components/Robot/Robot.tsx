@@ -1,17 +1,17 @@
 'use client'
 
 import React, { Suspense, useEffect, useState, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import {
   OrbitControls,
   useGLTF,
   useAnimations,
-  Html,
-  useProgress,
   Stage,
   CameraShake,
+  PerspectiveCamera,
 } from '@react-three/drei'
 import * as THREE from 'three'
+import { ViewportScrollScene } from '@/components/canvas/ViewportScrollScene'
 
 interface ModelProps extends React.ComponentPropsWithoutRef<'group'> {
   onLoaded?: () => void
@@ -19,13 +19,12 @@ interface ModelProps extends React.ComponentPropsWithoutRef<'group'> {
 }
 
 function LoadingScreen() {
-  const { progress } = useProgress()
+  // Simple loading indicator without Html portal
   return (
-    <Html center>
-      <div className="px-6 py-3 bg-black/50 rounded-lg backdrop-blur text-white text-xl font-medium">
-        {progress.toFixed(0)}%
-      </div>
-    </Html>
+    <mesh>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshBasicMaterial color="#666" wireframe />
+    </mesh>
   )
 }
 
@@ -492,46 +491,51 @@ function SceneContent() {
 }
 
 export default function Scene() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  
   return (
-    <Canvas
-      shadows
-      camera={{
-        fov: 50, // Increased FOV to see more of the robot
-        position: [0, 1, 8], // Moved camera back a bit
-        near: 0.1,
-        far: 1000,
-      }}
-      style={{ touchAction: 'none' }}
-      dpr={[1, 2]}
-      onCreated={({ gl }) => {
-        gl.toneMapping = THREE.ACESFilmicToneMapping
-        gl.toneMappingExposure = 1.2
-        gl.outputColorSpace = 'srgb'
-      }}
-    >
-      <Suspense fallback={<LoadingScreen />}>
-        <SceneContent />
-      </Suspense>
+    <div ref={containerRef} style={{ width: '100%', height: '100%', touchAction: 'none' }}>
+      <ViewportScrollScene
+        track={containerRef as React.MutableRefObject<HTMLElement>}
+        hideOffscreen={false}
+        orthographic={false}
+      >
+        {() => (
+          <>
+            <PerspectiveCamera
+              makeDefault
+              fov={50}
+              position={[0, 1, 8]}
+              near={0.1}
+              far={1000}
+            />
+            
+            <Suspense fallback={<LoadingScreen />}>
+              <SceneContent />
+            </Suspense>
 
-      <OrbitControls
-        makeDefault
-        enablePan={false}
-        enableZoom={false} // Disable zoom to prevent interference with page scroll
-        maxPolarAngle={Math.PI / 2}
-        target={[0, 0.5, 0]}
-      />
+            <OrbitControls
+              makeDefault
+              enablePan={false}
+              enableZoom={false} // Disable zoom to prevent interference with page scroll
+              maxPolarAngle={Math.PI / 2}
+              target={[0, 0.5, 0]}
+            />
 
-      <CameraShake
-        maxYaw={0.1}
-        maxPitch={0.1}
-        maxRoll={0.1}
-        yawFrequency={0.1}
-        pitchFrequency={0.1}
-        rollFrequency={0.1}
-        intensity={0.5}
-        decayRate={0.65}
-      />
-    </Canvas>
+            <CameraShake
+              maxYaw={0.1}
+              maxPitch={0.1}
+              maxRoll={0.1}
+              yawFrequency={0.1}
+              pitchFrequency={0.1}
+              rollFrequency={0.1}
+              intensity={0.5}
+              decayRate={0.65}
+            />
+          </>
+        )}
+      </ViewportScrollScene>
+    </div>
   )
 }
 

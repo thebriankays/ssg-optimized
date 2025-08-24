@@ -1,30 +1,22 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { gsap } from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import { PageTransition } from './PageTransition'
+import { useTransitionStore } from '@/lib/stores/transition-store'
 
 // Register ScrollTrigger
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-interface TransitionState {
-  isTransitioning: boolean
-  direction: 'out' | 'in'
-  pendingHref: string | null
-}
-
 export function PageTransitionManager() {
   const router = useRouter()
   const pathname = usePathname()
-  const [transitionState, setTransitionState] = useState<TransitionState>({
-    isTransitioning: false,
-    direction: 'out',
-    pendingHref: null
-  })
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { isTransitioning, direction, startTransition, endTransition } = useTransitionStore()
   
   const isAnimatingRef = useRef(false)
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
@@ -33,60 +25,28 @@ export function PageTransitionManager() {
   useEffect(() => {
     if (isAnimatingRef.current) return
 
-    // Initial setup - page starts invisible
+    // Skip animations for now - just ensure content is visible
     gsap.set('#page-content', { 
-      opacity: 0, 
-      y: 12, 
-      pointerEvents: 'none' 
-    })
-
-    // Start WebGL transition in
-    setTransitionState(prev => ({
-      ...prev,
-      isTransitioning: true,
-      direction: 'in'
-    }))
-
-    // Animate page content in after a brief delay
-    const tl = gsap.timeline({ delay: 0.2 })
-    tl.to('#page-content', { 
       opacity: 1, 
       y: 0, 
-      duration: 0.6, 
-      ease: 'power2.out',
-      pointerEvents: 'auto'
+      pointerEvents: 'auto' 
     })
-    .add(() => {
-      // Refresh ScrollTrigger and resume scroll
-      ScrollTrigger.refresh(true)
-      document.documentElement.style.overflow = ''
-      document.body.style.overflow = ''
-    })
+
+    // Refresh ScrollTrigger and resume scroll
+    ScrollTrigger.refresh(true)
+    document.documentElement.style.overflow = ''
+    document.body.style.overflow = ''
+    
+    // Just refresh ScrollTrigger and resume scroll
+    ScrollTrigger.refresh(true)
+    document.documentElement.style.overflow = ''
+    document.body.style.overflow = ''
 
   }, [pathname])
 
-  // Handle WebGL transition completion
-  const handleTransitionComplete = useCallback(() => {
-    setTransitionState(prev => ({
-      ...prev,
-      isTransitioning: false
-    }))
-
-    // If we have a pending navigation, execute it now
-    if (transitionState.pendingHref && transitionState.direction === 'out') {
-      router.push(transitionState.pendingHref)
-      setTransitionState(prev => ({
-        ...prev,
-        pendingHref: null
-      }))
-    }
-
-    isAnimatingRef.current = false
-  }, [router, transitionState.direction, transitionState.pendingHref])
-
   // Navigation handler for transition links
   const handleTransitionNavigation = useCallback((href: string) => {
-    if (isAnimatingRef.current || transitionState.pendingHref === href) return
+    if (isAnimatingRef.current) return
 
     isAnimatingRef.current = true
     
@@ -97,24 +57,17 @@ export function PageTransitionManager() {
     // Kill any existing timeline
     timelineRef.current?.kill()
 
-    // Animate page content out
-    timelineRef.current = gsap.timeline()
-    timelineRef.current.to('#page-content', { 
-      opacity: 0, 
-      y: -12, 
-      duration: 0.35, 
-      ease: 'power2.in',
-      pointerEvents: 'none'
-    })
+    // Skip animation for now - just disable pointer events
+    gsap.set('#page-content', { pointerEvents: 'none' })
 
     // Start WebGL transition out
-    setTransitionState({
-      isTransitioning: true,
-      direction: 'out',
-      pendingHref: href
+    startTransition('out', href, () => {
+      router.push(href)
+      endTransition()
+      isAnimatingRef.current = false
     })
 
-  }, [transitionState.pendingHref])
+  }, [router, startTransition, endTransition])
 
   // Click handler for transition links
   useEffect(() => {
@@ -168,16 +121,14 @@ export function PageTransitionManager() {
       if (isAnimatingRef.current) return
       
       // For browser navigation, skip the out animation and go straight to in
-      setTransitionState({
-        isTransitioning: true,
-        direction: 'in',
-        pendingHref: null
+      startTransition('in', null, () => {
+        endTransition()
       })
     }
 
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
+  }, [startTransition, endTransition])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -189,17 +140,22 @@ export function PageTransitionManager() {
   return (
     <>
       <PageTransition
-        isTransitioning={transitionState.isTransitioning}
-        direction={transitionState.direction}
-        onComplete={handleTransitionComplete}
+        isTransitioning={isTransitioning}
+        direction={direction}
+        containerRef={containerRef}
       />
       
-      {/* Optional overlay for additional visual feedback */}
+      {/* CSS fallback overlay for visual feedback */}
       <div
         id="transition-overlay"
-        className="pointer-events-none fixed inset-0 z-[9998] bg-black/5 opacity-0 transition-opacity duration-300"
+        className="pointer-events-none fixed inset-0 z-[9998] bg-black opacity-0 transition-all duration-700"
         style={{
-          opacity: transitionState.isTransitioning && transitionState.direction === 'out' ? 1 : 0
+          opacity: isTransitioning ? 1 : 0,
+          transform: isTransitioning 
+            ? (direction === 'out' ? 'scaleY(1)' : 'scaleY(0)') 
+            : 'scaleY(0)',
+          transformOrigin: direction === 'out' ? 'top' : 'bottom',
+          transition: 'transform 0.7s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.7s ease'
         }}
       />
     </>

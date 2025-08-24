@@ -25,83 +25,48 @@ export interface TravelDataGlobeBlock {
 
 export interface AreaExplorerBlock {
   blockType: 'area-explorer'
-  title: string
-  description?: string
-  googleMapsApiKey: string
-  mapSettings?: {
-    mapId: string
-    defaultLocation?: {
-      lat: number
-      lng: number
-      altitude?: number
-      heading?: number
-      tilt?: number
-      range?: number
-    }
-    gestureHandling?: 'greedy' | 'cooperative' | 'none' | 'auto'
+  locationName?: string
+  locationDescription?: string
+  location?: {
+    lat: number
+    lng: number
   }
-  pois?: Array<{
-    name: string
-    description?: string
-    category?: string
-    location?: {
-      lat: number
-      lng: number
-      altitude?: number
-    }
-    image?: any
-    icon?: string
-  }>
-  tours?: Array<{
-    name: string
-    description?: string
-    waypoints?: Array<{
-      name?: string
-      description?: string
-      location?: {
-        lat: number
-        lng: number
-        altitude?: number
-        heading?: number
-        tilt?: number
-        range?: number
-      }
-      duration?: number
-      transitionDuration?: number
-    }>
-  }>
+  cameraOrbitType?: 'fixed-orbit' | 'dynamic-orbit'
+  cameraSpeed?: number
+  poiTypes?: string[]
+  poiDensity?: number
+  poiSearchRadius?: number
 }
 
 export interface StorytellingBlock {
   blockType: 'storytelling'
-  sections?: Array<{
-    type?: 'intro' | 'chapter' | 'quote' | 'parallax' | 'outro'
-    title?: string
-    subtitle?: string
-    content?: any
-    quote?: string
-    simpleContent?: string
-    media?: {
-      type?: 'none' | 'image' | 'video' | 'webgl'
-      image?: any
-      video?: any
-      webglComponent?: 'spiral' | 'particles' | 'waves'
-      webglProps?: any
+  title: string
+  date?: string
+  description?: string
+  createdBy?: string
+  coverImage?: any
+  imageCredit?: string
+  chapters?: Array<{
+    title: string
+    content?: string
+    dateTime?: string
+    location?: {
+      lat: number
+      lng: number
     }
-    layout?: 'center' | 'left' | 'right' | 'fullscreen'
-    animation?: {
-      type?: 'none' | 'fade' | 'slide' | 'scale' | 'parallax'
-      duration?: number
-      delay?: number
-    }
-    background?: {
-      color?: string
-      gradient?: string
-      image?: any
-      blur?: number
-      overlay?: string
-    }
+    address?: string
+    chapterImage?: any
+    imageCredit?: string
+    cameraZoom?: number
+    cameraTilt?: number
+    cameraHeading?: number
+    showLocationMarker?: boolean
+    showFocusRadius?: boolean
+    focusRadius?: number
   }>
+  theme?: 'light' | 'dark'
+  autoPlay?: boolean
+  autoPlayDelay?: number
 }
 
 export interface BackgroundBlock {

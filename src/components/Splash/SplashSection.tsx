@@ -1,9 +1,9 @@
 'use client'
 import React, { useState, useRef } from 'react'
-import { gsap, useGSAP, ScrollTrigger } from '@/gsap'
+import { gsap, useGSAP } from '@/gsap'
+import { useRevealAnimation } from '@/hooks/useScrollTrigger'
 import Image from 'next/image'
 import CircleTriangleUp from '@/svg/icons/CircleTriangleUp'
-import './SplashSection.scss'
 import ParticleEffectButton from '../ParticleEffectButton/ParticleEffectButton'
 
 export interface SplashSectionProps {
@@ -68,28 +68,6 @@ const SplashSection: React.FC<SplashSectionProps> = (props) => {
     isHero = false,
   } = props
 
-  // Suppress ParticleEffectButton warning
-  // useEffect(() => {
-  //   const originalError = console.error
-
-  //   console.error = function (...args: any[]) {
-  //     if (
-  //       args[0] &&
-  //       typeof args[0] === 'string' &&
-  //       args[0].includes('componentWillReceiveProps has been renamed') &&
-  //       args[0].includes('ParticleEffectButton')
-  //     ) {
-  //       return
-  //     }
-
-  //     return originalError.apply(console, args)
-  //   }
-
-  //   return () => {
-  //     console.error = originalError
-  //   }
-  // }, [])
-
   const sectionRef = useRef<HTMLElement>(null)
   const bgRef = useRef<HTMLImageElement | HTMLVideoElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
@@ -152,224 +130,229 @@ const SplashSection: React.FC<SplashSectionProps> = (props) => {
     )
   }
 
+  // Hero animation with ScrollTrigger
+  useRevealAnimation(
+    sectionRef.current,
+    () => {
+      if (!isHero || !sectionRef.current) return gsap.timeline()
+
+      const heroTimeline = gsap.timeline({
+        defaults: { ease: 'power2.inOut', duration: 2 },
+      })
+
+      // Set initial state immediately
+      if (bgRef.current) {
+        gsap.set(bgRef.current, {
+          clipPath: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)',
+          opacity: 0,
+          filter: 'blur(100px)',
+        })
+      }
+
+      // Add callback
+      heroTimeline.eventCallback('onStart', () => {
+        console.log('SplashSection hero animation started')
+      })
+
+      if (bgRef.current) {
+        heroTimeline.to(
+          bgRef.current,
+          {
+            clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+            opacity: 1,
+            filter: 'blur(0)',
+            duration: 2,
+          },
+        )
+      }
+
+      if (titleRef.current) {
+        heroTimeline.fromTo(
+          titleRef.current,
+          { opacity: 0, x: -1000 },
+          { opacity: 1, x: 0, duration: 2 },
+          '-=2',
+        )
+      }
+
+      if (subRef.current) {
+        heroTimeline.fromTo(
+          subRef.current,
+          { opacity: 0, x: -1500 },
+          { opacity: 1, x: 0, duration: 2 },
+          '-=2',
+        )
+      }
+
+      if (overlayRef.current) {
+        heroTimeline.fromTo(
+          overlayRef.current,
+          { opacity: 0 },
+          { opacity: 1, duration: 2 },
+          '-=1.5',
+        )
+      }
+
+      if (logoRef.current) {
+        heroTimeline.fromTo(
+          logoRef.current,
+          {
+            clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)',
+            opacity: 0,
+            y: 242,
+          },
+          {
+            clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+            opacity: 0.7,
+            y: 0,
+            duration: 3,
+          },
+          '-=2',
+        )
+      }
+
+      return heroTimeline
+    },
+    {
+      start: 'top center',
+      once: true,
+      id: `${id}-hero-scrollTrigger`,
+    },
+    [isHero, id]
+  )
+
+  // Background animation for non-hero sections
+  useRevealAnimation(
+    sectionRef.current,
+    () => {
+      if (isHero || !sectionRef.current || !bgRef.current) return gsap.timeline()
+
+      const bgTimeline = gsap.timeline()
+
+      bgTimeline.fromTo(
+        bgRef.current,
+        {
+          clipPath:
+            animationDirection === 'left'
+              ? 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)'
+              : 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)',
+          opacity: 0,
+          filter: 'blur(32px)',
+        },
+        {
+          clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+          opacity: 1,
+          filter: 'blur(0)',
+          duration: 2,
+          ease: 'power2.inOut',
+        },
+      )
+
+      return bgTimeline
+    },
+    {
+      start: 'top 88%',
+      once: false,
+      toggleActions: 'restart none reverse none',
+      id: `${id}-bg-scrollTrigger`,
+    },
+    [isHero, animationDirection, id]
+  )
+
+  // Content animation for non-hero sections
+  useRevealAnimation(
+    sectionRef.current,
+    () => {
+      if (isHero || !sectionRef.current) return gsap.timeline()
+
+      const contentTimeline = gsap.timeline()
+
+      if (titleRef.current) {
+        contentTimeline.fromTo(
+          titleRef.current,
+          {
+            opacity: 0,
+            x: animationDirection === 'left' ? -300 : 300,
+          },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 1.5,
+            ease: 'power2.out',
+          },
+        )
+      }
+
+      if (subRef.current) {
+        contentTimeline.fromTo(
+          subRef.current,
+          {
+            opacity: 0,
+            x: animationDirection === 'left' ? -400 : 400,
+          },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 1.5,
+            ease: 'power2.out',
+          },
+          '-=1.2',
+        )
+      }
+
+      if (paragraphRef.current) {
+        contentTimeline.fromTo(
+          paragraphRef.current,
+          {
+            opacity: 0,
+            y: 50,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: 'power2.out',
+          },
+          '-=0.8',
+        )
+      }
+
+      if (ctaRef.current) {
+        contentTimeline.fromTo(
+          ctaRef.current,
+          {
+            opacity: 0,
+            y: 30,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: 'power2.out',
+          },
+          '-=0.5',
+        )
+      }
+
+      return contentTimeline
+    },
+    {
+      start: 'top 80%',
+      once: false,
+      toggleActions: 'restart none reverse none',
+      id: `${id}-content-scrollTrigger`,
+    },
+    [isHero, animationDirection, id]
+  )
+
+  // Parallax and other non-ScrollTrigger animations
   useGSAP(
     () => {
       if (typeof window === 'undefined' || !sectionRef.current) return
 
-      gsap.registerPlugin(ScrollTrigger)
-
-      // Clean up previous ScrollTriggers for this section
-      const cleanup = () => {
-        ScrollTrigger.getAll()
-          .filter((trigger) => trigger.vars.id && String(trigger.vars.id).includes(id))
-          .forEach((trigger) => trigger.kill())
-      }
-
-      cleanup()
-
-      if (isHero) {
-        // Set initial state immediately
-        if (bgRef.current) {
-          gsap.set(bgRef.current, {
-            clipPath: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)',
-            opacity: 0,
-            filter: 'blur(100px)',
-          })
-        }
-        
-        // Use ScrollTrigger for hero sections too when not actually the page hero
-        const heroTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top center',
-            end: 'top center',
-            id: `${id}-hero-scrollTrigger`,
-            once: true,
-          },
-          defaults: { ease: 'power2.inOut', duration: 2 }, // Reduced from 3 to 2
-        })
-
-        // Add callback after ScrollTrigger setup
-        heroTimeline.eventCallback('onStart', () => {
-          console.log('SplashSection hero animation started')
-        })
-
-        if (bgRef.current) {
-          heroTimeline.to(
-            bgRef.current,
-            {
-              clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-              opacity: 1,
-              filter: 'blur(0)',
-              duration: 2, // Faster animation
-            },
-          )
-        }
-
-        if (titleRef.current) {
-          heroTimeline.fromTo(
-            titleRef.current,
-            { opacity: 0, x: -1000 },
-            { opacity: 1, x: 0, duration: 2 },
-            '-=2', // Overlap with background animation
-          )
-        }
-
-        if (subRef.current) {
-          heroTimeline.fromTo(
-            subRef.current,
-            { opacity: 0, x: -1500 },
-            { opacity: 1, x: 0, duration: 2 },
-            '-=2', // Same overlap
-          )
-        }
-
-        if (overlayRef.current) {
-          heroTimeline.fromTo(
-            overlayRef.current,
-            { opacity: 0 },
-            { opacity: 1, duration: 2 },
-            '-=1.5', // Less overlap
-          )
-        }
-
-        if (logoRef.current) {
-          heroTimeline.fromTo(
-            logoRef.current,
-            {
-              clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)',
-              opacity: 0,
-              y: 242,
-            },
-            {
-              clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-              opacity: 0.7,
-              y: 0,
-              duration: 3, // Reduced for faster animation
-            },
-            '-=2', // Overlap timing
-          )
-        }
-      } else {
-        const bgTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 88%',
-            end: 'top 88%',
-            id: `${id}-bg-scrollTrigger`,
-            toggleActions: 'restart none reverse none',
-          },
-        })
-
-        if (bgRef.current) {
-          bgTimeline.fromTo(
-            bgRef.current,
-            {
-              clipPath:
-                animationDirection === 'left'
-                  ? 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)'
-                  : 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)',
-              opacity: 0,
-              filter: 'blur(32px)',
-            },
-            {
-              clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-              opacity: 1,
-              filter: 'blur(0)',
-              duration: 2,
-              ease: 'power2.inOut',
-            },
-          )
-        }
-
-        const contentTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 80%',
-            end: 'top 80%',
-            id: `${id}-content-scrollTrigger`,
-            toggleActions: 'restart none reverse none',
-          },
-        })
-
-        if (titleRef.current) {
-          contentTimeline.fromTo(
-            titleRef.current,
-            {
-              opacity: 0,
-              x: animationDirection === 'left' ? -300 : 300,
-            },
-            {
-              opacity: 1,
-              x: 0,
-              duration: 1.4,
-            },
-          )
-        }
-
-        if (paragraphRef.current) {
-          contentTimeline.fromTo(
-            paragraphRef.current,
-            {
-              opacity: 0,
-              x: animationDirection === 'left' ? -500 : 500,
-            },
-            {
-              opacity: 1,
-              x: 0,
-              duration: 1.8,
-            },
-            '-=1',
-          )
-        }
-
-        if (ctaRef.current) {
-          contentTimeline.fromTo(
-            ctaRef.current.parentElement,
-            {
-              opacity: 0,
-              x: animationDirection === 'left' ? -400 : 400,
-            },
-            {
-              opacity: 1,
-              x: 0,
-              duration: 2,
-            },
-            '-=1',
-          )
-        }
-
-        if (stripeBoxRef.current) {
-          contentTimeline.fromTo(
-            stripeBoxRef.current,
-            {
-              opacity: 0,
-              x: animationDirection === 'left' ? 800 : 200,
-              width: '0',
-            },
-            {
-              opacity: 1,
-              x: 0,
-              width: '100%',
-              duration: 1.8,
-            },
-            '-=1.5',
-          )
-        }
-
-        if (frostBoxRef.current && frostBoxRef.current.querySelectorAll('div').length > 0) {
-          contentTimeline.fromTo(
-            frostBoxRef.current.querySelectorAll('div'),
-            { opacity: 0 },
-            { opacity: 1, duration: 2 },
-            '-=1.2',
-          )
-        }
-      }
-
-      return cleanup
+      // Add any additional animations here that don't use ScrollTrigger
     },
-    { scope: sectionRef, dependencies: [id, isHero, animationDirection, title, bubblesType] },
+    { scope: sectionRef, dependencies: [id] },
   )
 
   return (
