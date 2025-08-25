@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { ViewportScrollScene } from '@/components/canvas/ViewportScrollScene'
+import { ViewportScrollScene, UseCanvas } from '@14islands/r3f-scroll-rig'
 import { KineticImagesR3F } from './KineticImagesR3F'
 import { GlassCard } from '@/components/ui/glass/GlassCard'
 import { motion } from 'framer-motion'
@@ -36,33 +36,34 @@ export function KineticImages({
     { key: 'spiral' as const, label: 'Spiral', description: 'Spiral 3D structure' },
   ]
   
+  const proxyRef = useRef<HTMLDivElement>(null)
+  
   return (
     <div ref={containerRef} className={`kinetic-images ${className}`}>
       {/* WebGL Scene */}
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-        className="kinetic-images__scene"
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100vh',
-          minHeight: '600px',
-          background: 'radial-gradient(circle at center, #1a1a2e 0%, #0f0f0f 100%)',
-        }}
-      >
-        {() => (
-          <KineticImagesR3F
-            images={images}
-            variant={selectedVariant}
-            autoRotate={isAutoRotate}
-            rotateSpeed={rotateSpeed}
-            scrollSpeed={scrollSpeed}
-            gap={gap}
-            canvasSize={canvasSize}
-            enableInteraction={enableInteraction}
-          />
-        )}
-      </ViewportScrollScene>
+      <div ref={proxyRef} className="webgl-proxy h-[100vh] min-h-[600px] w-full relative" style={{
+        background: 'radial-gradient(circle at center, #1a1a2e 0%, #0f0f0f 100%)',
+      }} />
+      
+      <UseCanvas>
+        <ViewportScrollScene
+          track={proxyRef as React.MutableRefObject<HTMLElement>}
+          hideOffscreen={false}
+        >
+          {() => (
+            <KineticImagesR3F
+              images={images}
+              variant={selectedVariant}
+              autoRotate={isAutoRotate}
+              rotateSpeed={rotateSpeed}
+              scrollSpeed={scrollSpeed}
+              gap={gap}
+              canvasSize={canvasSize}
+              enableInteraction={enableInteraction}
+            />
+          )}
+        </ViewportScrollScene>
+      </UseCanvas>
       
       {/* Controls */}
       <div className="kinetic-images__controls">

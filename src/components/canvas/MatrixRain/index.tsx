@@ -3,7 +3,7 @@
 import { useRef, useMemo, useEffect, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Text, useTexture } from '@react-three/drei'
-import { ViewportScrollScene } from '@14islands/r3f-scroll-rig'
+import { ViewportScrollScene, UseCanvas } from '@14islands/r3f-scroll-rig'
 import * as THREE from 'three'
 
 interface Drop {
@@ -152,7 +152,7 @@ interface MatrixRainProps {
 }
 
 export function MatrixRain({ className = '' }: MatrixRainProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const proxyRef = useRef<HTMLDivElement>(null)
   const [hue, setHue] = useState(0)
   
   // Animate hue rotation
@@ -165,27 +165,24 @@ export function MatrixRain({ className = '' }: MatrixRainProps) {
   }, [])
   
   return (
-    <div 
-      ref={containerRef}
-      className={`matrix-rain ${className}`}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '90vh',
-        zIndex: 20,
-        pointerEvents: 'none',
-        filter: `hue-rotate(${hue}deg)`
-      }}
-    >
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-        hideOffscreen={false}
-        camera={{ position: [0, 0, 10] }}
-      >
-        {() => <MatrixRainScene />}
-      </ViewportScrollScene>
-    </div>
+    <section className={`block matrix-rain ${className}`}>
+      <h2 className="mb-3 text-xl font-semibold">Matrix Rain</h2>
+      
+      {/* SMALL proxy to track – this is key */}
+      <div ref={proxyRef} className="webgl-proxy h-[45vh] rounded-lg" />
+      
+      {/* Apply the filter to a wrapper div */}
+      <div style={{ filter: `hue-rotate(${hue}deg)` }}>
+        <UseCanvas>
+          <ViewportScrollScene
+            track={proxyRef as React.MutableRefObject<HTMLElement>}
+            hideOffscreen={false}
+            camera={{ position: [0, 0, 10] }}
+          >
+            {() => <MatrixRainScene />}
+          </ViewportScrollScene>
+        </UseCanvas>
+      </div>
+    </section>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { ViewportScrollScene } from '@/components/canvas/ViewportScrollScene'
+import { ViewportScrollScene, UseCanvas } from '@14islands/r3f-scroll-rig'
 import { AnimatedFlagR3F } from './AnimatedFlagR3F'
 import { GlassCard } from '@/components/ui/glass/GlassCard'
 import { motion } from 'framer-motion'
@@ -37,49 +37,50 @@ export function AnimatedFlag({
   const [currentFlagColor, setCurrentFlagColor] = useState(flagColor)
   const containerRef = useRef<HTMLDivElement>(null)
   
+  const proxyRef = useRef<HTMLDivElement>(null)
+  
   return (
     <div ref={containerRef} className={`animated-flag ${className}`}>
       {/* WebGL Scene */}
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-        className="animated-flag__scene"
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100vh',
-          minHeight: '400px',
-          background: 'linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%)',
-        }}
-      >
-        {() => (
-          <>
-            <AnimatedFlagR3F
-              flagTexture={flagTexture}
-              poleTexture={poleTexture}
-              width={width}
-              height={height}
-              segments={segments}
-              windStrength={currentWindStrength}
-              windDirection={windDirection}
-              enablePhysics={enablePhysics}
-              autoWind={isAutoWind}
-              flagColor={currentFlagColor}
-              poleColor={poleColor}
-              shadows={shadows}
-            />
-            
-            {/* Lighting */}
-        <ambientLight intensity={0.6} />
-        <directionalLight
-          position={[5, 5, 5]}
-          intensity={0.8}
-          castShadow={shadows}
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-        />
-          </>
-        )}
-      </ViewportScrollScene>
+      <div ref={proxyRef} className="webgl-proxy h-[100vh] min-h-[400px] w-full relative" style={{
+        background: 'linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%)',
+      }} />
+      
+      <UseCanvas>
+        <ViewportScrollScene
+          track={proxyRef as React.MutableRefObject<HTMLElement>}
+          hideOffscreen={false}
+        >
+          {() => (
+            <>
+              <AnimatedFlagR3F
+                flagTexture={flagTexture}
+                poleTexture={poleTexture}
+                width={width}
+                height={height}
+                segments={segments}
+                windStrength={currentWindStrength}
+                windDirection={windDirection}
+                enablePhysics={enablePhysics}
+                autoWind={isAutoWind}
+                flagColor={currentFlagColor}
+                poleColor={poleColor}
+                shadows={shadows}
+              />
+              
+              {/* Lighting */}
+              <ambientLight intensity={0.6} />
+              <directionalLight
+                position={[5, 5, 5]}
+                intensity={0.8}
+                castShadow={shadows}
+                shadow-mapSize-width={1024}
+                shadow-mapSize-height={1024}
+              />
+            </>
+          )}
+        </ViewportScrollScene>
+      </UseCanvas>
       
       {/* Controls */}
       {showControls && (

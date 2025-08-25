@@ -37,7 +37,11 @@
       "Bash(curl:*)",
       "Bash(npx kill-port:*)",
       "Bash(pnpm dev:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(rg:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(dir:*)",
+      "Bash(npm ls:*)"
     ],
     "deny": []
   }

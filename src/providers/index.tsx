@@ -8,7 +8,6 @@ import { AnimationProvider } from './Animation'
 import { MouseProvider } from './Mouse'
 import { QualityProvider } from './Quality'
 import { MouseFollowerProvider } from '@/components/mouse-follower'
-import { PageTransitionProvider } from '@/lib/contexts/page-transition-context'
 
 export const Providers: React.FC<{
   children: React.ReactNode
@@ -19,11 +18,9 @@ export const Providers: React.FC<{
         <MouseProvider>
           <MouseFollowerProvider>
             <QualityProvider>
-              <PageTransitionProvider>
-                <CanvasProvider>
-                  <HeaderThemeProvider>{children}</HeaderThemeProvider>
-                </CanvasProvider>
-              </PageTransitionProvider>
+              <CanvasProvider>
+                <HeaderThemeProvider>{children}</HeaderThemeProvider>
+              </CanvasProvider>
             </QualityProvider>
           </MouseFollowerProvider>
         </MouseProvider>

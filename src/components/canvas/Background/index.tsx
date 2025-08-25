@@ -33,8 +33,8 @@ export function Background({
 }: BackgroundProps) {
   const [mounted, setMounted] = useState(false)
   const webglEnabled = useAppStore((state) => state.webglEnabled)
-  // Fix: Use proper type for ref
-  const containerRef = useRef<HTMLDivElement>(null!) as React.MutableRefObject<HTMLElement>
+  // Use a small proxy element, not the entire container
+  const proxyRef = useRef<HTMLDivElement>(null!) as React.MutableRefObject<HTMLElement>
   
   useEffect(() => {
     setMounted(true)
@@ -46,25 +46,31 @@ export function Background({
   
   return (
     <>
-      {/* Fixed background container */}
+      {/* Small proxy element - this gets hidden but doesn't affect layout */}
       <div 
-        ref={containerRef as any} 
-        className="fixed inset-0 pointer-events-none"
+        ref={proxyRef as any} 
+        className="webgl-background-proxy"
         style={{ 
-          zIndex: -1,
-          transform: 'translateZ(0)', // Force GPU layer
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '1px',
+          height: '1px',
+          opacity: 0,
+          pointerEvents: 'none',
+          zIndex: -1000,
         }}
       />
       
-      {/* WebGL content */}
-      {mounted && containerRef.current && (
+      {/* WebGL content properly wrapped in UseCanvas */}
+      {mounted && (
         <UseCanvas>
           <ViewportScrollScene
-            track={containerRef}
+            track={proxyRef}
             hideOffscreen={false}
             inViewportMargin="0%"
             hud // Keep in background layer
-            priority={-1} // Lower priority for background
+            priority={-1}
           >
             {() => {
               switch (settings.type) {
@@ -72,14 +78,14 @@ export function Background({
                   return (
                     <Whatamesh
                       colors={[
-                        settings.color1 || '#dca8d8',
-                        settings.color2 || '#a3d3f9',
-                        settings.color3 || '#fcd6d6',
-                        settings.color4 || '#eae2ff',
+                        settings.color1,
+                        settings.color2,
+                        settings.color3,
+                        settings.color4,
                       ]}
-                      amplitude={320 * (settings.intensity || 0.5)}
+                      amplitude={3.2 * settings.intensity}
                       speed={1}
-                      darkenTop={true}
+                      darkenTop={false}
                     />
                   )
                 case 'gradient':
@@ -87,33 +93,9 @@ export function Background({
                     <mesh>
                       <planeGeometry args={[10, 10]} />
                       <meshBasicMaterial
-                        color={settings.color1 || '#000000'}
+                        color={settings.color1}
                         transparent
-                        opacity={settings.intensity || 0.5}
-                      />
-                    </mesh>
-                  )
-                case 'particles':
-                  // TODO: Implement particles background
-                  return (
-                    <mesh>
-                      <planeGeometry args={[10, 10]} />
-                      <meshBasicMaterial
-                        color={settings.color1 || '#1a1a1a'}
-                        transparent
-                        opacity={0.8}
-                      />
-                    </mesh>
-                  )
-                case 'fluid':
-                  // TODO: Implement fluid background
-                  return (
-                    <mesh>
-                      <planeGeometry args={[10, 10]} />
-                      <meshBasicMaterial
-                        color={settings.color1 || '#0a0a0a'}
-                        transparent
-                        opacity={0.9}
+                        opacity={settings.intensity}
                       />
                     </mesh>
                   )

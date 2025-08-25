@@ -2,6 +2,7 @@
 
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { ViewportScrollScene } from '@/components/canvas/ViewportScrollScene'
+import { UseCanvas } from '@14islands/r3f-scroll-rig'
 import { TravelDataGlobeR3F, GlobeRef } from './TravelDataGlobeR3F'
 import { 
   GlobeView, 
@@ -120,8 +121,11 @@ export function TravelDataGlobe({
     }
   }
   
+  // Create a small proxy ref for the WebGL scene
+  const proxyRef = useRef<HTMLDivElement>(null)
+  
   return (
-    <div ref={containerRef} className={`travel-data-globe ${className}`}>
+    <section className={`block travel-data-globe ${className}`}>
       {/* Controls */}
       <GlassCard
         variant="frosted"
@@ -331,35 +335,33 @@ export function TravelDataGlobe({
         )}
       </AnimatePresence>
       
-      {/* Globe */}
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-        className="travel-data-globe__scene"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-        }}
-      >
-        {() => (
-          <TravelDataGlobeR3F
-            ref={globeRef}
-            features={features}
-            advisories={advisoryMap}
-            visaRequirements={visaMap}
-            points={globePoints}
-            selectedCountry={selectedCountry || undefined}
-            hoveredCountry={hoveredCountry || undefined}
-            view={view}
-            onCountryClick={handleCountryClick}
-            onCountryHover={setHoveredCountry}
-            onPointClick={handlePointClick}
-            onPointHover={setHoveredPoint}
-          />
-        )}
-      </ViewportScrollScene>
-    </div>
+      {/* SMALL proxy to track – this is key */}
+      <div ref={proxyRef} className="webgl-proxy h-[55vh] rounded-lg" />
+      
+      {/* Globe - Only WebGL subtree is tunneled */}
+      <UseCanvas>
+        <ViewportScrollScene
+          track={proxyRef as React.MutableRefObject<HTMLElement>}
+          hideOffscreen={false}
+        >
+          {() => (
+            <TravelDataGlobeR3F
+              ref={globeRef}
+              features={features}
+              advisories={advisoryMap}
+              visaRequirements={visaMap}
+              points={globePoints}
+              selectedCountry={selectedCountry || undefined}
+              hoveredCountry={hoveredCountry || undefined}
+              view={view}
+              onCountryClick={handleCountryClick}
+              onCountryHover={setHoveredCountry}
+              onPointClick={handlePointClick}
+              onPointHover={setHoveredPoint}
+            />
+          )}
+        </ViewportScrollScene>
+      </UseCanvas>
+    </section>
   )
 }

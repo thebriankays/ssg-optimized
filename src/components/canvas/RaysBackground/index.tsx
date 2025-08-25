@@ -3,7 +3,7 @@
 import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { ShaderMaterial, PlaneGeometry, Mesh } from 'three'
-import { ViewportScrollScene } from '@14islands/r3f-scroll-rig'
+import { ViewportScrollScene, UseCanvas } from '@14islands/r3f-scroll-rig'
 
 const vertexShader = `
   varying vec2 vUv;
@@ -123,26 +123,24 @@ export function RaysBackgroundWebGL({
   darkMode = false,
   className = ''
 }: RaysBackgroundWebGLProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const proxyRef = useRef<HTMLDivElement>(null)
   
   return (
-    <div 
-      ref={containerRef} 
-      className={`rays-background-webgl ${className}`}
-      style={{ 
-        position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none'
-      }}
-    >
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-        hideOffscreen={false}
-      >
-        {() => <RaysBackgroundMesh darkMode={darkMode} />}
-      </ViewportScrollScene>
+    <div className={`global-bg pointer-events-none ${className}`}>
+      {/* This proxy can be 1px if you truly want a fullscreen bg; it's tracked for visibility */}
+      <div ref={proxyRef} className="webgl-proxy h-[1px] w-[1px]" />
+      
+      <UseCanvas>
+        <ViewportScrollScene
+          track={proxyRef as React.MutableRefObject<HTMLElement>}
+          hideOffscreen={false}
+          inViewportThreshold={0}
+          inViewportMargin="0px"
+          hud
+        >
+          {() => <RaysBackgroundMesh darkMode={darkMode} />}
+        </ViewportScrollScene>
+      </UseCanvas>
     </div>
   )
 }

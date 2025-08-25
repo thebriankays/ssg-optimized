@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import { useTexture, Box, Sphere, Cylinder } from '@react-three/drei'
 import * as THREE from 'three'
 import { ViewportScrollScene } from '@/components/canvas/ViewportScrollScene'
+import { UseCanvas } from '@14islands/r3f-scroll-rig'
 import { GlassCard } from '@/components/ui/glass/GlassCard'
 
 interface ThreeDItem {
@@ -122,37 +123,36 @@ export function ThreeDCarousel({
   className = '',
 }: ThreeDCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const proxyRef = useRef<HTMLDivElement>(null)
   
   const currentItem = items[currentIndex]
   
   return (
-    <div 
-      ref={containerRef}
-      className={`threed-carousel ${className}`}
-      data-cursor="-drag"
-      data-cursor-text="DRAG"
-    >
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-        style={{
-          width: '100%',
-          height: '100vh',
-          minHeight: '500px',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        }}
-      >
-        {() => (
-          <ThreeDCarouselR3F
-            items={items}
-            radius={radius}
-            autoRotate={autoRotate}
-            rotateSpeed={rotateSpeed}
-            currentIndex={currentIndex}
-            onItemClick={setCurrentIndex}
-          />
-        )}
-      </ViewportScrollScene>
+    <section className={`block three-d-carousel ${className}`}>
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold">3D Carousel</h2>
+      </div>
+      
+      {/* SMALL proxy to track – this is key */}
+      <div ref={proxyRef} className="webgl-proxy h-[60vh] rounded-lg" />
+      
+      <UseCanvas>
+        <ViewportScrollScene
+          track={proxyRef as React.MutableRefObject<HTMLElement>}
+          hideOffscreen={false}
+        >
+          {() => (
+            <ThreeDCarouselR3F
+              items={items}
+              radius={radius}
+              autoRotate={autoRotate}
+              rotateSpeed={rotateSpeed}
+              currentIndex={currentIndex}
+              onItemClick={setCurrentIndex}
+            />
+          )}
+        </ViewportScrollScene>
+      </UseCanvas>
       
       {/* Item Info */}
       {currentItem && (
@@ -216,6 +216,6 @@ export function ThreeDCarousel({
           </button>
         ))}
       </div>
-    </div>
+    </section>
   )
 }

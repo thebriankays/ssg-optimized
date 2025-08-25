@@ -12,7 +12,6 @@ import { Providers } from '@/providers'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
 import { GlobalBackground } from '@/components/GlobalBackground'
-import { PageTransitionManager } from '@/components/transitions/PageTransitionManager'
 import { getServerSideURL } from '@/utilities/getURL'
 import './globals.css'
 import './canvas-fix.css'
@@ -22,12 +21,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { isEnabled } = await draftMode()
 
   return (
-    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" data-theme="light">
+    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <Providers>
           <AdminBar
             adminBarProps={{
@@ -35,12 +34,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             }}
           />
           
+          {/* Global background WebGL */}
           <GlobalBackground />
           
           <Header />
-          {children}
+          <main className="relative min-h-screen">
+            {children}
+          </main>
           <Footer />
-          <PageTransitionManager />
         </Providers>
       </body>
     </html>
@@ -55,4 +56,3 @@ export const metadata: Metadata = {
     creator: '@payloadcms',
   },
 }
-

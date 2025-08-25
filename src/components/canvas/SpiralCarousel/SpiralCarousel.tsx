@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ViewportScrollScene } from '@/components/canvas/ViewportScrollScene'
+import { ViewportScrollScene, UseCanvas } from '@14islands/r3f-scroll-rig'
 import { SpiralCarouselR3F } from './SpiralCarouselR3F'
 import { GlassCard } from '@/components/ui/glass/GlassCard'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -63,32 +63,32 @@ export function SpiralCarousel({
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [selectedItem, items])
   
+  const proxyRef = useRef<HTMLDivElement>(null)
+  
   return (
     <div ref={containerRef} className={`spiral-carousel ${className}`}>
       {/* 3D Carousel */}
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-        className="spiral-carousel__scene"
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100vh',
-          minHeight: '600px',
-        }}
-      >
-        {() => (
-          <SpiralCarouselR3F
-          items={items}
-          radius={radius}
-          angleBetween={angleBetween}
-          verticalDistance={verticalDistance}
-          itemWidth={itemWidth}
-          itemHeight={itemHeight}
-          onItemClick={handleItemClick}
-          onItemHover={handleItemHover}
-        />
-        )}
-      </ViewportScrollScene>
+      <div ref={proxyRef} className="webgl-proxy h-[100vh] min-h-[600px] w-full relative" />
+      
+      <UseCanvas>
+        <ViewportScrollScene
+          track={proxyRef as React.MutableRefObject<HTMLElement>}
+          hideOffscreen={false}
+        >
+          {() => (
+            <SpiralCarouselR3F
+              items={items}
+              radius={radius}
+              angleBetween={angleBetween}
+              verticalDistance={verticalDistance}
+              itemWidth={itemWidth}
+              itemHeight={itemHeight}
+              onItemClick={handleItemClick}
+              onItemHover={handleItemHover}
+            />
+          )}
+        </ViewportScrollScene>
+      </UseCanvas>
       
       {/* Controls Overlay */}
       <div className="spiral-carousel__controls">

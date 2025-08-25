@@ -326,6 +326,19 @@ canvas {
   display: block !important;
 }
 
+/* DEBUG ONLY: prevent scroll-rig proxies from collapsing the layout */
+[data-scrollrig-proxy],
+.scrollrig-proxy,
+.scrollrig-tunnel,
+.webgl-proxy,
+.webgl-background-proxy {
+  display: block !important;      /* avoid hard display:none collapse */
+  visibility: hidden !important;  /* keep it non-interactive/invisible */
+  opacity: 0 !important;
+  position: fixed !important;
+  pointer-events: none !important;
+}
+
 /* Header Glass */
 .header-glass {
   position: fixed;

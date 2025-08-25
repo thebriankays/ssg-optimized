@@ -16,6 +16,9 @@ import { BannerBlock } from '@/blocks/Banner/Component'
 import { CodeBlock } from '@/blocks/Code/Component'
 import { DestinationDetailBlock } from '@/blocks/DestinationDetailBlock/Component'
 import { WhatameshBlock } from '@/blocks/Whatamesh/Component'
+import { WebGLCarouselBlock } from '@/blocks/WebGLCarouselBlock/Component'
+import { ScrollingImagesBlock } from '@/blocks/ScrollingImagesBlock/Component'
+import { DolphinsBlock } from '@/blocks/DolphinsBlock/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -32,6 +35,9 @@ const blockComponents = {
   code: CodeBlock,
   destinationDetailBlock: DestinationDetailBlock,
   whatamesh: WhatameshBlock,
+  webglCarousel: WebGLCarouselBlock,
+  scrollingImages: ScrollingImagesBlock,
+  dolphins: DolphinsBlock,
 }
 
 export const RenderBlocks: React.FC<{

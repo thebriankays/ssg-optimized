@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import { GlobalCanvas, SmoothScrollbar } from '@14islands/r3f-scroll-rig'
+import { Preload, PerformanceMonitor } from '@react-three/drei'
 import { useCanvasStore } from '@/lib/stores/canvas-store'
+import { GlassOverlayMesh } from '@/components/canvas/GlassOverlay'
 
 interface CanvasProviderProps {
   children: React.ReactNode
@@ -10,34 +12,50 @@ interface CanvasProviderProps {
 
 export function CanvasProvider({ children }: CanvasProviderProps) {
   const [mounted, setMounted] = useState(false)
-  const { quality } = useCanvasStore()
-  const eventSourceRef = useRef<HTMLDivElement>(null!)
+  const eventSource = useRef<HTMLDivElement>(null!)
+  const { quality, setQuality } = useCanvasStore()
   
   useEffect(() => {
-    setMounted(true)
+    // Delay mount to ensure proper hydration
+    const timer = setTimeout(() => {
+      setMounted(true)
+    }, 100)
     
-    // Ensure canvas stays fixed after mount
-    const fixCanvas = () => {
-      const canvas = document.querySelector('canvas')
-      if (canvas && canvas.parentElement) {
-        // Force the canvas container to stay fixed
-        const container = canvas.parentElement
-        container.style.position = 'fixed'
-        container.style.top = '0'
-        container.style.left = '0'
-        container.style.width = '100vw'
-        container.style.height = '100vh'
-        container.style.zIndex = '-1'
-        container.style.pointerEvents = 'none'
-        container.style.transform = 'translateZ(0)' // Force GPU layer
+    // Force page-content to be visible
+    const pageContent = document.getElementById('page-content')
+    if (pageContent) {
+      pageContent.style.display = 'block'
+      pageContent.style.visibility = 'visible'
+      pageContent.style.opacity = '1'
+      
+      // Watch for style changes and prevent display:none
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            const target = mutation.target as HTMLElement
+            if (target.id === 'page-content' && window.getComputedStyle(target).display === 'none') {
+              console.warn('Preventing display:none on page-content')
+              target.style.display = 'block'
+              target.style.visibility = 'visible'
+              target.style.opacity = '1'
+            }
+          }
+        })
+      })
+      
+      observer.observe(pageContent, {
+        attributes: true,
+        attributeFilter: ['style']
+      })
+      
+      return () => {
+        clearTimeout(timer)
+        observer.disconnect()
       }
     }
     
-    fixCanvas()
-    const timer = setTimeout(fixCanvas, 100)
-    
     return () => clearTimeout(timer)
-  }, [mounted])
+  }, [])
   
   const dpr = 
     quality === 'low' ? [1, 1] as [number, number] :
@@ -46,72 +64,69 @@ export function CanvasProvider({ children }: CanvasProviderProps) {
 
   return (
     <>
-      {/* Scrollable content wrapper */}
-      <div 
-        ref={eventSourceRef}
-        id="scroll-container"
-        style={{ 
-          position: 'relative',
-          zIndex: 1,
-          minHeight: '100vh',
-        }}
-      >
+      {/* This wraps ALL page DOM that emits pointer/scroll events */}
+      <div id="page-content" ref={eventSource}>
         {children}
       </div>
+
+      {/* One native-smooth scroller */}
+      {mounted && <SmoothScrollbar />}
       
-      {/* Fixed canvas and smooth scrollbar */}
+      {/* One shared canvas. NO <UseCanvas> here. */}
       {mounted && (
-        <>
-          <SmoothScrollbar 
-            enabled={true}
-            config={{
-              lerp: 0.1,
-              smooth: true,
-              smartphone: { smooth: false },
-              tablet: { smooth: true },
-            }}
-          />
+        <GlobalCanvas
+          eventSource={eventSource}
+          eventPrefix="client"
+          frameloop="demand"
+          scaleMultiplier={0.01}
+          dpr={dpr}
+          gl={{ 
+            antialias: true, 
+            powerPreference: 'high-performance', 
+            alpha: true
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: -1,
+            pointerEvents: 'none',
+          }}
+          onCreated={(state: any) => {
+            state.gl.setClearColor(0x000000, 0)
+            state.gl.setClearAlpha(0)
+          }}
+        >
+          {/* Lights minimal defaults (heavy lights/effects should live inside leaf scenes) */}
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 10]} intensity={1} />
+          <PerformanceMonitor onDecline={() => {
+            console.warn('Performance declining, lowering quality')
+            if (quality !== 'low') {
+              if (quality === 'high') {
+                setQuality('medium')
+              } else if (quality === 'medium') {
+                setQuality('low')
+              }
+            }
+          }} />
+          <Preload all />
           
-          <GlobalCanvas
-            // Attach events to the scrollable container
-            eventSource={eventSourceRef}
-            eventPrefix="client"
-            frameloop="demand"
-            scaleMultiplier={0.01}
-            dpr={dpr}
-            camera={{
-              fov: 45,
-              near: 0.1,
-              far: 200,
-              position: [0, 0, 5],
-            }}
-            gl={{ 
-              antialias: quality !== 'low', 
-              powerPreference: 'high-performance', 
-              alpha: true,
-              stencil: false,
-              depth: true,
-            }}
-            shadows={quality !== 'low'}
-            style={{
-              position: 'fixed !important' as any,
-              top: '0 !important' as any,
-              left: '0 !important' as any,
-              width: '100vw !important' as any,
-              height: '100vh !important' as any,
-              zIndex: '-1 !important' as any,
-              pointerEvents: 'none !important' as any,
-              transform: 'translateZ(0)',
-            }}
-            onCreated={(state: any) => {
-              state.gl.setClearColor(0x000000, 0)
-              state.gl.setClearAlpha(0)
-            }}
-          >
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-          </GlobalCanvas>
-        </>
+          {/* Global Glass Overlay Effect */}
+          <GlassOverlayMesh 
+            enabled={quality !== 'low'} // Disable on low quality
+            intensity={0.3}
+            speed={0.2}
+            distortion={1.2}
+            frequency={2.0}
+            amplitude={0.015}
+            brightness={1.02}
+            contrast={1.02}
+            followMouse={true}
+          />
+        </GlobalCanvas>
       )}
     </>
   )

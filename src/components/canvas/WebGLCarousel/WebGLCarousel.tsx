@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { ViewportScrollScene } from '@/components/canvas/ViewportScrollScene'
+import { UseCanvas } from '@14islands/r3f-scroll-rig'
 import { GlassCard } from '@/components/ui/glass/GlassCard'
 import type { WebGLCarouselConfig, CarouselItem } from './types'
 
@@ -160,37 +161,40 @@ export function WebGLCarousel({
   }
   
   const currentItem = items[currentIndex]
+  const proxyRef = useRef<HTMLDivElement>(null)
   
   return (
-    <div 
-      ref={containerRef}
-      className={`webgl-carousel ${className}`}
-      data-cursor="-drag"
-      data-cursor-text="DRAG"
-    >
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-        style={{
-          width: '100%',
-          height: '100vh',
-          minHeight: '500px',
-          background: 'radial-gradient(circle, #2c3e50 0%, #1a1a1a 100%)',
-        }}
-      >
-        {() => (
-          <WebGLCarouselR3F
-            items={items}
-            radius={radius}
-            itemWidth={itemWidth}
-            itemHeight={itemHeight}
-            autoRotate={autoRotate}
-            rotateSpeed={rotateSpeed}
-            currentIndex={currentIndex}
-            onItemClick={handleItemClick}
-            onItemHover={handleItemHover}
-          />
-        )}
-      </ViewportScrollScene>
+    <section className={`block webgl-carousel ${className}`}>
+      <h2 className="mb-4 text-xl font-semibold">WebGL Carousel</h2>
+      
+      {/* SMALL proxy to track – this is key */}
+      <div 
+        ref={proxyRef} 
+        className="webgl-proxy h-[60vh] rounded-lg"
+        data-cursor="-drag"
+        data-cursor-text="DRAG"
+      />
+      
+      <UseCanvas>
+        <ViewportScrollScene
+          track={proxyRef as React.MutableRefObject<HTMLElement>}
+          hideOffscreen={false}
+        >
+          {() => (
+            <WebGLCarouselR3F
+              items={items}
+              radius={radius}
+              itemWidth={itemWidth}
+              itemHeight={itemHeight}
+              autoRotate={autoRotate}
+              rotateSpeed={rotateSpeed}
+              currentIndex={currentIndex}
+              onItemClick={handleItemClick}
+              onItemHover={handleItemHover}
+            />
+          )}
+        </ViewportScrollScene>
+      </UseCanvas>
       
       {/* Navigation */}
       {enableNavigation && (
@@ -307,6 +311,6 @@ export function WebGLCarousel({
           ))}
         </div>
       )}
-    </div>
+    </section>
   )
 }

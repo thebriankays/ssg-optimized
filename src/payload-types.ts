@@ -6315,7 +6315,48 @@ export interface SiteSetting {
   };
   glass?: {
     enabled?: boolean | null;
-    variant?: ('clear' | 'frosted' | 'refractive') | null;
+    variant?: ('clear' | 'frosted' | 'refractive' | 'holographic' | 'liquid') | null;
+    /**
+     * Configure the global WebGL glass overlay effect that enhances the entire interface
+     */
+    webglOverlay?: {
+      /**
+       * Adds a liquid glass distortion effect over the entire canvas
+       */
+      enabled?: boolean | null;
+      /**
+       * Overall intensity of the glass effect (0 = off, 1 = maximum)
+       */
+      intensity?: number | null;
+      /**
+       * Speed of the glass animation
+       */
+      speed?: number | null;
+      /**
+       * Amount of liquid distortion
+       */
+      distortion?: number | null;
+      /**
+       * Frequency of the distortion waves
+       */
+      frequency?: number | null;
+      /**
+       * Amplitude of the distortion waves
+       */
+      amplitude?: number | null;
+      /**
+       * Brightness adjustment
+       */
+      brightness?: number | null;
+      /**
+       * Contrast adjustment
+       */
+      contrast?: number | null;
+      /**
+       * Glass distortion follows mouse movement
+       */
+      followMouse?: boolean | null;
+    };
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -6399,6 +6440,19 @@ export interface SiteSettingsSelect<T extends boolean = true> {
     | {
         enabled?: T;
         variant?: T;
+        webglOverlay?:
+          | T
+          | {
+              enabled?: T;
+              intensity?: T;
+              speed?: T;
+              distortion?: T;
+              frequency?: T;
+              amplitude?: T;
+              brightness?: T;
+              contrast?: T;
+              followMouse?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;
