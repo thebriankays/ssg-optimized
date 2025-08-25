@@ -6,6 +6,7 @@ import { gsap } from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import { PageTransition } from './PageTransition'
 import { useTransitionStore } from '@/lib/stores/transition-store'
+import { usePageTransitionContext } from '@/lib/contexts/page-transition-context'
 
 // Register ScrollTrigger
 if (typeof window !== 'undefined') {
@@ -17,6 +18,7 @@ export function PageTransitionManager() {
   const pathname = usePathname()
   const containerRef = useRef<HTMLDivElement>(null)
   const { isTransitioning, direction, startTransition, endTransition } = useTransitionStore()
+  const { pageContentRef } = usePageTransitionContext()
   
   const isAnimatingRef = useRef(false)
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
@@ -26,23 +28,20 @@ export function PageTransitionManager() {
     if (isAnimatingRef.current) return
 
     // Skip animations for now - just ensure content is visible
-    gsap.set('#page-content', { 
-      opacity: 1, 
-      y: 0, 
-      pointerEvents: 'auto' 
-    })
+    if (pageContentRef.current) {
+      gsap.set(pageContentRef.current, { 
+        opacity: 1, 
+        y: 0, 
+        pointerEvents: 'auto' 
+      })
+    }
 
     // Refresh ScrollTrigger and resume scroll
     ScrollTrigger.refresh(true)
     document.documentElement.style.overflow = ''
     document.body.style.overflow = ''
-    
-    // Just refresh ScrollTrigger and resume scroll
-    ScrollTrigger.refresh(true)
-    document.documentElement.style.overflow = ''
-    document.body.style.overflow = ''
 
-  }, [pathname])
+  }, [pathname, pageContentRef])
 
   // Navigation handler for transition links
   const handleTransitionNavigation = useCallback((href: string) => {
@@ -58,7 +57,9 @@ export function PageTransitionManager() {
     timelineRef.current?.kill()
 
     // Skip animation for now - just disable pointer events
-    gsap.set('#page-content', { pointerEvents: 'none' })
+    if (pageContentRef.current) {
+      gsap.set(pageContentRef.current, { pointerEvents: 'none' })
+    }
 
     // Start WebGL transition out
     startTransition('out', href, () => {
@@ -67,7 +68,7 @@ export function PageTransitionManager() {
       isAnimatingRef.current = false
     })
 
-  }, [router, startTransition, endTransition])
+  }, [router, startTransition, endTransition, pageContentRef])
 
   // Click handler for transition links
   useEffect(() => {
@@ -133,9 +134,22 @@ export function PageTransitionManager() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      // Kill any running timeline
       timelineRef.current?.kill()
+      
+      // Clear any inline styles applied to page content
+      if (pageContentRef.current) {
+        gsap.set(pageContentRef.current, { clearProps: 'all' })
+      }
+      
+      // Restore scroll
+      document.documentElement.style.overflow = ''
+      document.body.style.overflow = ''
+      
+      // Kill all ScrollTriggers
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
     }
-  }, [])
+  }, [pageContentRef])
 
   return (
     <>

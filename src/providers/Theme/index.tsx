@@ -25,8 +25,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   useEffect(() => {
-    // Always set to light theme
-    document.documentElement.setAttribute('data-theme', 'light')
+    // Theme is already set on the server, just update state
     setThemeState('light')
   }, [])
 

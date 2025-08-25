@@ -36,7 +36,8 @@
       "Bash(npx payload:*)",
       "Bash(curl:*)",
       "Bash(npx kill-port:*)",
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }

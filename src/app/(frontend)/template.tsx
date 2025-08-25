@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { usePageTransitionContext } from '@/lib/contexts/page-transition-context'
 
 interface TemplateProps {
   children: React.ReactNode
@@ -8,12 +9,13 @@ interface TemplateProps {
 
 export default function Template({ children }: TemplateProps) {
   const pathname = usePathname()
+  const { pageContentRef } = usePageTransitionContext()
 
   return (
     <div
-      id="page-content"
-      key={pathname}
+      ref={pageContentRef}
       className="min-h-screen"
+      data-page-content
     >
       {children}
     </div>

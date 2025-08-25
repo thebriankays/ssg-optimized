@@ -2,7 +2,7 @@
 
 import { GlobalCanvas, SmoothScrollbar } from '@14islands/r3f-scroll-rig'
 import { Preload, PerformanceMonitor } from '@react-three/drei'
-import { ReactNode, useRef, useState, useEffect } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import { useCanvasStore } from '@/lib/stores/canvas-store'
 import { GlobalCanvasContent } from '@/components/GlobalCanvasContent'
 // import { Perf } from 'r3f-perf'
@@ -37,17 +37,9 @@ export function CanvasProvider({ children }: CanvasProviderProps) {
     return () => clearTimeout(id)
   }, [])
   
-  // Don't render canvas until mounted on client
-  if (!mounted) {
-    return <>{children}</>
-  }
-
   return (
     <>
-      {/* DOM Content */}
-      {children}
-
-      {/* GlobalCanvas from scroll-rig */}
+      {/* GlobalCanvas from scroll-rig - render first as per docs */}
       {mounted && (
         <GlobalCanvas
           eventPrefix="client"
@@ -103,7 +95,7 @@ export function CanvasProvider({ children }: CanvasProviderProps) {
         </GlobalCanvas>
       )}
 
-      {/* Smooth Scrollbar */}
+      {/* Smooth Scrollbar - before content as per docs */}
       {mounted && (
         <SmoothScrollbar
           enabled={true}
@@ -119,6 +111,9 @@ export function CanvasProvider({ children }: CanvasProviderProps) {
           }}
         />
       )}
+      
+      {/* DOM Content - render last as per docs */}
+      {children}
     </>
   )
 }

@@ -45,24 +45,30 @@ export function WebGLTextWrapper({
   const [velocity, setVelocity] = useState(0)
   
   return (
-    <div ref={containerRef} className={`webgl-text-wrapper ${className}`} style={style}>
-      <ViewportScrollScene
-        track={containerRef as React.MutableRefObject<HTMLElement>}
-      >
-        {() => (
-          <>
-            <ScrollVelocityTracker onVelocityChange={setVelocity} />
-            <WebGLText {...textProps} />
-            {enablePostProcessing && (
-              <PostProcessing 
-                velocity={scrollVelocity || velocity}
-                distortion={1}
-                rgbShift={1}
-              />
-            )}
-          </>
-        )}
-      </ViewportScrollScene>
-    </div>
+    <>
+      {/* DOM element for tracking - stays visible */}
+      <div ref={containerRef} className={`webgl-text-wrapper ${className}`} style={style} />
+      
+      {/* WebGL content only - gets tunneled to canvas */}
+      <UseCanvas>
+        <ViewportScrollScene
+          track={containerRef as React.MutableRefObject<HTMLElement>}
+        >
+          {() => (
+            <>
+              <ScrollVelocityTracker onVelocityChange={setVelocity} />
+              <WebGLText {...textProps} />
+              {enablePostProcessing && (
+                <PostProcessing 
+                  velocity={scrollVelocity || velocity}
+                  distortion={1}
+                  rgbShift={1}
+                />
+              )}
+            </>
+          )}
+        </ViewportScrollScene>
+      </UseCanvas>
+    </>
   )
 }

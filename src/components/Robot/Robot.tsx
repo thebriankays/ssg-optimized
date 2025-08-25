@@ -401,8 +401,13 @@ function Model({ onLoaded, currentState = 'idle', ...props }: ModelProps) {
 function SceneContent() {
   const [modelLoaded, setModelLoaded] = useState(false)
   const [robotState, setRobotState] = useState<'idle' | 'thinking' | 'talking' | 'excited' | 'welcome' | 'flipped'>('idle')
-  const [lastActivityTime, setLastActivityTime] = useState(Date.now())
+  const [lastActivityTime, setLastActivityTime] = useState(0)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Initialize lastActivityTime on client
+  useEffect(() => {
+    setLastActivityTime(Date.now())
+  }, [])
 
   // Listen for global state changes with activity tracking
   useEffect(() => {

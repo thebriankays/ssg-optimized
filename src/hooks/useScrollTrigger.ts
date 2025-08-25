@@ -103,7 +103,7 @@ export function useScrollTriggerBatch(
 
     const batch = ScrollTrigger.batch(targets, {
       ...config,
-      onRefreshInit: () => gsap.set(targets, { opacity: 0 }),
+      // Removed opacity: 0 to prevent content from disappearing
       onEnter: config.onEnter as any,
       onLeave: config.onLeave as any,
       onEnterBack: config.onEnterBack as any,
