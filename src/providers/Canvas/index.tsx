@@ -26,16 +26,25 @@ export function CanvasProvider({ children }: CanvasProviderProps) {
   const antialias = quality !== 'low'
   const shadows = quality !== 'low'
   
-  // Ensure client-side only
+  // Ensure client-side only and wait for DOM to settle
   useEffect(() => {
-    setMounted(true)
+    // Add a small delay to ensure DOM is fully ready
+    const mountTimeout = setTimeout(() => {
+      setMounted(true)
+      // Force a reflow to ensure styles are applied
+      document.body.offsetHeight
+    }, 50)
+    
+    return () => clearTimeout(mountTimeout)
   }, [])
   
   // Delay preload for better performance
   useEffect(() => {
-    const id = setTimeout(() => setStartPreload(true), 800)
-    return () => clearTimeout(id)
-  }, [])
+    if (mounted) {
+      const id = setTimeout(() => setStartPreload(true), 800)
+      return () => clearTimeout(id)
+    }
+  }, [mounted])
   
   return (
     <>
@@ -43,7 +52,7 @@ export function CanvasProvider({ children }: CanvasProviderProps) {
       {mounted && (
         <GlobalCanvas
           eventPrefix="client"
-          frameloop="always"
+          frameloop="demand" // Changed to demand for better performance
           dpr={dpr}
           camera={{
             fov: 45,
@@ -67,7 +76,7 @@ export function CanvasProvider({ children }: CanvasProviderProps) {
             width: '100%',
             height: '100%',
             pointerEvents: 'none',
-            zIndex: -10,
+            zIndex: 1, // Changed from -10 to 1 to be above body but below content
           }}
           onCreated={(state: any) => {
             // Set clear color to transparent so CSS gradient shows through
