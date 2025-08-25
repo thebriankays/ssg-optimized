@@ -258,6 +258,25 @@ body {
 /* When WebGL loads and is ready, the canvas will cover this background */
 /* The canvas has position: fixed and will overlay the body gradient */
 
+/* R3F Scroll-Rig Integration Styles */
+/* Ensure page wrapper stays visible */
+#page-wrapper {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+}
+
+/* Hide proxy elements properly without breaking layout */
+[data-scrollrig-proxy] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Ensure canvas is positioned correctly */
+canvas {
+  display: block !important;
+}
+
 /* Header Glass */
 .header-glass {
   position: fixed;
@@ -266,58 +285,6 @@ body {
   right: 0;
   z-index: 50;
   transition: all 0.3s ease;
-}
-
-/* Critical Fix for r3f-scroll-rig content disappearing issue */
-/* The issue: scroll-rig applies display:none to proxy elements during hydration */
-
-/* Force all main content containers to remain visible */
-main,
-[data-page-content],
-#page-content,
-.app-content-wrapper,
-div[class*="min-h-screen"],
-body > div:not(#__next-build-watcher) {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Override any scroll-rig proxy hiding */
-[data-scrollrig-proxy] {
-  /* Use visibility instead of display to maintain layout */
-  visibility: hidden !important;
-  pointer-events: none !important;
-  /* Never use display: none */
-  display: block !important;
-}
-
-/* Ensure blocks and sections stay visible */
-section,
-article,
-.block,
-[class*="block"],
-[class*="section"] {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* WebGL view elements should be invisible but maintain layout */
-.webgl-view,
-[data-webgl-placeholder] {
-  visibility: hidden;
-  pointer-events: none;
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-}
-
-/* Ensure the canvas itself is visible */
-canvas {
-  display: block !important;
-  visibility: visible !important;
 }
 
 /* Accessibility */
