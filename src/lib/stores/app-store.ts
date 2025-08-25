@@ -9,6 +9,15 @@ interface Location {
   description?: string
 }
 
+interface BackgroundSettings {
+  type: 'none' | 'gradient' | 'particles' | 'fluid' | 'whatamesh'
+  color1: string
+  color2: string
+  color3: string
+  color4: string
+  intensity: number
+}
+
 interface AppState {
   // Navigation
   isMenuOpen: boolean
@@ -29,6 +38,8 @@ interface AppState {
   // WebGL
   webglEnabled: boolean
   setWebglEnabled: (enabled: boolean) => void
+  backgroundSettings: BackgroundSettings | null
+  setBackgroundSettings: (settings: BackgroundSettings) => void
   
   // Preferences
   preferences: {
@@ -50,6 +61,7 @@ export const useAppStore = create<AppState>()(
         locations: [],
         selectedLocation: null,
         webglEnabled: true,
+        backgroundSettings: null,
         preferences: {
           reducedMotion: false,
           highContrast: false,
@@ -86,6 +98,11 @@ export const useAppStore = create<AppState>()(
         setWebglEnabled: (enabled) =>
           set((state) => {
             state.webglEnabled = enabled
+          }),
+          
+        setBackgroundSettings: (settings) =>
+          set((state) => {
+            state.backgroundSettings = settings
           }),
           
         updatePreferences: (prefs) =>

@@ -20,7 +20,7 @@ function GlobalCanvasContentInner() {
   const containerRef = useRef<HTMLElement>(null!)
   const { isTransitioning, direction, onComplete } = useTransitionStore()
   const [isReady, setIsReady] = useState(false)
-  const [backgroundSettings, setBackgroundSettings] = useState<any>(null)
+  const backgroundSettings = useAppStore((state) => state.backgroundSettings)
   const webglEnabled = useAppStore((state) => state.webglEnabled)
   const { gl } = useThree()
   
@@ -35,55 +35,6 @@ function GlobalCanvasContentInner() {
     }
   }, [gl])
   
-  // Fetch background settings from site settings
-  useEffect(() => {
-    fetch('/api/globals/site-settings')
-      .then(res => res.json())
-      .then(data => {
-        if (data?.webgl?.background) {
-          
-          // Check if colors are too dark (all black/gray colors)
-          const bg = data.webgl.background
-          const isDark = [bg.color1, bg.color2, bg.color3, bg.color4].every(color => {
-            // Check if color is very dark (close to black)
-            return color && (color.startsWith('#0') || color.startsWith('#1') || color.startsWith('#2') || color.startsWith('#3'))
-          })
-          
-          if (isDark) {
-            setBackgroundSettings({
-              ...bg,
-              color1: DEFAULT_GRADIENT_COLORS[0],
-              color2: DEFAULT_GRADIENT_COLORS[1],
-              color3: DEFAULT_GRADIENT_COLORS[2],
-              color4: DEFAULT_GRADIENT_COLORS[3],
-            })
-          } else {
-            setBackgroundSettings(data.webgl.background)
-          }
-        } else {
-          // Fallback to default Whatamesh if no settings found
-          setBackgroundSettings({
-            type: 'whatamesh',
-            color1: DEFAULT_GRADIENT_COLORS[0],
-            color2: DEFAULT_GRADIENT_COLORS[1],
-            color3: DEFAULT_GRADIENT_COLORS[2],
-            color4: DEFAULT_GRADIENT_COLORS[3],
-            intensity: 0.5
-          })
-        }
-      })
-      .catch(err => {
-        // Fallback to default on error
-        setBackgroundSettings({
-          type: 'whatamesh',
-          color1: DEFAULT_GRADIENT_COLORS[0],
-          color2: DEFAULT_GRADIENT_COLORS[1],
-          color3: DEFAULT_GRADIENT_COLORS[2],
-          color4: DEFAULT_GRADIENT_COLORS[3],
-          intensity: 0.5
-        })
-      })
-  }, [])
   
   // Set up container ref from DOM
   useEffect(() => {
@@ -120,13 +71,13 @@ function GlobalCanvasContentInner() {
   return (
     <>
       {/* Animated Whatamesh background */}
-      {isReady && backgroundSettings && (
+      {isReady && backgroundSettings && backgroundSettings.type === 'whatamesh' && (
         <WhatameshSimple
           colors={[
-            backgroundSettings?.color1 || DEFAULT_GRADIENT_COLORS[0],
-            backgroundSettings?.color2 || DEFAULT_GRADIENT_COLORS[1],
-            backgroundSettings?.color3 || DEFAULT_GRADIENT_COLORS[2],
-            backgroundSettings?.color4 || DEFAULT_GRADIENT_COLORS[3],
+            backgroundSettings.color1 || DEFAULT_GRADIENT_COLORS[0],
+            backgroundSettings.color2 || DEFAULT_GRADIENT_COLORS[1],
+            backgroundSettings.color3 || DEFAULT_GRADIENT_COLORS[2],
+            backgroundSettings.color4 || DEFAULT_GRADIENT_COLORS[3],
           ]}
         />
       )}
@@ -180,7 +131,8 @@ function FullscreenGradient({ colors }: { colors: string[] }) {
   // Create gradient geometry with vertex colors
   const geometry = useMemo(() => {
     const geo = new THREE.PlaneGeometry(1, 1, 1, 1)
-    const colors = new Float32Array([
+    // Fix: Rename the local variable to avoid conflict with the 'colors' prop
+    const vertexColors = new Float32Array([
       // Top left - color1
       ...new THREE.Color(colors[0]).toArray(),
       // Top right - color2  
@@ -190,7 +142,7 @@ function FullscreenGradient({ colors }: { colors: string[] }) {
       // Bottom right - color4
       ...new THREE.Color(colors[3]).toArray(),
     ])
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+    geo.setAttribute('color', new THREE.BufferAttribute(vertexColors, 3))
     return geo
   }, [colors])
   

@@ -16,6 +16,12 @@ export default function Template({ children }: TemplateProps) {
       ref={pageContentRef}
       className="min-h-screen"
       data-page-content
+      style={{
+        position: 'relative',
+        zIndex: 1000,
+        backgroundColor: 'transparent',
+        pointerEvents: 'auto',
+      }}
     >
       {children}
     </div>

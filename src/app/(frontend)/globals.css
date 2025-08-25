@@ -258,6 +258,55 @@ body {
 /* When WebGL loads and is ready, the canvas will cover this background */
 /* The canvas has position: fixed and will overlay the body gradient */
 
+/* FORCE CANVAS BEHIND CONTENT */
+/* Target the GlobalCanvas specifically */
+div:has(> canvas) {
+  z-index: -100 !important;
+  position: fixed !important;
+  pointer-events: none !important;
+}
+
+/* Canvas and Content Layering */
+body {
+  position: relative;
+}
+
+/* Ensure canvas stays behind */
+canvas {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  z-index: -1 !important;
+  pointer-events: none !important;
+}
+
+/* Ensure all content stays above canvas */
+main,
+header,
+footer,
+section,
+article,
+div[class*="container"],
+div[class*="wrapper"] {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure ALL page content stays above */
+#__next > div,
+body > div:not(:has(canvas)) {
+  position: relative;
+  z-index: 10 !important;
+}
+
+/* Force the template wrapper above canvas */
+[data-page-content] {
+  position: relative !important;
+  z-index: 100 !important;
+  background: transparent;
+  pointer-events: auto !important;
+}
+
 /* R3F Scroll-Rig Integration Styles */
 /* Ensure page wrapper stays visible */
 #page-wrapper {

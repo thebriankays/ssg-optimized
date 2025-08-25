@@ -33,7 +33,8 @@ export function Background({
 }: BackgroundProps) {
   const [mounted, setMounted] = useState(false)
   const webglEnabled = useAppStore((state) => state.webglEnabled)
-  const containerRef = useRef<HTMLDivElement>(null)
+  // Fix: Use proper type for ref
+  const containerRef = useRef<HTMLDivElement>(null!) as React.MutableRefObject<HTMLElement>
   
   useEffect(() => {
     setMounted(true)
@@ -45,21 +46,25 @@ export function Background({
   
   return (
     <>
-      {/* DOM placeholder - this stays in the document flow */}
+      {/* Fixed background container */}
       <div 
-        ref={containerRef} 
-        className={`background-container fixed inset-0 pointer-events-none ${className}`}
-        style={{ zIndex: 0 }}
+        ref={containerRef as any} 
+        className="fixed inset-0 pointer-events-none"
+        style={{ 
+          zIndex: -1,
+          transform: 'translateZ(0)', // Force GPU layer
+        }}
       />
       
-      {/* WebGL content - only this gets tunneled to the canvas */}
-      {containerRef.current && (
+      {/* WebGL content */}
+      {mounted && containerRef.current && (
         <UseCanvas>
           <ViewportScrollScene
             track={containerRef}
             hideOffscreen={false}
             inViewportMargin="0%"
-            hud // Render as HUD to stay in background
+            hud // Keep in background layer
+            priority={-1} // Lower priority for background
           >
             {() => {
               switch (settings.type) {
@@ -67,12 +72,12 @@ export function Background({
                   return (
                     <Whatamesh
                       colors={[
-                        settings.color1,
-                        settings.color2,
-                        settings.color3,
-                        settings.color4,
+                        settings.color1 || '#dca8d8',
+                        settings.color2 || '#a3d3f9',
+                        settings.color3 || '#fcd6d6',
+                        settings.color4 || '#eae2ff',
                       ]}
-                      amplitude={320 * settings.intensity}
+                      amplitude={320 * (settings.intensity || 0.5)}
                       speed={1}
                       darkenTop={true}
                     />
@@ -82,9 +87,33 @@ export function Background({
                     <mesh>
                       <planeGeometry args={[10, 10]} />
                       <meshBasicMaterial
-                        color={settings.color1}
+                        color={settings.color1 || '#000000'}
                         transparent
-                        opacity={settings.intensity}
+                        opacity={settings.intensity || 0.5}
+                      />
+                    </mesh>
+                  )
+                case 'particles':
+                  // TODO: Implement particles background
+                  return (
+                    <mesh>
+                      <planeGeometry args={[10, 10]} />
+                      <meshBasicMaterial
+                        color={settings.color1 || '#1a1a1a'}
+                        transparent
+                        opacity={0.8}
+                      />
+                    </mesh>
+                  )
+                case 'fluid':
+                  // TODO: Implement fluid background
+                  return (
+                    <mesh>
+                      <planeGeometry args={[10, 10]} />
+                      <meshBasicMaterial
+                        color={settings.color1 || '#0a0a0a'}
+                        transparent
+                        opacity={0.9}
                       />
                     </mesh>
                   )
@@ -97,23 +126,4 @@ export function Background({
       )}
     </>
   )
-}
-
-// Export a hook to get background settings from SiteSettings
-export function useBackgroundSettings() {
-  const [settings, setSettings] = useState<BackgroundSettings | null>(null)
-  
-  useEffect(() => {
-    // Default settings for now
-    setSettings({
-      type: 'whatamesh',
-      color1: '#dca8d8',
-      color2: '#a3d3f9', 
-      color3: '#fcd6d6',
-      color4: '#eae2ff',
-      intensity: 0.5,
-    })
-  }, [])
-  
-  return settings
 }
