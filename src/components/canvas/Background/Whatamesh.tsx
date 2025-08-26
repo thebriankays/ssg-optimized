@@ -286,7 +286,7 @@ export function Whatamesh({
   
   const meshRef = useRef<THREE.Mesh>(null)
   const { size } = useThree()
-  const quality = useCanvasStore((state) => state.quality)
+  const quality = useCanvasStore((state) => state.quality) || 'medium'
   
   // Adjust density based on quality
   const meshDensity = useMemo(() => {
@@ -295,22 +295,28 @@ export function Whatamesh({
       medium: 0.75,
       high: 1,
       ultra: 1.25,
-    }[quality]
+    }[quality] || 0.75
     
-    const width = Math.round(size.width * density[0] * qualityMultiplier)
-    const height = Math.round(size.height * density[1] * qualityMultiplier)
+    const safeWidth = size?.width || 1920
+    const safeHeight = size?.height || 1080
     
-    return [Math.max(16, width), Math.max(16, height)]
+    const width = Math.round(safeWidth * density[0] * qualityMultiplier)
+    const height = Math.round(safeHeight * density[1] * qualityMultiplier)
+    
+    return [Math.max(16, width || 16), Math.max(16, height || 16)]
   }, [size, density, quality])
   
   const uniforms = useMemo(() => {
     // Convert hex colors to Three.js Color instances
     const colorArray = colors.map(hex => new THREE.Color(hex))
     
+    const safeWidth = size?.width || 1920
+    const safeHeight = size?.height || 1080
+    
     return {
       u_time: { value: 0 },
-      u_resolution: { value: new THREE.Vector2(size.width, size.height) },
-      u_ratio: { value: size.width / size.height },
+      u_resolution: { value: new THREE.Vector2(safeWidth, safeHeight) },
+      u_ratio: { value: safeWidth / safeHeight },
       u_pointSize: { value: 1 },
       
       // Colors
@@ -346,7 +352,7 @@ export function Whatamesh({
       
       // Effects
       u_darken_top: { value: darkenTop ? 1.0 : 0.0 },
-      u_shadow_power: { value: size.width < 600 ? 5.0 : 6.0 },
+      u_shadow_power: { value: safeWidth < 600 ? 5.0 : 6.0 },
     }
   }, [colors, amplitude, speed, seed, darkenTop, size])
   
@@ -366,7 +372,9 @@ export function Whatamesh({
   })
   
   // Calculate the proper scale to fill the viewport
-  const aspect = size.width / size.height
+  const safeWidth = size?.width || 1920
+  const safeHeight = size?.height || 1080
+  const aspect = safeWidth / safeHeight
   const distance = 5 // Camera distance
   const vFov = 45 * (Math.PI / 180) // Convert FOV to radians
   const planeHeight = 2 * Math.tan(vFov / 2) * distance

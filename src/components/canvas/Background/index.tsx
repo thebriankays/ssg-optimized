@@ -83,7 +83,7 @@ export function Background({
                         settings.color3,
                         settings.color4,
                       ]}
-                      amplitude={3.2 * settings.intensity}
+                      amplitude={320}
                       speed={1}
                       darkenTop={false}
                     />
