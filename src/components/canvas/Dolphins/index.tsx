@@ -346,23 +346,10 @@ function DolphinsScene({ scale, scrollState, inViewport }: any) {
 function DolphinsSection({ waterColor, skyColor, showSky }: { waterColor: string, skyColor: string, showSky: boolean }) {
   const proxyRef = useRef<HTMLDivElement>(null) as MutableRefObject<HTMLElement>
   const [isActive, setIsActive] = useState(false)
-  const [canvasReady, setCanvasReady] = useState(false)
   
   useEffect(() => {
     // Mark as active after mount to hide the gradient proxy
     setIsActive(true)
-    
-    // Check if GlobalCanvas exists
-    const checkCanvas = () => {
-      const canvas = document.querySelector('canvas')
-      console.log('Checking for canvas:', canvas)
-      if (canvas) {
-        setCanvasReady(true)
-      } else {
-        setTimeout(checkCanvas, 100)
-      }
-    }
-    checkCanvas()
   }, [])
   
   return (
@@ -387,23 +374,21 @@ function DolphinsSection({ waterColor, skyColor, showSky }: { waterColor: string
       </div>
 
       {/* Always mount the scene - no hasSmoothScrollbar gate */}
-      {canvasReady && (
-        <UseCanvas>
-          <ViewportScrollScene track={proxyRef} hideOffscreen={false}>
-            {(props) => {
-              console.log('ViewportScrollScene render props:', props)
-              return (
-                // Let the rig position/clip the group
-                <group {...props}>
-                  <Suspense fallback={null}>
-                    <DolphinsScene {...props} />
-                  </Suspense>
-                </group>
-              )
-            }}
-          </ViewportScrollScene>
-        </UseCanvas>
-      )}
+      <UseCanvas>
+        <ViewportScrollScene track={proxyRef} hideOffscreen={false}>
+          {(props) => {
+            console.log('ViewportScrollScene render props:', props)
+            return (
+              // Let the rig position/clip the group
+              <group {...props}>
+                <Suspense fallback={null}>
+                  <DolphinsScene {...props} />
+                </Suspense>
+              </group>
+            )
+          }}
+        </ViewportScrollScene>
+      </UseCanvas>
     </>
   )
 }
