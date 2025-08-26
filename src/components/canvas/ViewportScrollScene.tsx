@@ -23,9 +23,10 @@ interface ViewportScrollSceneProps {
   camera?: any
   margin?: number
   orthographic?: boolean
+  scissor?: boolean
 }
 
-export function ViewportScrollScene({
+export default function ViewportScrollScene({
   children,
   track,
   className,
@@ -40,6 +41,7 @@ export function ViewportScrollScene({
   camera,
   margin,
   orthographic = false,
+  scissor = false,
 }: ViewportScrollSceneProps) {
   // NOTE: This component should be used INSIDE a UseCanvas wrapper
   // Do not wrap it with UseCanvas here to avoid tunneling DOM content
@@ -56,6 +58,7 @@ export function ViewportScrollScene({
       camera={camera}
       margin={margin}
       orthographic={orthographic}
+      scissor={scissor}
     >
       {children}
     </R3FViewportScrollScene>

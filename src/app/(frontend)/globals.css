@@ -349,6 +349,11 @@ canvas {
   transition: all 0.3s ease;
 }
 
+/* Dolphins scene proxy fix - hide gradient when scene is active */
+.dolphins-proxy[data-active="true"] {
+  visibility: hidden;   /* keeps layout; avoids the earlier display:none collapse */
+}
+
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,
