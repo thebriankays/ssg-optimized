@@ -14,7 +14,6 @@ import { draftMode } from 'next/headers'
 import { GlobalBackground } from '@/components/GlobalBackground'
 import { getServerSideURL } from '@/utilities/getURL'
 import './globals.css'
-import './canvas-fix.css'
 import '@/components/ui/glass/glass-styles.scss'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

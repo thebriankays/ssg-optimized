@@ -1,8 +1,7 @@
 'use client'
 
-import { useRef, useEffect, useState, Suspense, useMemo, useCallback } from 'react'
-import { UseCanvas } from '@14islands/r3f-scroll-rig'
-import ViewportScrollScene from '@/components/canvas/ViewportScrollScene'
+import { useRef, useEffect, useState, Suspense, useMemo, useCallback, MutableRefObject } from 'react'
+import { ViewportScrollScene, UseCanvas } from '@14islands/r3f-scroll-rig'
 import { useFrame, useThree, extend } from '@react-three/fiber'
 import { OrbitControls, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
@@ -10,6 +9,7 @@ import { Water } from './Water'
 import { Sky } from './Sky'
 import gsap from 'gsap'
 import { CustomEase } from 'gsap/CustomEase'
+import { useGSAP } from '@gsap/react'
 
 // Register CustomEase plugin
 if (typeof window !== 'undefined') {
@@ -27,7 +27,8 @@ function map(value: number, sMin: number, sMax: number, dMin: number, dMax: numb
 /* ---------------- Ocean Component ---------------- */
 function Ocean({ onWaterRef }: { onWaterRef?: (water: Water | null) => void }) {
   const waterRef = useRef<Water>(null)
-  const { scene, gl } = useThree()
+  const { scene } = useThree()
+  const materialRef = useRef<THREE.ShaderMaterial | null>(null)
   
   const waterNormals = useMemo(() => {
     const texture = new THREE.TextureLoader().load('/dolphin-waternormals.jpg', (texture) => {
@@ -68,12 +69,17 @@ function Ocean({ onWaterRef }: { onWaterRef?: (water: Water | null) => void }) {
 }
 
 /* ---------------- Animated Dolphin Component ---------------- */
-function AnimatedDolphin({ curve, playHead, index }: { curve: THREE.CatmullRomCurve3; playHead: { value: number }; index: number }) {
+function AnimatedDolphin({ curve, playHead, scale }: { curve: THREE.CatmullRomCurve3; playHead: { value: number }; scale: number }) {
   const groupRef = useRef<THREE.Group>(null)
   const gltf = useGLTF('/dolphin.glb')
   
   const { geometry, material } = useMemo(() => {
+    console.log('Dolphin GLTF loaded:', gltf)
     const mesh = gltf.scene.children[0] as THREE.Mesh
+    if (!mesh || !mesh.geometry) {
+      console.error('No mesh found in dolphin.glb')
+      return { geometry: new THREE.BoxGeometry(1, 1, 1), material: new THREE.MeshBasicMaterial({ color: 'red' }) }
+    }
     const clonedGeometry = mesh.geometry.clone()
     clonedGeometry.rotateZ(-Math.PI * 0.5)
     return { geometry: clonedGeometry, material: mesh.material }
@@ -181,14 +187,14 @@ function AnimatedDolphin({ curve, playHead, index }: { curve: THREE.CatmullRomCu
   })
   
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} scale={scale * 0.01}>
       <mesh geometry={geometry} material={shaderMaterial} />
     </group>
   )
 }
 
 /* ---------------- Dolphins Scene Component ---------------- */
-function DolphinsScene() {
+function DolphinsScene({ scale, scrollState, inViewport }: any) {
   const { camera, scene, gl } = useThree()
   const waterRef = useRef<Water | null>(null)
   const skyRef = useRef<Sky | null>(null)
@@ -197,34 +203,27 @@ function DolphinsScene() {
   const playHead3 = useRef({ value: 0 })
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
   
-  // Setup camera
   useEffect(() => {
-    camera.position.set(3.159, 12.559, 162.851)
-    camera.rotation.set(-0.0157, 0.0194, 0.0003)
-    camera.updateProjectionMatrix()
-  }, [camera])
+    console.log('DolphinsScene mounted, scale:', scale, 'inViewport:', inViewport)
+  }, [scale, inViewport])
   
   // Setup GSAP timeline
-  useEffect(() => {
-    if (typeof window !== 'undefined' && CustomEase && gsap) {
+  useGSAP(() => {
+    if (typeof window !== 'undefined' && CustomEase) {
       const ease = CustomEase.create(
         "custom",
         "M0,0,C0.042,0.224,0.268,0.35,0.524,0.528,0.708,0.656,0.876,0.808,1,1"
       )
       
       const tl = gsap.timeline({ repeat: -1, repeatDelay: 1 })
+      tl.set([playHead1.current, playHead2.current, playHead3.current], { value: 0 }, 0)
       tl.to(playHead1.current, { value: 1, duration: 3, ease }, 0.3)
       tl.to(playHead2.current, { value: 1, duration: 3, ease }, 0)
       tl.to(playHead3.current, { value: 1, duration: 3, ease }, 0.4)
       
-      // Reset playheads on repeat
-      tl.set([playHead1.current, playHead2.current, playHead3.current], { value: 0 }, 0)
-      
       timelineRef.current = tl
       
-      return () => {
-        tl.kill()
-      }
+      // Cleanup handled automatically by useGSAP
     }
   }, [])
   
@@ -295,10 +294,13 @@ function DolphinsScene() {
     }
   }, [scene, gl])
   
-  // No need for useFrame animation as GSAP handles it
+  // Get scale value for scene - handle the vecn type properly
+  const sceneScale = scale ? scale.xy.min() * 0.5 : 1
+  
+  console.log('DolphinsScene rendering, sceneScale:', sceneScale)
   
   return (
-    <>
+    <group>
       {/* Ambient Light */}
       <ambientLight intensity={0.6} />
       
@@ -330,65 +332,106 @@ function DolphinsScene() {
       
       {/* Animated dolphins */}
       <Suspense fallback={null}>
-        <AnimatedDolphin curve={curves.curve1} playHead={playHead1.current} index={0} />
-        <AnimatedDolphin curve={curves.curve2} playHead={playHead2.current} index={1} />
-        <AnimatedDolphin curve={curves.curve3} playHead={playHead3.current} index={2} />
+        <AnimatedDolphin curve={curves.curve1} playHead={playHead1.current} scale={1} />
+        <AnimatedDolphin curve={curves.curve2} playHead={playHead2.current} scale={1} />
+        <AnimatedDolphin curve={curves.curve3} playHead={playHead3.current} scale={1} />
       </Suspense>
       
-      {/* Camera controls */}
-      <OrbitControls
-        enablePan={true}
-        enableZoom={true}
-        maxPolarAngle={Math.PI * 0.495}
-        target={[0, 10, 0]}
-        minDistance={40}
-        maxDistance={200}
-      />
-    </>
+      {/* Camera controls removed - scroll-rig manages camera */}
+    </group>
   )
 }
 
-/* ---------------- Public Dolphins Component ---------------- */
-export function Dolphins({ className = '' }: { className?: string }) {
-  const proxy = useRef<HTMLDivElement | null>(null)
-  const [active, setActive] = useState(false)
+/* ---------------- Main Dolphins Component ---------------- */
+function DolphinsSection({ waterColor, skyColor, showSky }: { waterColor: string, skyColor: string, showSky: boolean }) {
+  const proxyRef = useRef<HTMLDivElement>(null) as MutableRefObject<HTMLElement>
+  const [isActive, setIsActive] = useState(false)
+  const [canvasReady, setCanvasReady] = useState(false)
   
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setActive(true)
-    }, 100)
-    return () => clearTimeout(timer)
+    // Mark as active after mount to hide the gradient proxy
+    setIsActive(true)
+    
+    // Check if GlobalCanvas exists
+    const checkCanvas = () => {
+      const canvas = document.querySelector('canvas')
+      console.log('Checking for canvas:', canvas)
+      if (canvas) {
+        setCanvasReady(true)
+      } else {
+        setTimeout(checkCanvas, 100)
+      }
+    }
+    checkCanvas()
   }, [])
   
   return (
     <>
-      <div className={`dolphins-scene ${className}`} style={{ position: 'relative' }}>
+      {/* DOM proxy that defines the block size & gradient */}
+      <div className="dolphins-scene">
         <div
-          ref={proxy}
-          data-active={active ? 'true' : 'false'}
+          ref={proxyRef as any}
+          data-active={isActive}
           className="dolphins-proxy"
           style={{
             height: '100vh',
             minHeight: '600px',
             width: '100%',
-            background: '#87CEEB',
+            background: showSky
+              ? `linear-gradient(to bottom, ${skyColor} 0%, ${waterColor} 50%, #000080 100%)`
+              : waterColor,
             position: 'relative',
-            overflow: 'hidden',
+            visibility: isActive ? 'hidden' : 'visible', // Hide after scene mounts
           }}
         />
       </div>
-      
-      {active && (
+
+      {/* Always mount the scene - no hasSmoothScrollbar gate */}
+      {canvasReady && (
         <UseCanvas>
-          <ViewportScrollScene track={proxy as React.RefObject<HTMLElement>} hideOffscreen={false}>
-            {(props) => (
-              <group {...props}>
-                <DolphinsScene />
-              </group>
-            )}
+          <ViewportScrollScene track={proxyRef} hideOffscreen={false}>
+            {(props) => {
+              console.log('ViewportScrollScene render props:', props)
+              return (
+                // Let the rig position/clip the group
+                <group {...props}>
+                  <Suspense fallback={null}>
+                    <DolphinsScene {...props} />
+                  </Suspense>
+                </group>
+              )
+            }}
           </ViewportScrollScene>
         </UseCanvas>
       )}
     </>
+  )
+}
+
+// Preload the dolphin model
+useGLTF.preload('/dolphin.glb')
+
+/* ---------------- Public Export ---------------- */
+export function Dolphins({ 
+  className = '',
+  dolphinCount = 3,
+  showBubbles = true,
+  showSky = true,
+  animationSpeed = 1,
+  waterColor = '#001e0f',
+  skyColor = '#87CEEB'
+}: { 
+  className?: string
+  dolphinCount?: number
+  showBubbles?: boolean
+  showSky?: boolean
+  animationSpeed?: number
+  waterColor?: string
+  skyColor?: string
+}) {
+  return (
+    <div className={className}>
+      <DolphinsSection waterColor={waterColor} skyColor={skyColor} showSky={showSky} />
+    </div>
   )
 }

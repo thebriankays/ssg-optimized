@@ -178,6 +178,6 @@ export class Sky extends THREE.Mesh {
       depthWrite: false
     })
     super(new THREE.BoxGeometry(1, 1, 1), material)
-    this.scale.setScalar(10000)
+    this.scale.setScalar(10000) // Scale for sky dome
   }
 }

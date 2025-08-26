@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useRef, useMemo, useEffect } from 'react'
-import { ViewportScrollScene } from '@/components/canvas/ViewportScrollScene'
-import { UseCanvas } from '@14islands/r3f-scroll-rig'
+import { ViewportScrollScene, UseCanvas } from '@14islands/r3f-scroll-rig'
 import { TravelDataGlobeR3F, GlobeRef } from './TravelDataGlobeR3F'
 import { 
   GlobeView, 
