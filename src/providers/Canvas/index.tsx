@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { GlobalCanvas, SmoothScrollbar } from '@14islands/r3f-scroll-rig'
 import { Preload, PerformanceMonitor } from '@react-three/drei'
 import { useCanvasStore } from '@/lib/stores/canvas-store'
-import { GlassOverlayMesh } from '@/components/canvas/GlassOverlay'
+// import { GlassOverlayMesh } from '@/components/canvas/GlassOverlay'
 
 interface CanvasProviderProps {
   children: React.ReactNode
@@ -97,6 +97,7 @@ export function CanvasProvider({ children }: CanvasProviderProps) {
           onCreated={(state: any) => {
             state.gl.setClearColor(0x000000, 0)
             state.gl.setClearAlpha(0)
+            console.log('GlobalCanvas created!', state)
           }}
         >
           {/* Lights minimal defaults (heavy lights/effects should live inside leaf scenes) */}
@@ -114,8 +115,8 @@ export function CanvasProvider({ children }: CanvasProviderProps) {
           }} />
           <Preload all />
           
-          {/* Global Glass Overlay Effect */}
-          <GlassOverlayMesh 
+          {/* Global Glass Overlay Effect - DISABLED FOR DEBUGGING */}
+          {/* <GlassOverlayMesh 
             enabled={quality !== 'low'} // Disable on low quality
             intensity={0.3}
             speed={0.2}
@@ -125,7 +126,7 @@ export function CanvasProvider({ children }: CanvasProviderProps) {
             brightness={1.02}
             contrast={1.02}
             followMouse={true}
-          />
+          /> */}
         </GlobalCanvas>
       )}
     </>
